@@ -167,6 +167,13 @@ Next step is to create the socket syscall
 
 ```nasm
 ; create socket
+mov bl, 2       ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
+mov cl, 1       ; setting up SOCK_STREAM, as seen in C code and pulled from /usr/include/i386-linux-gnu/bits/socket_type.h
+mov dl, 6       ; setting protocol again as in C code, pulled from /usr/include/linux/netinet/in.h
+
+mov ax, 359     ; syscall socket()
+
+int 0x80        ; create the socket ( socket() in C code )
 ???
 ```
 
