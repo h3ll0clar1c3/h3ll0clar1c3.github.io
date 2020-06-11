@@ -11,6 +11,8 @@ classes: wide
 #  - slae
 ---
 
+![Bind Shell](/assets/images/SHELLCODING32.png)
+
 ### TCP BIND SHELLCODE
 
 * Binds to a port
