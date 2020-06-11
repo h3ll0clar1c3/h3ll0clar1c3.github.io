@@ -103,14 +103,14 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-##### SLAE DISCLAIMER
+##### SLAE DISCLAIMER ####
 ---------
 
 This blog post has been created for completing the requirements of the [SecurityTube Linux Assembly Expert certification] [slae-link].
 
 Student ID: SLAE-xxxx
 
-Github [Code][github-code].
+Github: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
