@@ -110,7 +110,7 @@ This blog post has been created for completing the requirements of the [Security
 
 Student ID: SLAE-xxxx
 
-Github Code: [ASSIGNMENT 1][github-code].
+[Github Code - Assignment 1][github-code].
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
