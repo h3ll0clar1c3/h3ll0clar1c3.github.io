@@ -81,7 +81,7 @@ Note the various syscalls in the C code which will be utilised in the upcoming A
 * dup2
 * execve
 
-The C code consists of the following:
+The C achieves the following objectives:
 
 * Creates a socket
 * Binds the socket to a port
@@ -110,7 +110,7 @@ This blog post has been created for completing the requirements of the [Security
 
 Student ID: SLAE-xxxx
 
-Github Code: [https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1][github-code].
+Github Code: [ASSIGNMENT 1][github-code].
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
