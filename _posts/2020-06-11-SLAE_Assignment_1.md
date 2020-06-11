@@ -17,7 +17,7 @@ classes: wide
 * Executes a shell on an incoming connection
 * Port number should be easily configurable
 
-## CONCEPT ##
+### CONCEPT 
 
 A TCP bind shellcode will bind the shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
 
@@ -25,7 +25,7 @@ A TCP bind shellcode will bind the shell to a specific network port on a host li
 
 Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports with known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
 
-## TCP BIND SHELL IN C ## 
+### TCP BIND SHELL IN C
 
 The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective, this will be used as a template for the low-level assembly code to follow.
 
@@ -90,7 +90,7 @@ The C code consists of the following:
 * Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * Executes a shell
 
-## POC ##
+### POC 
 
 ```ruby
 osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp.c -o shell_bind_tcp
@@ -103,7 +103,7 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-## SLAE DISCLAIMER ##
+### SLAE DISCLAIMER
 
 This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
 
