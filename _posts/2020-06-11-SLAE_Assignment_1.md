@@ -12,14 +12,12 @@ tags:
 ---
 
 ## TCP BIND SHELLCODE ## 
---------------------------
 
 * Binds to a port
 * Executes a shell on an incoming connection
 * Port number should be easily configurable
 
 ## CONCEPT ##
---------------------
 
 A TCP bind shellcode will bind the shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
 
@@ -106,7 +104,7 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-# #SLAE DISCLAIMER ##
+## SLAE DISCLAIMER ##
 --------
 
 This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
