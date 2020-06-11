@@ -143,7 +143,7 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 ##### SLAE DISCLAIMER ####
 ---------
 
-This blog post has been created for completing the requirements of the [SecurityTube Linux Assembly Expert certification] [slae-link].
+This blog post has been created for completing the requirements of the [SLAE certification] [slae-link].
 
 Student ID: SLAE-xxxx
 
