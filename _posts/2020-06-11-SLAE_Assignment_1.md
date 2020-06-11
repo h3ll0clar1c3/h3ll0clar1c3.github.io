@@ -3,12 +3,12 @@ title:  "SLAE x86 Assignment 1: TCP Bind Shellcode"
 header:
   teaser: "/assets/images/SHELLCODING32.png"
   teaser_home_page: true
-categories:
-  - exploit dev
+#categories:
+#  - exploit dev
 classes: wide
-tags:
-  - exploit dev
-  - slae
+#tags:
+#  - exploit dev
+#  - slae
 ---
 
 ## TCP BIND SHELLCODE ## 
@@ -26,7 +26,6 @@ A TCP bind shellcode will bind the shell to a specific network port on a host li
 Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports with known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
 
 ## TCP BIND SHELL IN C ## 
------------------
 
 The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective, this will be used as a template for the low-level assembly code to follow.
 
@@ -82,7 +81,7 @@ Note the various syscalls in the C code which will be utilised in the upcoming A
 * dup2
 * execve
 
-The C code does the following:
+The C code consists of the following:
 
 * Creates a socket
 * Binds the socket to a port
