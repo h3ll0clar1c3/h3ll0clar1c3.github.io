@@ -127,6 +127,40 @@ The C code achieves the following objectives:
 * Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * Executes a shell
 
+```bash
+osboxes@osboxes:~/Downloads/SLAE$man socket
+
+SOCKET(2)                              Linux Programmer's Manual                             SOCKET(2)
+
+NAME
+       socket - create an endpoint for communication
+
+SYNOPSIS
+       #include <sys/types.h>          /* See NOTES */
+       #include <sys/socket.h>
+
+       int socket(int domain, int type, int protocol);
+
+DESCRIPTION
+       socket() creates an endpoint for communication and returns a descriptor.
+
+       The  domain  argument  specifies a communication domain; this selects the protocol family which
+       will be used for communication.  These families are defined in <sys/socket.h>.   The  currently
+       understood formats include:
+
+       Name                Purpose                          Man page
+       AF_UNIX, AF_LOCAL   Local communication              unix(7)
+       AF_INET             IPv4 Internet protocols          ip(7)
+       AF_INET6            IPv6 Internet protocols          ipv6(7)
+       AF_IPX              IPX - Novell protocols
+       AF_NETLINK          Kernel user interface device     netlink(7)
+       AF_X25              ITU-T X.25 / ISO-8208 protocol   x25(7)
+       AF_AX25             Amateur radio AX.25 protocol
+       AF_ATMPVC           Access to raw ATM PVCs
+       AF_APPLETALK        Appletalk                        ddp(7)
+       AF_PACKET           Low level packet interface       packet(7)
+```
+
 #### POC 
 
 ```bash
