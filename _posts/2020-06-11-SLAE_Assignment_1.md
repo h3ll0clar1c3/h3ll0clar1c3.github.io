@@ -157,6 +157,17 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
+#### TCP Bind Shell in Assembly
+--------------
+
+Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against itself which sets their values to 0:
+
+```assembly
+xor eax, eax
+xor ebx, ebx
+xor ecx, ecx
+```
+
 ##### SLAE DISCLAIMER ####
 ---------
 
