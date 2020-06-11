@@ -133,14 +133,6 @@ DESCRIPTION
        Name                Purpose                          Man page
        AF_UNIX, AF_LOCAL   Local communication              unix(7)
        AF_INET             IPv4 Internet protocols          ip(7)
-       AF_INET6            IPv6 Internet protocols          ipv6(7)
-       AF_IPX              IPX - Novell protocols
-       AF_NETLINK          Kernel user interface device     netlink(7)
-       AF_X25              ITU-T X.25 / ISO-8208 protocol   x25(7)
-       AF_AX25             Amateur radio AX.25 protocol
-       AF_ATMPVC           Access to raw ATM PVCs
-       AF_APPLETALK        Appletalk                        ddp(7)
-       AF_PACKET           Low level packet interface       packet(7)
 ```
 
 #### POC 
@@ -164,11 +156,18 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to 0:
 
 ```nasm
-; zero registers
+; initialize registers
 xor eax, eax
 xor ebx, ebx
 xor ecx, ecx
 xor edx, edx
+```
+
+Next step is to create the socket syscall
+
+```nasm
+; create socket
+???
 ```
 
 ##### SLAE DISCLAIMER ####
@@ -178,7 +177,7 @@ This blog post has been created for completing the requirements of the [SLAE cer
 
 Student ID: SLAE-xxxx
 
-Github: [Code][github-code]
+Github Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
