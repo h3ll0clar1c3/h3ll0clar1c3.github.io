@@ -82,7 +82,7 @@ Note the various syscalls in the C code which will be utilised in the upcoming A
 * dup2
 * execve
 
-The C code is composed of the following objectives:
+The C code does the following:
 
 * Creates a socket
 * Binds the socket to a port
@@ -115,5 +115,3 @@ Student ID: SLAE-xxxx
 Github Code: [Assignment 1][github-code].
 
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
-
-https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
