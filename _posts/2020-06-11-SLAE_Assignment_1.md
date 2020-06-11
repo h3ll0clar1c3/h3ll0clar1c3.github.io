@@ -11,7 +11,7 @@ classes: wide
 #  - slae
 ---
 
-![Bind Shell](/assets/images/SHELLCODING32.png)
+{: .center}![Shellcoding](/assets/images/SHELLCODING32.png)
 
 ### TCP BIND SHELLCODE
 
