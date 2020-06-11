@@ -29,7 +29,9 @@ Bind shells are easily blocked by firewalls and inbound filtering rules along wi
 
 #### TCP BIND SHELL IN C
 
-The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective, this will be used as a template for the low-level assembly code to follow.
+The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective. 
+
+This will be used as a template for the low-level assembly code to follow:
 
 ```c
 #include <stdio.h>  
@@ -104,7 +106,7 @@ The C code achieves the following objectives:
 * Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * Executes a shell
 
-The man pages defines a socket with the the domain, type and protocol properties:
+A socket is defined in the man pages with domain, type and protocol properties:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ man socket
@@ -141,6 +143,8 @@ DESCRIPTION
 ```
 
 #### POC 
+
+The C code is compiled and executed demonstrating a successful bind connection and shell on the local host via port 4444:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp.c -o shell_bind_tcp
