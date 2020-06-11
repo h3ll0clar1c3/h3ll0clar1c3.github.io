@@ -105,7 +105,6 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 ```
 
 ## SLAE DISCLAIMER ##
---------
 
 This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
 
@@ -116,3 +115,5 @@ Student ID: SLAE-xxxx
 Github Code: [Assignment 1][github-code].
 
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
+
+https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
