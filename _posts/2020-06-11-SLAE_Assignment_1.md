@@ -83,7 +83,7 @@ Note the various syscalls in the C code which will be utilised in the upcoming A
 * dup2
 * execve
 
-The syscalls are related to the socket network access protocol as referenced below:
+The syscalls in the C code relate to the socket network access protocol as referenced below:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h 
@@ -118,8 +118,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h
 #define SYS_SENDMMSG	20		/* sys_sendmmsg(2)		*/
 ```
 
-
-The C achieves the following objectives:
+The C code achieves the following objectives:
 
 * Creates a socket
 * Binds the socket to a port
