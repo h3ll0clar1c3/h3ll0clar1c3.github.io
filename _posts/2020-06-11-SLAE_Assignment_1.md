@@ -19,7 +19,7 @@ classes: wide
 
 ### CONCEPT 
 
-A TCP bind shellcode will bind the shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
+A TCP bind shellcode will bind a shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
@@ -104,13 +104,13 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 ```
 
 ### SLAE DISCLAIMER
+---------
 
-This blog post has been created for completing the requirements of the SecurityTube Linux Assembly Expert certification:
-
-http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
+This blog post has been created for completing the requirements of the [SecurityTube Linux Assembly Expert certification] [slae-link]:
 
 Student ID: SLAE-xxxx
 
-Github Code: [Assignment 1][github-code].
+Github Code: [https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1][github-code].
 
+[slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
