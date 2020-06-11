@@ -28,6 +28,7 @@ A TCP bind shellcode will bind a shell to a specific network port on a host list
 Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports with known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
 
 #### TCP BIND SHELL IN C
+--------
 
 The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective. 
 
@@ -163,9 +164,11 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to 0:
 
 ```nasm
+; zero registers
 xor eax, eax
 xor ebx, ebx
 xor ecx, ecx
+xor edx, edx
 ```
 
 ##### SLAE DISCLAIMER ####
