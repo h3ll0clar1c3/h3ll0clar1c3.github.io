@@ -1,7 +1,7 @@
 ---
 title:  "SLAE x86 Assignment 1: TCP Bind Shellcode"
 header:
-  teaser: "/assets/images/SHELLCODING32.png"
+  teaser: "/assets/images/slae.png"
   teaser_home_page: true
 #categories:
 #  - exploit dev
@@ -11,7 +11,7 @@ classes: wide
 #  - slae
 ---
 
-![Shellcoding](/assets/images/SHELLCODING32.png)
+![Shellcoding](/assets/images/slae.png)
 
 ### TCP BIND SHELLCODE
 
