@@ -156,11 +156,11 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to '0':
 
 ```nasm
-; initialize registers
-xor eax, eax
-xor ebx, ebx
-xor ecx, ecx
-xor edx, edx
+	; initialize registers
+	xor eax, eax
+	xor ebx, ebx
+	xor ecx, ecx
+	xor edx, edx
 ```
 
 #### 1. Socket Syscall - Create Socket
@@ -202,7 +202,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax
 ```
 
-Summary of assembly code:
+*Summary of assembly code:
 
 ```nasm
 	; 1st syscall - create socket
