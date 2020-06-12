@@ -180,19 +180,39 @@ SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 #define	PF_INET		2	/* IP protocol family.  */
 ```
 
-The last argument value for int protocol is going to be ‘0’ according to the man pages for socket. 
+The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. The registers would show the following at this stage:
+
+EBX == 0x02
+ECX == 0x01
+EDX == 0
+
+The EDX register was already cleared when initialised, the zero value is already set and does not require any change.
+
+The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall.
+
+Lastly, before moving on, we will need a way to identify this socket we’ve just created to subsequent systemcalls. We can do this by storing the value of EAX off to the side so that we can reference it later and still use EAX in our subsequent systemcalls. I chose to store this value in EDI as EDI is pretty far down our list of registers we’d fill arguments with, no idea if this makes sense, but it worked!
+
+mov edi, eax
 
 ```nasm
 ; 1st syscall - create socket
 mov al, 0x66    ; hex value for socket
-mov bl, 2       ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
-mov cl, 1       ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
-mov dl, 6       ; setting protocol, value from /usr/include/linux/netinet/in.h
+mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
+mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
 
-mov ax, 359     ; syscall socket()
+mov ax, 359     ; syscall socket
 
-int 0x80        ; create the socket ( socket() in C code )
-???
+int 0x80        ; create the socket 
+
+; this confuses me BELOW
+; SYS CALL #1 = socket()
+	
+	mov ax, 0x66
+	mov bl, 0x02
+	mov cl, 0x01
+	
+	int 0x80
+	mov edi, eax
 ```
 
 ##### SLAE DISCLAIMER ####
