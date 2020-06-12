@@ -163,7 +163,7 @@ xor ecx, ecx
 xor edx, edx
 ```
 
-#### Socket Syscall - Create Socket
+#### 1. Socket Syscall - Create Socket
 
 To create the socket syscall, a value is needed in the EAX register to call socket:
 
@@ -202,7 +202,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax
 ```
 
-1st syscall - create socket:
+Summary of assembly code:
 
 ```nasm
 	; 1st syscall - create socket
@@ -215,9 +215,9 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax    ; eax moved into edi for later reference
 ```
 
-#### Bind Syscall - Bind Socket to IP/Port in Sockaddr Struct 
+#### 2. Bind Syscall - Bind Socket to IP/Port in Sockaddr Struct 
 
-continue ... 
+continue ... u got this !
 
 ##### SLAE DISCLAIMER ####
 ---------
