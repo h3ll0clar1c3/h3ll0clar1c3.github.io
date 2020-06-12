@@ -163,7 +163,9 @@ xor ecx, ecx
 xor edx, edx
 ```
 
-Next step is to create the socket syscall, a value is needed in the EAX register to call socket:
+##### 1st syscall - create socket
+
+To create the socket syscall, a value is needed in the EAX register to call socket:
 
 ```bash 
 osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
@@ -182,38 +184,40 @@ SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 
 The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. The registers would show the following at this stage:
 
-EBX == 0x02
-ECX == 0x01
-EDX == 0
+* EBX == 0x02
+* ECX == 0x01
+* EDX == 0x00
 
-The EDX register was already cleared when initialised, the zero value is already set and does not require any change.
+The EDX register was already cleared when initialised, the zero value is set and does not require any change.
 
-The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall.
-
-Lastly, before moving on, we will need a way to identify this socket we’ve just created to subsequent systemcalls. We can do this by storing the value of EAX off to the side so that we can reference it later and still use EAX in our subsequent systemcalls. I chose to store this value in EDI as EDI is pretty far down our list of registers we’d fill arguments with, no idea if this makes sense, but it worked!
-
-mov edi, eax
+The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall:
 
 ```nasm
-; 1st syscall - create socket
-mov al, 0x66    ; hex value for socket
-mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
-mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
-
-mov ax, 359     ; syscall socket
-
-int 0x80        ; create the socket 
-
-; this confuses me BELOW
-; SYS CALL #1 = socket()
-	
-	mov ax, 0x66
-	mov bl, 0x02
-	mov cl, 0x01
-	
 	int 0x80
+```
+
+The newly created socket can be identified by storing the value of EAX into the EDI register as a reference for a later stage with the ability to use EAX in subsequent system calls:
+
+```nasm
 	mov edi, eax
 ```
+
+1st syscall - create socket:
+
+```nasm
+	; 1st syscall - create socket
+	mov al, 0x66    ; hex value for socket
+	mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
+	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
+
+	int 0x80        ; create the socket, execute the syscall 
+
+	mov edi, eax    ; eax moved into edi for later reference
+```
+
+##### 2nd syscall - bind socket to IP/Port in sockaddr struct 
+
+continue ... 
 
 ##### SLAE DISCLAIMER ####
 ---------
