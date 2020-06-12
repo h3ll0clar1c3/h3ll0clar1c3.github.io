@@ -219,6 +219,7 @@ Summary of 1st syscall:
 continue ... u got this !
 
 #### Assembly Code
+-------------
 
 ````nasm
 global_start
