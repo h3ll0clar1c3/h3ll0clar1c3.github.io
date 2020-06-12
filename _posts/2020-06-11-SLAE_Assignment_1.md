@@ -193,16 +193,16 @@ The EDX register was already cleared when initialised, the zero value is set and
 The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall:
 
 ```nasm
-	int 0x80
+	int 0x80       ; create the socket, execute the syscall
 ```
 
 The newly created socket can be identified by storing the value of EAX into the EDI register as a reference for a later stage with the ability to use EAX in subsequent system calls:
 
 ```nasm
-	mov edi, eax
+	mov edi, eax   ; move the value of eax into edi for later reference
 ```
 
-*Summary of assembly code:
+Summary:
 
 ```nasm
 	; 1st syscall - create socket
@@ -211,8 +211,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
 
 	int 0x80        ; create the socket, execute the syscall 
-
-	mov edi, eax    ; eax moved into edi for later reference
+	mov edi, eax    ; move the value of eax into edi for later reference
 ```
 
 #### 2. Bind Syscall - Bind Socket to IP/Port in Sockaddr Struct 
