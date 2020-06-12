@@ -98,15 +98,6 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h
 #define SYS_ACCEPT	5		/* sys_accept(2)		*/
 ```
 
-The C code achieves the following objectives:
-
-* Creates a socket
-* Binds the socket to a port
-* Configures the socket to listen for incoming connections
-* Accepts connections on the newly created socket
-* Redirects STDIN, STDOUT, and STDERR to the incoming client connection
-* Executes a shell
-
 A socket is defined in the man pages with domain, type and protocol properties:
 
 ```bash
@@ -134,6 +125,15 @@ DESCRIPTION
        AF_UNIX, AF_LOCAL   Local communication              unix(7)
        AF_INET             IPv4 Internet protocols          ip(7)
 ```
+
+The C code achieves the following objectives:
+
+* Creates a socket
+* Binds the socket to a port
+* Configures the socket to listen for incoming connections
+* Accepts connections on the newly created socket
+* Redirects STDIN, STDOUT, and STDERR to the incoming client connection
+* Executes a shell
 
 #### POC 
 
