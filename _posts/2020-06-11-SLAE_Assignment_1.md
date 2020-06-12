@@ -202,7 +202,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax   ; move the value of eax into edi for later reference
 ```
 
-Summary:
+Summary of 1st syscall:
 
 ```nasm
 	; 1st syscall - create socket
@@ -217,6 +217,29 @@ Summary:
 #### 2. Bind Syscall - Bind Socket to IP/Port in Sockaddr Struct 
 
 continue ... u got this !
+
+#### Assembly Code
+
+````nasm
+global_start
+
+section .text
+_start: 
+
+	; initialize registers
+	xor eax, eax
+	xor ebx, ebx
+	xor ecx, ecx
+	xor edx, edx
+	
+	; 1st syscall - create socket
+	mov al, 0x66    ; hex value for socket
+	mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
+	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
+
+	int 0x80        ; create the socket, execute the syscall 
+	mov edi, eax    ; move the value of eax into edi for later reference
+````
 
 ##### SLAE DISCLAIMER ####
 ---------
