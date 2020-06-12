@@ -165,6 +165,13 @@ xor edx, edx
 
 Next step is to create the socket syscall
 
+```bash 
+osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
+#define __NR_socketcall		102
+```
+
+Let’s now figure out what we’re going to put into EAX to call socket. The command grep command above reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, so let’s place that in the low space of EAX so as to not introduce any NULL BYTEs with padding.
+
 ```nasm
 ; 1st syscall - create socket
 mov al, 0x66    ;
