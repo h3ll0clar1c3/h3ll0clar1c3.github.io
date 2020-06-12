@@ -98,7 +98,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h
 #define SYS_ACCEPT	5		/* sys_accept(2)		*/
 ```
 
-A socket is defined in the man pages with domain, type and protocol properties:
+A socket is defined in the man pages with domain, type and protocol arguments:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ man socket
@@ -153,7 +153,7 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 #### TCP Bind Shell in Assembly
 --------------
 
-Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to 0:
+Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to '0':
 
 ```nasm
 ; initialize registers
@@ -163,21 +163,31 @@ xor ecx, ecx
 xor edx, edx
 ```
 
-Next step is to create the socket syscall
+Next step is to create the socket syscall, a value is needed in the EAX register to call socket:
 
 ```bash 
 osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
 #define __NR_socketcall		102
 ```
 
-Let’s now figure out what we’re going to put into EAX to call socket. The command grep command above reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, so let’s place that in the low space of EAX so as to not introduce any NULL BYTEs with padding.
+The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the low space of EAX (avoid Null Bytes with padding).
+
+The next values are that of the socket properties defined earlier with the man pages, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
+
+```bash
+osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/bits/socket.h
+SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
+#define	PF_INET		2	/* IP protocol family.  */
+```
+
+The last argument value for int protocol is going to be ‘0’ according to the man pages for socket. 
 
 ```nasm
 ; 1st syscall - create socket
-mov al, 0x66    ;
+mov al, 0x66    ; hex value for socket
 mov bl, 2       ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
-mov cl, 1       ; setting up SOCK_STREAM, as seen in C code and pulled from /usr/include/i386-linux-gnu/bits/socket_type.h
-mov dl, 6       ; setting protocol again as in C code, pulled from /usr/include/linux/netinet/in.h
+mov cl, 1       ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
+mov dl, 6       ; setting protocol, value from /usr/include/linux/netinet/in.h
 
 mov ax, 359     ; syscall socket()
 
