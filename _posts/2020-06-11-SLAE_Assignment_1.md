@@ -14,12 +14,14 @@ classes: wide
 ![Shellcoding](/assets/images/slae32.png)
 
 ### TCP Bind Shellcode
+------
 
 * Binds to a port
 * Executes a shell on an incoming connection
 * Port number should be easily configurable
 
 #### Concept 
+-----
 
 A TCP bind shellcode will bind a shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
 
@@ -136,6 +138,7 @@ The C code achieves the following objectives:
 * Executes a shell
 
 #### POC 
+------
 
 The C code is compiled and executed demonstrating a successful bind connection and shell on the local host via port 4444:
 
@@ -332,6 +335,7 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
 ----
 
 Let's go :-)
+Write some stuff here ...
 
 #### Assembly Code
 -------------
