@@ -368,7 +368,7 @@ _start:
 	
     	int 0x80	; call the interrupt to execute the bind syscall
 	
-	; 3rd syscall - bind socket to IP/Port in sockaddr struct 
+	; 3rd syscall - listen for incoming connections 
 	let's go :-)
 ````
 
