@@ -296,17 +296,39 @@ Finally the word value of 0x02 is pushed onto the stack which loads the value fo
     	push word 0x02	; AF_INET
 ```    
     
-The last instruction will move the ESP stack pointer to this entity into the ECX register to store the const struct sockaddr *addr argument. 
+Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
 
-The value of 16 will be moved into the low part of the EDX register.
+The value of 16 (sizeof function) will be moved into the low part of the EDX register.
 
-Followed by an instruction to call the interrupt again.
+Followed by an instruction to call the interrupt to execute the bind syscall.
 
 ```nasm
     	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
     	mov dl, 16	; move the value of 16 into edx
-    	int 0x80	; call interrup
+    	int 0x80	; call the interrupt to execute the bind syscall
 ```
+
+2nd Syscall (Assembly code):
+
+```nasm
+	xor eax, eax
+	mov al, 0x66	; hex value for socket
+	mov ebx, edi    ; move the value of edi (socket) into ebx
+	xor ecx, ecx
+	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push word 0x5c11; bind port 4444 is set
+    	push word 0x02	; AF_INET
+
+    	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
+    	mov dl, 16	; move the value of 16 into edx
+	
+    	int 0x80	; call the interrupt to execute the bind syscall
+```
+
+#### 3rd Syscall (Listen for Incoming Connections)
+
+Let's go :-)
 
 #### Assembly Code
 -------------
@@ -333,9 +355,21 @@ _start:
 	
 	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
 	xor eax, eax
-	mov al, 0x66    ; hex value for socket
+	mov al, 0x66	; hex value for socket
 	mov ebx, edi    ; move the value of edi (socket) into ebx
+	xor ecx, ecx
+	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push word 0x5c11; bind port 4444 is set
+    	push word 0x02	; AF_INET
+
+    	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
+    	mov dl, 16	; move the value of 16 into edx
 	
+    	int 0x80	; call the interrupt to execute the bind syscall
+	
+	; 3rd syscall - bind socket to IP/Port in sockaddr struct 
+	let's go :-)
 ````
 
 ##### SLAE DISCLAIMER ####
