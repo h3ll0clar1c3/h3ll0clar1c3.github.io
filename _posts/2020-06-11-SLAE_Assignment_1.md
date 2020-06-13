@@ -196,7 +196,7 @@ The socket syscall is executed with int 0x80 which creates the socket in the pro
 	int 0x80       ; create the socket, execute the syscall
 ```
 
-The newly created socket can be identified by storing the value of EAX into the EDI register as a reference for a later stage with the ability to use EAX in subsequent system calls:
+The newly created socket can be identified by storing the value of EAX into the EDI register as reference for a later stage with the ability to use EAX in subsequent system calls:
 
 ```nasm
 	mov edi, eax   ; move the value of eax into edi for later reference
@@ -284,9 +284,9 @@ The chosen port number will need to be converted from decimal (4444) to hex (115
 
 The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX.
 
-The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in little endian format. 
+The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in Little Endian format. 
 
-Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall.
+Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct.
 
 ```nasm
 	xor ecx, ecx
@@ -296,12 +296,16 @@ Finally the word value of 0x02 is pushed onto the stack which loads the value fo
     	push word 0x02	; AF_INET
 ```    
     
-Struct is now complete. The next instruction will place the pointer to this entity into the ECX register so that we can satisfy our const struct sockaddr *addr argument. We’ll also put 16 into the low part of the EDX register and call the interrupt again.
+The last instruction will move the ESP stack pointer to this entity into the ECX register to store the const struct sockaddr *addr argument. 
+
+The value of 16 will be moved into the low part of the EDX register.
+
+Followed by an instruction to call the interrupt again.
 
 ```nasm
-    	mov ecx, esp
-    	mov dl, 16
-    	int 0x80
+    	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
+    	mov dl, 16	; move the value of 16 into edx
+    	int 0x80	; call interrup
 ```
 
 #### Assembly Code
