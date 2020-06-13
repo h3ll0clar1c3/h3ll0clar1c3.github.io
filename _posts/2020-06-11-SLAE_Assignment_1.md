@@ -172,7 +172,7 @@ osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
 #define __NR_socketcall		102
 ```
 
-The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the low space of EAX (avoid Null Bytes with padding).
+The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX (avoid Null Bytes with padding).
 
 The next values are that of the socket properties defined earlier with the man pages, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
 
@@ -216,12 +216,42 @@ The newly created socket can be identified by storing the value of EAX into the 
 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
 
-To bind a port to the newly created socket the EAX register is cleared out using the XOR opertion. Next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
+To bind a port (name) to the newly created socket, the EAX register will need to be cleared out using the XOR operation. The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
 
 ```nasm
 	xor eax, eax
 	mov al, 0x66
 ```
+
+The definition of the bind syscall function in the man pages describes the arguments required:
+
+```bash
+BIND(2)                                Linux Programmer's Manual                               BIND(2)
+
+NAME
+       bind - bind a name to a socket
+
+SYNOPSIS
+       #include <sys/types.h>          /* See NOTES */
+       #include <sys/socket.h>
+
+       int bind(int sockfd, const struct sockaddr *addr,
+                socklen_t addrlen);
+
+DESCRIPTION
+       When  a socket is created with socket(2), it exists in a name space (address family) but has no
+       address assigned to it.  bind() assigns the address specified to by addr to the socket referred
+       to  by the file descriptor sockfd.  addrlen specifies the size, in bytes, of the address struc-
+       ture pointed to by addr.  Traditionally, this operation  is  called  "assigning  a  name  to  a
+       socket".
+```
+
+These arguments can be summarized at a high-level as follows:
+
+int sockfd – this is a reference to the socket we just created, this is why we moved EAX into EDI
+const struct sockaddr *addr – this is a pointer to the location on the stack of the sockaddr struct we are going to create
+socklen_t addrlen – this is the length of the address which the /usr/include/linux/in.h file tells us is 16
+
 
 #### Assembly Code
 -------------
@@ -245,6 +275,10 @@ _start:
 
 	int 0x80        ; create the socket, execute the syscall 
 	mov edi, eax    ; move the value of eax into edi for later reference
+	
+	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
+	xor eax, eax
+	mov al, 0x66    ; hex value for socket
 ````
 
 ##### SLAE DISCLAIMER ####
