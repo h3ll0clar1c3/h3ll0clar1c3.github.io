@@ -246,11 +246,11 @@ DESCRIPTION
        socket".
 ```
 
-These arguments can be summarized at a high-level as follows:
+The 3 arguments required can be summarised:
 
-int sockfd – this is a reference to the socket we just created, this is why we moved EAX into EDI
-const struct sockaddr *addr – this is a pointer to the location on the stack of the sockaddr struct we are going to create
-socklen_t addrlen – this is the length of the address which the /usr/include/linux/in.h file tells us is 16
+* int sockfd - a reference to the newly created socket (EAX was moved into EDI)
+* const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
+* socklen_t addrlen – the length of the address which is found to be 16 in the header file /usr/include/linux/in.h
 
 
 #### Assembly Code
