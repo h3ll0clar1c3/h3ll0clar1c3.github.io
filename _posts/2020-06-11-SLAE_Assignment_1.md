@@ -220,7 +220,7 @@ To bind a port (name) to the newly created socket, the EAX register will need to
 
 ```nasm
 	xor eax, eax
-	mov al, 0x66
+	mov al, 0x66	; hex value for socket
 ```
 
 The definition of the bind syscall function in the man pages describes the arguments required:
@@ -255,7 +255,7 @@ The 3 arguments required:
 The sockfd argument can be set by moving the value of EDI into EBX, this was originally the value of socket:
 
 ```nasm
-	mov ebx, edi    ; move the value of edi into ebx
+	mov ebx, edi    ; move the value of edi (socket) into ebx
 ```
 
 The structure for handling internet addresses can be viewed via man pages for the header file:
@@ -282,22 +282,26 @@ Since the stack grows from High to Low memory it is important to remember to pla
 
 The chosen port number will need to be converted from decimal (4444) to hex (115C), which equates to 0x5c11 in Little Endian format.
 
-The Internet address will equal 0.0.0.0 (opens bind port to all interfaces).
+The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX.
+
+The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in little endian format. 
+
+Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall.
 
 ```nasm
-    xor ecx, ecx
-    push ecx
-    push ecx
-    push word 0x5c11
-    push word 0x02
+	xor ecx, ecx
+	push ecx	; pushes all zeroes on the stack, giving us the IP parameter of 0.0.0.0
+    	push ecx	; pushes all zeroes on the stack, giving us the IP parameter of 0.0.0.0
+    	push word 0x5c11; port 4444 is set
+    	push word 0x02	; AF_INET
 ```    
     
-Boom! Struct completed. Let’s put the pointer to this entity into the ECX register so that we can satisfy our const struct sockaddr *addr argument. We’ll also put 16 into the low part of the EDX register and call the interrupt again while we’re here since that’s easy enough.
+Struct is now complete. The next instruction will place the pointer to this entity into the ECX register so that we can satisfy our const struct sockaddr *addr argument. We’ll also put 16 into the low part of the EDX register and call the interrupt again.
 
 ```nasm
-    mov ecx, esp
-    mov dl, 16
-    int 0x80
+    	mov ecx, esp
+    	mov dl, 16
+    	int 0x80
 ```
 
 #### Assembly Code
@@ -326,7 +330,7 @@ _start:
 	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
 	xor eax, eax
 	mov al, 0x66    ; hex value for socket
-	mov ebx, edi    ; move the value of edi into ebx
+	mov ebx, edi    ; move the value of edi (socket) into ebx
 	
 ````
 
