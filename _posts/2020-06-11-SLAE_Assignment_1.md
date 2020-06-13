@@ -13,13 +13,13 @@ classes: wide
 
 ![Shellcoding](/assets/images/slae32.png)
 
-### TCP BIND SHELLCODE
+### TCP Bind Shellcode
 
 * Binds to a port
 * Executes a shell on an incoming connection
 * Port number should be easily configurable
 
-#### CONCEPT 
+#### Concept 
 
 A TCP bind shellcode will bind a shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
 
@@ -27,7 +27,7 @@ A TCP bind shellcode will bind a shell to a specific network port on a host list
 
 Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports/well known services). This limits the target host's exposure and will prevent a port-binding shellcode from receiving a successful connection.
 
-#### TCP BIND SHELL IN C
+#### TCP Bind Shell in C
 --------
 
 The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective. 
@@ -164,6 +164,7 @@ Using the C code as a reference and template for the Assembly code, the memory r
 ```
 
 #### 1st Syscall (Create Socket)
+----
 
 To create the socket syscall, a value is needed in the EAX register to call socket:
 
@@ -215,6 +216,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 ```
 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
+-----
 
 To bind a port (name) to the newly created socket, the EAX register will need to be cleared out using the XOR operation. The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
 
@@ -327,6 +329,7 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
 ```
 
 #### 3rd Syscall (Listen for Incoming Connections)
+----
 
 Let's go :-)
 
@@ -372,7 +375,7 @@ _start:
 	let's go :-)
 ````
 
-##### SLAE DISCLAIMER ####
+##### SLAE Disclaimer ####
 ---------
 
 This blog post has been created for completing the requirements of the [SLAE certification] [slae-link].
