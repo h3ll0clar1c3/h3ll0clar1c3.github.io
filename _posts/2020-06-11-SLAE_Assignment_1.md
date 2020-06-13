@@ -202,7 +202,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax   ; move the value of eax into edi for later reference
 ```
 
-Summary of 1st syscall:
+1st Syscall (Assembly code):
 
 ```nasm
 	; 1st syscall - create socket
@@ -214,9 +214,14 @@ Summary of 1st syscall:
 	mov edi, eax    ; move the value of eax into edi for later reference
 ```
 
-#### 2. Bind Syscall - Bind Socket to IP/Port in Sockaddr Struct 
+#### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
 
-continue ... u got this !
+To bind a port to the newly created socket the EAX register is cleared out using the XOR opertion. Next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
+
+```nasm
+	xor eax, eax
+	mov al, 0x66
+```
 
 #### Assembly Code
 -------------
