@@ -246,12 +246,17 @@ DESCRIPTION
        socket".
 ```
 
-The 3 arguments required can be summarised:
+The 3 arguments required can be summarised as:
 
 * int sockfd - a reference to the newly created socket (EAX was moved into EDI)
 * const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
-* socklen_t addrlen – the length of the address which is found to be 16 in the header file /usr/include/linux/in.h
+* socklen_t addrlen – the length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
 
+The sockfd argument can be set by moving the value of EDI into EBX, this was originally the value of socket:
+
+```nasm
+	mov ebx, edi    ; move the value of edi into ebx
+```
 
 #### Assembly Code
 -------------
@@ -279,6 +284,8 @@ _start:
 	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
 	xor eax, eax
 	mov al, 0x66    ; hex value for socket
+	mov ebx, edi    ; move the value of edi into ebx
+	
 ````
 
 ##### SLAE DISCLAIMER ####
