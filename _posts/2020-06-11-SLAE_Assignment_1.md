@@ -290,9 +290,9 @@ Finally the word value of 0x02 is pushed onto the stack which loads the value fo
 
 ```nasm
 	xor ecx, ecx
-	push ecx	; pushes all zeroes on the stack, giving us the IP parameter of 0.0.0.0
-    	push ecx	; pushes all zeroes on the stack, giving us the IP parameter of 0.0.0.0
-    	push word 0x5c11; port 4444 is set
+	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
+    	push word 0x5c11; bind port 4444 is set
     	push word 0x02	; AF_INET
 ```    
     
