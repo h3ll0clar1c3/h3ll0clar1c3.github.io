@@ -163,7 +163,7 @@ Using the C code as a reference and template for the Assembly code, the memory r
 	xor edx, edx
 ```
 
-#### 1st Syscall (Create Socket)
+#### * 1st Syscall (Create Socket)
 
 To create the socket syscall, a value is needed in the EAX register to call socket:
 
