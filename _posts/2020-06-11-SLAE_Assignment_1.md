@@ -506,6 +506,8 @@ The RETURN VALUE defined in the man pages for accept4 describes a new sockfd val
 
 The dup2 syscall works by creating a loop and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
 
+Carry on here ... syscall code of 63 (0x3f):
+
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep dup2 
 #define __NR_dup2 63
