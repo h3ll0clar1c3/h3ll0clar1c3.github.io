@@ -63,7 +63,7 @@ int main()
     // 3rd syscall - listen for incoming connections  
     listen(host_sockid, 2);  
   
-    // 4th syscall - accept incoming connections using the created socket   
+    // 4th syscall - accept incoming connections    
     client_sockid = accept(host_sockid, NULL, NULL);  
   
     // 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR  
@@ -500,6 +500,12 @@ The RETURN VALUE defined in the man pages for accept4 describes a new sockfd val
 	xor edi, edi    ; zeroize socket value stored in edi
 	mov edi, eax    ; save return value from eax into edi		
 ```
+
+#### 5th Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
+
+The dup2 syscall works by creating a loop and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
+
+...... 
 
 #### Assembly Code
 -------------
