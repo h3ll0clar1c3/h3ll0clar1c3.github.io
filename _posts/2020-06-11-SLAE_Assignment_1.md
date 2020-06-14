@@ -479,7 +479,7 @@ The program interrupt is then called which executes the accept syscall:
 
 The socket value stored in EDI is then set to '0' with an XOR operation. 
 
-The RETURN VALUE defined in the man pages for accept4 describes a new int sockfd value returned after the accept syscall is executed, this return value can be moved into EDI as with the previous sockfd value:
+The RETURN VALUE defined in the man pages for accept4 describes a new sockfd value returned after the accept syscall is executed, this return value can be moved into EDI as with the previous sockfd value:
 
 ```nasm
 	xor edi, edi    ; zeroize socket value stored in edi
@@ -542,6 +542,17 @@ _start:
 	mov ebx, edi	; move value of socket stored in edi into ebx
    	xor ecx, ecx	
     	int 0x80	; call the interrupt to execute the listen syscall
+	
+	; 4th syscall - accept incoming connections 
+	xor eax, eax
+   	mov ax, 0x16c	; syscall for accept4 moved into eax
+	mov ebx, edi    ; reference in stored EDI
+	xor ecx, ecx    ; addr = 0
+	xor edx, edx    ; addrlen = 0
+	xor esi, esi    ; flags = 0
+	int 0x80	; call the interrupt to execute accept syscall
+	xor edi, edi    ; zeroize socket value stored in edi
+	mov edi, eax    ; save return value from eax into edi	
 ````
 
 ##### SLAE Disclaimer ####
