@@ -465,7 +465,24 @@ The 4 arguments required for accept4:
 * addrlen - EDX == 0
 * flags - ESI == 0
 
-nasm code
+The reference of socket is moved into EBX, with the remaining 3 argument values equal to '0' with their respective XOR operations.
+
+The program interrupt is then called which executes the accept syscall:
+
+```nasm
+	mov ebx, edi    ; reference in stored EDI
+	xor ecx, ecx    ; addr = 0
+	xor edx, edx    ; addrlen = 0
+	xor esi, esi    ; flags = 0
+	int 0x80	; call the interrupt to execute accept syscall
+```
+
+carry on here ... 
+
+```nasm
+	xor edi, edi    ; zeroize socket value stored in edi
+	mov edi, eax    ; save return value from eax into edi	
+```
 
 #### Assembly Code
 -------------
