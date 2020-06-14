@@ -173,7 +173,7 @@ To create the socket syscall, a value is needed in the EAX register to call sock
 
 ```bash 
 osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
-#define __NR_socketcall		102
+#define __NR_socketcall	102
 ```
 
 The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX (avoid Null Bytes with padding).
@@ -369,22 +369,22 @@ DESCRIPTION
 
 The 3 required arguments would result in:
 
-* listen = EAX
-* sockfd = EBX -> reference of socket initially stored in EDI
-* backlog = ECX -> 0 (accept first incoming connection)
+* listen - EAX
+* sockfd - EBX (reference of socket initially stored in EDI)
+* backlog - ECX == 0 (accept first incoming connection)
 
 The listen syscall begins with its code value of 363, converting from decimal to hex equals 0x16b:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep listen
-#define __NR_listen 363 => 0x16B
+#define __NR_listen 363 
 ```
 
 The EAX register is cleared to store the listen syscall value into the lower memory region:
 
 ```nasm
 	xor eax, eax	
-    	mov ax, 0x16b	; syscall for listen moved into AX
+    	mov ax, 0x16b	; syscall for listen moved into eax
 ```
 
 The stored socket value from the EDI register is moved into the EBX register. 
@@ -402,11 +402,70 @@ The ECX memory register is then cleared, the  program interrupt is called and th
 ```nasm
 	; 3rd syscall - listen for incoming connections 
 	xor eax, eax	
-    	mov ax, 0x16b	; syscall for listen moved into AX
+    	mov ax, 0x16b	; syscall for listen moved into eax
 	mov ebx, edi	; move value of socket stored in edi into ebx
    	xor ecx, ecx	
     	int 0x80	; call the interrupt to execute the listen syscall
 ```
+
+#### 4th Syscall (Accept Incoming Connections)
+----
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep accept
+#define __NR_accept4 364
+```
+
+The accept4 syscall begins with its code value of 364, converting from decimal to hex equals 0x16c.
+
+The EAX register is cleared to store the accept4 syscall value into the lower memory region:
+
+```nasm
+	xor eax, eax
+   	mov ax, 0x16c	; syscall for accept4 moved into eax
+```
+
+The accept syscall is defined by the man pages as follows:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ man accept
+
+ACCEPT(2)                              Linux Programmer's Manual                             ACCEPT(2)
+
+NAME
+       accept - accept a connection on a socket
+
+SYNOPSIS
+       #include <sys/types.h>          /* See NOTES */
+       #include <sys/socket.h>
+
+       int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+       #define _GNU_SOURCE             /* See feature_test_macros(7) */
+       #include <sys/socket.h>
+
+       int accept4(int sockfd, struct sockaddr *addr,
+                   socklen_t *addrlen, int flags);
+
+DESCRIPTION
+       The  accept()  system  call  is used with connection-based socket types (SOCK_STREAM, SOCK_SEQ-
+       PACKET).  It extracts the first connection request on the queue of pending connections for  the
+       listening  socket,  sockfd,  creates  a new connected socket, and returns a new file descriptor
+       referring to that socket.  The newly created socket is not in the listening state.  The  origi-
+       nal socket sockfd is unaffected by this call.
+```
+EBX will contain the reference of socket initially stored in EDI. 
+
+The next 3 arguments can all equal '0' according to the man pages definition of accept.
+
+The 4 arguments required for accept4:
+
+* sockfd - EBX (reference of socket initially stored in EDI)
+* addr - ECX == 0
+* addrlen - EDX == 0
+* flags - ESI == 0
+
+nasm code
 
 #### Assembly Code
 -------------
@@ -445,7 +504,7 @@ _start:
 	
 	; 3rd syscall - listen for incoming connections 
 	xor eax, eax	
-    	mov ax, 0x16b	; syscall for listen moved into AX
+    	mov ax, 0x16b	; syscall for listen moved into eax
 	mov ebx, edi	; move value of socket stored in edi into ebx
    	xor ecx, ecx	
     	int 0x80	; call the interrupt to execute the listen syscall
