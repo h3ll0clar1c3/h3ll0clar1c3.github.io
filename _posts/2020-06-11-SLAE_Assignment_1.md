@@ -320,6 +320,7 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
 2nd Syscall (Assembly code):
 
 ```nasm
+	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
 	xor eax, eax
 	mov al, 0x66	; hex value for socket
 	mov ebx, edi    ; move the value of edi (socket) into ebx
@@ -338,8 +339,44 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
 #### 3rd Syscall (Listen for Incoming Connections)
 ----
 
-Let's go :-)
-Write some stuff here ...
+The listen syscall works by preparing the bind socket to listen for incoming connections. 
+
+The man pages defines the arguments required for the listen syscall:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ man listen
+
+LISTEN(2)                              Linux Programmer's Manual                             LISTEN(2)
+
+NAME
+       listen - listen for connections on a socket
+
+SYNOPSIS
+       #include <sys/types.h>          /* See NOTES */
+       #include <sys/socket.h>
+
+       int listen(int sockfd, int backlog);
+
+DESCRIPTION
+       listen()  marks the socket referred to by sockfd as a passive socket, that is, as a socket that
+       will be used to accept incoming connection requests using accept(2).
+
+       The sockfd argument is a file descriptor that  refers  to  a  socket  of  type  SOCK_STREAM  or
+       SOCK_SEQPACKET.
+
+       The  backlog  argument defines the maximum length to which the queue of pending connections for
+       sockfd may grow.  If a connection request arrives when  the  queue  is  full,  the  client  may
+       receive  an  error  with  an indication of ECONNREFUSED or, if the underlying protocol supports
+       retransmission, the request may be ignored so that a later reattempt at connection succeeds.
+```
+
+Find that value ... 
+
+```nasm
+	xor eax, eax
+    	mov ax, 0x16b	;???
+```
+
 
 #### Assembly Code
 -------------
