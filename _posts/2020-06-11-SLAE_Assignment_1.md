@@ -370,11 +370,24 @@ DESCRIPTION
        retransmission, the request may be ignored so that a later reattempt at connection succeeds.
 ```
 
+The listen syscall begins with the value of 363, converted from decimal to hex which equals 0x16b:
+
+'''bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep listen
+#define __NR_listen 363 => 0x16B
+```
+
+```nasm
+	mov ax, 0x16b   ; syscall for listen() = 363 or 0x16b, loading it in AX
+	xor ecx, ecx    ; clearing ECX for listen syscall
+	int 0x80        ; execute listen syscall
+```
+
 Find that value ... 
 
 ```nasm
 	xor eax, eax
-    	mov ax, 0x16b	;???
+    	mov ax, 0x16b	; syscall for listen moved into AX
 ```
 
 
