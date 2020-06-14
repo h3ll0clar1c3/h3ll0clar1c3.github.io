@@ -186,7 +186,9 @@ SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 #define	PF_INET		2	/* IP protocol family.  */
 ```
 
-The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. The registers would show the following at this stage:
+The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. 
+
+The registers would show the following at this stage:
 
 * EBX == 0x02
 * ECX == 0x01
@@ -200,7 +202,7 @@ The socket syscall is executed with int 0x80 which creates the socket in the pro
 	int 0x80       ; create the socket, execute the syscall
 ```
 
-The newly created socket can be identified by storing the value of EAX into the EDI register as reference for a later stage with the ability to use EAX in subsequent system calls:
+The newly created socket can be identified by storing the value of EAX into the EDI register as reference for a later stage (with the ability to use EAX in subsequent system calls):
 
 ```nasm
 	mov edi, eax   ; move the value of eax into edi for later reference
@@ -221,7 +223,9 @@ The newly created socket can be identified by storing the value of EAX into the 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
 -----
 
-To bind a port (name) to the newly created socket, the EAX register will need to be cleared out using the XOR operation. The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
+To bind a port to the newly created socket, the EAX register will need to be cleared out using the XOR operation. 
+
+The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
 
 ```nasm
 	xor eax, eax
