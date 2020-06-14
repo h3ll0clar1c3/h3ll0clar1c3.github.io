@@ -194,12 +194,12 @@ The registers would show the following at this stage:
 * ECX == 0x01
 * EDX == 0x00
 
-The EDX register was already cleared when initialised, the zero value is set and does not require any change.
+The EDX register was already cleared when initialized, the zero value is set and does not require any change.
 
 The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall:
 
 ```nasm
-	int 0x80       ; create the socket, execute the syscall
+	int 0x80       ; call the interrupt to create the socket, execute the syscall
 ```
 
 The newly created socket can be identified by storing the value of EAX into the EDI register as reference for a later stage (with the ability to use EAX in subsequent system calls):
@@ -208,14 +208,13 @@ The newly created socket can be identified by storing the value of EAX into the 
 	mov edi, eax   ; move the value of eax into edi for later reference
 ```
 
-1st Syscall (Assembly code):
+1st Syscall (Assembly code section):
 
 ```nasm
 	; 1st syscall - create socket
 	mov al, 0x66    ; hex value for socket
 	mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
 	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
-
 	int 0x80        ; create the socket, execute the syscall 
 	mov edi, eax    ; move the value of eax into edi for later reference
 ```
@@ -317,7 +316,7 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
     	int 0x80	; call the interrupt to execute the bind syscall
 ```
 
-2nd Syscall (Assembly code):
+2nd Syscall (Assembly code section):
 
 ```nasm
 	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
@@ -329,10 +328,8 @@ Followed by an instruction to call the interrupt to execute the bind syscall.
     	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
     	push word 0x5c11; bind port 4444 is set
     	push word 0x02	; AF_INET
-
     	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
     	mov dl, 16	; move the value of 16 into edx
-	
     	int 0x80	; call the interrupt to execute the bind syscall
 ```
 
@@ -400,6 +397,17 @@ The ECX memory register is then cleared, the  program interrupt is called and th
     	int 0x80	; call the interrupt to execute the listen syscall
 ```
 
+3rd syscall (Assembly code section):
+
+```nasm
+	; 3rd syscall - listen for incoming connections 
+	xor eax, eax	
+    	mov ax, 0x16b	; syscall for listen moved into AX
+	mov ebx, edi	; move value of socket stored in edi into ebx
+   	xor ecx, ecx	
+    	int 0x80	; call the interrupt to execute the listen syscall
+```
+
 #### Assembly Code
 -------------
 
@@ -419,8 +427,7 @@ _start:
 	mov al, 0x66    ; hex value for socket
 	mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
 	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
-
-	int 0x80        ; create the socket, execute the syscall 
+	int 0x80        ; call the interrupt to create the socket, execute the syscall 
 	mov edi, eax    ; move the value of eax into edi for later reference
 	
 	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
@@ -432,10 +439,8 @@ _start:
     	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
     	push word 0x5c11; bind port 4444 is set
     	push word 0x02	; AF_INET
-
     	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
     	mov dl, 16	; move the value of 16 into edx
-	
     	int 0x80	; call the interrupt to execute the bind syscall
 	
 	; 3rd syscall - listen for incoming connections 
