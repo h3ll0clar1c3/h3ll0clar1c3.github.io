@@ -370,24 +370,32 @@ DESCRIPTION
        retransmission, the request may be ignored so that a later reattempt at connection succeeds.
 ```
 
-The listen syscall begins with the value of 363, converted from decimal to hex which equals 0x16b:
+The 3 required arguments would result in:
 
-'''bash
+* listen = EAX
+* sockfd = EBX -> reference of socket initially stored in EDI
+* backlog = ECX -> 0 (accept first incoming connection)
+
+The listen syscall begins with its code value of 363, converting from decimal to hex equals 0x16b:
+
+```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep listen
 #define __NR_listen 363 => 0x16B
 ```
 
+The EAX register is cleared to store the listen syscall value into the lower memory region:
+
 ```nasm
-	mov ax, 0x16b   ; syscall for listen() = 363 or 0x16b, loading it in AX
-	xor ecx, ecx    ; clearing ECX for listen syscall
-	int 0x80        ; execute listen syscall
+	xor eax, eax	
+    	mov ax, 0x16b	; syscall for listen moved into AX
 ```
 
-Find that value ... 
+blah blah 
 
 ```nasm
-	xor eax, eax
-    	mov ax, 0x16b	; syscall for listen moved into AX
+	mov ebx, edi	; move value of socket stored in edi into ebx
+   	xor ecx, ecx	
+    	int 0x80	; call the interrupt to execute the listen syscall
 ```
 
 
