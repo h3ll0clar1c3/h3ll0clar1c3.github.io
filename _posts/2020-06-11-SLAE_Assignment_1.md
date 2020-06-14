@@ -390,14 +390,15 @@ The EAX register is cleared to store the listen syscall value into the lower mem
     	mov ax, 0x16b	; syscall for listen moved into AX
 ```
 
-blah blah 
+The stored socket value from the EDI register is moved into the EBX register. 
+
+The ECX memory register is then cleared, the  program interrupt is called and the listen syscall is executed:
 
 ```nasm
 	mov ebx, edi	; move value of socket stored in edi into ebx
    	xor ecx, ecx	
     	int 0x80	; call the interrupt to execute the listen syscall
 ```
-
 
 #### Assembly Code
 -------------
@@ -438,7 +439,11 @@ _start:
     	int 0x80	; call the interrupt to execute the bind syscall
 	
 	; 3rd syscall - listen for incoming connections 
-	let's go :-)
+	xor eax, eax	
+    	mov ax, 0x16b	; syscall for listen moved into AX
+	mov ebx, edi	; move value of socket stored in edi into ebx
+   	xor ecx, ecx	
+    	int 0x80	; call the interrupt to execute the listen syscall
 ````
 
 ##### SLAE Disclaimer ####
