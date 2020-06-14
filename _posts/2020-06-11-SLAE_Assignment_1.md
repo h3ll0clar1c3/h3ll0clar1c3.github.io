@@ -502,6 +502,7 @@ The RETURN VALUE defined in the man pages for accept4 describes a new sockfd val
 ```
 
 #### 5th Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
+------
 
 The dup2 syscall works by creating a loop and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
 
