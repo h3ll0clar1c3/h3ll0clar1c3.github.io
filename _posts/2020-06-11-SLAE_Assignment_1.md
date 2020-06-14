@@ -224,7 +224,7 @@ The newly created socket can be identified by storing the value of EAX into the 
 
 To bind a port to the newly created socket, the EAX register will need to be cleared out using the XOR operation. 
 
-The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall.
+The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
 
 ```nasm
 	xor eax, eax
@@ -294,7 +294,7 @@ The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) 
 
 The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in Little Endian format. 
 
-Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct.
+Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct:
 
 ```nasm
 	xor ecx, ecx
@@ -308,7 +308,7 @@ Move the ESP stack pointer (top of the stack) into the ECX register to store the
 
 The value of 16 (sizeof function) will be moved into the low part of the EDX register.
 
-Followed by an instruction to call the interrupt to execute the bind syscall.
+Followed by an instruction to call the interrupt to execute the bind syscall:
 
 ```nasm
     	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
