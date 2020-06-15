@@ -508,16 +508,16 @@ The dup2 syscall works by creating a loop and iterating 3 times to accomodate al
 
 To redirect IO to the descriptor, a loop is initiated with the ECX register, commonly known as the counter register. 
 
-The syscall code can be found in the header file below, converting 63 from decimal to hex equals 0x3f:
+The dup2 syscall code can be found in the header file below, converting 63 from decimal to hex equals 0x3f:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep dup2 
 #define __NR_dup2 63
 ```
 
-The dup2 syscall code of 63 is moved in the lower part of the EAX memory region.
+The syscall code of 63 is moved in the lower part of the EAX memory region.
 
-All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved to EDI.
+All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved to EBX.
 
 Whilst the zero flag is not set (JNZ) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0):
 
