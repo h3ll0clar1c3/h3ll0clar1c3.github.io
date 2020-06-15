@@ -172,7 +172,7 @@ Using the C code as a reference and template for the Assembly code, the memory r
 To create the socket syscall, a value is needed in the EAX register to call socket:
 
 ```bash 
-osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep socket
 #define __NR_socketcall	102
 ```
 
@@ -181,7 +181,7 @@ The header file reveals the code for socket is 102. Converting 102 from decimal 
 The next values are that of the socket properties defined earlier with the man pages, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
 
 ```bash
-osboxes@osboxes:~$ cat /usr/include/i386-linux-gnu/bits/socket.h
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/bits/socket.h
 SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 #define	PF_INET		2	/* IP protocol family.  */
 ```
@@ -269,7 +269,7 @@ The sockfd argument can be set by moving the value of EDI into EBX, this was ori
 The structure for handling internet addresses can be viewed via man pages for the header file:
 
 ```bash
-cat /usr/include/netinet/in.h
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/netinet/in.h
 
 /* Structure describing an Internet (IP) socket address. */
 #define __SOCK_SIZE__	16		/* sizeof(struct sockaddr)	*/
