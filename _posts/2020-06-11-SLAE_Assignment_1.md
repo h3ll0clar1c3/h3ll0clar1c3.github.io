@@ -775,7 +775,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Linking ...
 [+] Done!
 ```
-The binary is executed:
+The binary is executed with a shell:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
