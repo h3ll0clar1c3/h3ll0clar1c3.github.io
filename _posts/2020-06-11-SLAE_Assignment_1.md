@@ -71,7 +71,7 @@ int main()
     dup2(client_sockid, 1);  
     dup2(client_sockid, 2);  
   
-    // 6th syscall - executes /bin/sh using execve  
+    // 6th syscall - execute /bin/sh using execve  
     execve("/bin/sh", NULL, NULL);  
     close(host_sockid);  
       
@@ -517,7 +517,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The syscall code of 63 is moved in the lower part of the EAX memory region.
 
-All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved to EBX.
+All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved into EBX.
 
 Whilst the zero flag is not set (JNZ) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0):
 
@@ -533,6 +533,11 @@ Whilst the zero flag is not set (JNZ) - the counter register is decremented each
    	int 0x80	; call interrupt to execute dup2 syscall
     	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
 ```
+
+#### 6th Syscall (Execute /bin/sh using Execve) 
+------
+
+asfds
 
 #### Assembly Code
 -------------
@@ -595,6 +600,8 @@ _start:
    	dec cl          ; decrement cl by 1
    	int 0x80	; call interrupt to execute dup2 syscall
     	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
+	
+	; 6th syscall - execute /bin/sh using execve 
 ````
 
 ##### SLAE Disclaimer ####
