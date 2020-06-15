@@ -137,7 +137,7 @@ The C code achieves the following objectives:
 * Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * Executes a shell
 
-#### POC 
+#### POC (C Code)
 ------
 
 The C code is compiled and executed demonstrating a successful bind connection and shell on the local host via port 4444:
@@ -663,7 +663,7 @@ Finally the execve syscall and the the program interrupt are called to execute t
 	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
-#### Assembly Code
+#### Assembly Code (Final)
 -------------
 
 ````nasm
@@ -738,6 +738,24 @@ _start:
 	mov al, 0x0b	; move syscall code for execve into al
   	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ````
+
+#### POC (Assembly Code) 
+
+asdfsddsf
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
+#!/bin/bash
+
+echo '[+] Assembling with Nasm ... '
+nasm -f elf32 -o $1.o $1.nasm
+
+echo '[+] Linking ...'
+ld -o $1 $1.o
+
+echo '[+] Done!'
+```
+asfasdf
 
 ##### SLAE Disclaimer ####
 ---------
