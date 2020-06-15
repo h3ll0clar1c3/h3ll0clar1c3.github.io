@@ -140,14 +140,21 @@ The C code achieves the following objectives:
 #### POC (C Code)
 ------
 
-The C code is compiled and executed demonstrating a successful bind connection and shell on the local host via port 4444:
+The C code is compiled as an executable binary and executed:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp.c -o shell_bind_tcp
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
 
-osboxes@osboxes:~$ netstat -ano | grep 4444
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      off (0.00/0/0)
+```
+
+Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+
+```bash
+osboxes@osboxes:~$ netstat -antp | grep 4444
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp
 osboxes@osboxes:~$ nc 127.0.0.1 4444
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
@@ -746,7 +753,7 @@ section .text
 #### POC (Assembly Code) 
 ------
 
-...
+The Assembly code is compiled by assembling with Nasm and linking with the following bash script whilst outputting an executable binary:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
@@ -760,7 +767,7 @@ ld -o $1 $1.o
 
 echo '[+] Done!'
 ```
-...
+The Assembly code compiled as an executable binary:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
@@ -768,6 +775,27 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Linking ...
 [+] Done!
 ```
+The binary is executed:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+```
+
+Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+
+```bash
+osboxes@osboxes:~$ netstat -antp | grep 4444
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp
+osboxes@osboxes:~$ nc 127.0.0.1 4444
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+```
+
+...
 
 ##### SLAE Disclaimer ####
 ---------
