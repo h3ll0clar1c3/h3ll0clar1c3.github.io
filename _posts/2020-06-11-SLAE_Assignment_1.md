@@ -295,7 +295,7 @@ struct sockaddr_in {
 
 Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
 
-The chosen port number will need to be converted from decimal (4444) to hex (115C), which equates to 0x5c11 in Little Endian format.
+The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
 
 The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX.
 
