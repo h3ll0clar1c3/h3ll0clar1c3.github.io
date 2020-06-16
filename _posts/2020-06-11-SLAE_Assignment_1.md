@@ -812,6 +812,8 @@ Once the raw shellcode has been extracted, the last requirement to complete the 
 This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and dynamically generates shellcode based on the user input (reference below includes the original hardcoded shellcode for port 4444):
 
 ```python
+#!/usr/bin/python
+
 import socket
 import sys
 
