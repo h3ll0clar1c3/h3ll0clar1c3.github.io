@@ -674,6 +674,15 @@ Finally the execve syscall and the the program interrupt are called to execute t
 -------------
 
 ````nasm
+; Filename: shell_bind_tcp.nasm
+; Author: h3ll0clar1c3
+; Purpose: bind shellcode on TCP port 4444, spawn a shell on incoming connection
+; Compilation: ./compile.sh shell_bind_tcp
+; Usage: ./shell_bind_tcp
+; Testing: nc 127.0.0.1 4444
+; Size of shellcode: 82 bytes
+; Architecture: x86
+
 global	_start
 
 section .text
