@@ -814,6 +814,10 @@ This can be achieved by utilising a Python wrapper which takes a standard 2 byte
 ```python
 #!/usr/bin/python
 
+# Filename: shell_bind_tcp_wrapper.py
+# Purpose: Wrapper script to generate dynamic shellcode, configurable bind port number
+# Usage: python shell_bind_tcp_wrapper.py <port>
+
 import socket
 import sys
 
