@@ -782,7 +782,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Linking ...
 [+] Done!
 ```
-The binary is executed with an interactive shell:
+The binary is executed returning an interactive shell:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
@@ -800,7 +800,7 @@ $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-...
+Shellcode ... then python wrapper ... then POC once more ... 
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./shell_bind_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
