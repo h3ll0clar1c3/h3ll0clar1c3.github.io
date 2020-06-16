@@ -825,7 +825,7 @@ shellcode = """
 """
 
 if len(sys.argv) < 2:
-    print 'Usage: python {name} [port_to_bind]'.format(name = sys.argv[0])
+    print 'Usage: python {name} <port>'.format(name = sys.argv[0])
     exit(1)
 
 port = hex(socket.htons(int(sys.argv[1])))
