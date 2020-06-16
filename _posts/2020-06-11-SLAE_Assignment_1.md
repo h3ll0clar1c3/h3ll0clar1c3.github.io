@@ -811,7 +811,7 @@ Once the raw shellcode has been extracted, the last requirement to complete the 
 
 This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and checks the supplied port number to ensure the custom port is valid.
 
-The reference below includes the original hardcoded shellcode for port 4444):
+The shellcode variable defined within the script includes the original hardcoded shellcode for port 4444:
 
 ```python
 #!/usr/bin/python
