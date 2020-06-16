@@ -910,6 +910,7 @@ The C program is compiled as an executable binary and executed:
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_final
+Shellcode length: 112
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
