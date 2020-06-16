@@ -143,8 +143,8 @@ The C code achieves the following objectives:
 The C code is compiled as an executable binary and executed:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp.c -o shell_bind_tcp
-osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
+osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp_poc.c -o shell_bind_tcp_poc
+osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc 
 
 ```
 
@@ -152,9 +152,7 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp
+tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp_poc
 osboxes@osboxes:~$ nc 127.0.0.1 4444
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
@@ -787,8 +785,6 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
-(Not all processes could be identified, non-owned process info
- will not be shown, you would have to be root to see it all.)
 tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp
 osboxes@osboxes:~$ nc 127.0.0.1 4444
 $ id
