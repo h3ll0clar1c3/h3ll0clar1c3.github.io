@@ -585,7 +585,7 @@ This objective is achieved when a connection is made to the newly created bind p
 
 This instuction set will load the string '/bin/sh' onto the stack in reverse order since the stack grows from high to low memory.
 
-The execve syscall works with null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
+The execve syscall works with Null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
 ```nasm
 	xor eax, eax	; clear register, place execve
@@ -613,7 +613,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 '69622f2f'
 ```
 
-After the null terminator has been pushed onto the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
+After the Null terminator has been pushed onto the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
 
 ```nasm
 	push  0x68732f2f ; push the end of "//bin/sh", 'hs/n'
@@ -625,7 +625,7 @@ The EBX register will be used to carry the pointer location of the '//bin/sh' en
 ```nasm
 	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
 ```
-Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from ESP into EDX (null terminated):
+Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from ESP into EDX (Null terminated):
 
 ```nasm
 	push eax	; push 0 onto the stack, sys argv
