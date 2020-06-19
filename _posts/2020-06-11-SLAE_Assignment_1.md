@@ -210,15 +210,6 @@ The newly created socket can be identified by storing the value of EAX into the 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
 -----
 
-To bind a port to the newly created socket, the EAX register will need to be cleared out using the XOR operation. 
-
-The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
-
-```nasm
-	xor eax, eax	; clear register
-	mov al, 0x66	; hex value for socket
-```
-
 The definition of the bind syscall function in the man pages describes the arguments required:
 
 ```bash
@@ -248,12 +239,6 @@ The 3 arguments required:
 * const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
 * socklen_t addrlen – the length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
 
-The sockfd argument can be set by moving the value of EDI into EBX, this was originally the value of socket:
-
-```nasm
-	mov ebx, edi    ; move the value of edi (socket) into ebx
-```
-
 The structure for handling internet addresses can be viewed via man pages for the header file:
 
 ```bash
@@ -278,47 +263,55 @@ Since the stack grows from High to Low memory it is important to remember to pla
 
 The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
 
-The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX.
+The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX and EDX.
 
 The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in Little Endian format. 
 
-Finally the word value of 0x02 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct:
+Finally the word value of 0x2 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct:
 
 ```nasm
-	xor ecx, ecx	; clear register, place bind
-	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
-    	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
-    	push word 0x5c11; bind port 4444 is set
-    	push word 0x02	; AF_INET
+	push esi        ; push 0 for bind address 0.0.0.0
+        push word 0x5c11; bind port 4444 is set
+        push word 0x2   ; AF_INET
+        mov ecx, esp    ; move esp into ecx, store the const struct sockaddr *addr argument
+        push 0x16       ; length of sockaddr struct, 16
+        push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
+        push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
 ```    
-    
+
 Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
 
-The value of 16 (sizeof function) will be moved into the low part of the EDX register.
-
-Followed by an instruction to call the interrupt to execute the bind syscall:
+The value of 16 (sizeof function) will be pushed onto the stack.
+    
+The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
 
 ```nasm
-    	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
-    	mov dl, 16	; move the value of 16 into edx
-    	int 0x80	; call the interrupt to execute the bind syscall
+	mov al, 0x66	; hex value for socket
+```
+    
+Followed by an instruction to call the interrupt to execute the bind syscall: 
+
+```nasm
+    	mov bl, 2       ; sys_bind = 2
+        mov ecx, esp    ; pointer to the arguments
+        int 0x80        ; call the interrupt to execute the bind syscall
 ```
 
 2nd Syscall (Assembly code section):
 
 ```nasm
-	; 2nd syscall - bind socket to IP/Port in sockaddr struct 
-	xor eax, eax	; clear register
-	mov al, 0x66	; hex value for socket
-	mov ebx, edi    ; move the value of edi (socket) into ebx
-	xor ecx, ecx	; clear register, place bind
-	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
-    	push ecx	; push all zeros on the stack, equals IP parameter of 0.0.0.0
-    	push word 0x5c11; bind port 4444 is set
-    	push word 0x02	; AF_INET
-    	mov ecx, esp	; move esp into ecx, store the const struct sockaddr *addr argument
-    	mov dl, 16	; move the value of 16 into edx
-    	int 0x80	; call the interrupt to execute the bind syscall
+	; 2nd syscall - bind socket to IP/Port in sockaddr struct
+        push esi        ; push 0 for bind address 0.0.0.0
+        push word 0x5c11; bind port 4444 is set
+        push word 0x2   ; AF_INET
+        mov ecx, esp    ; move esp into ecx, store the const struct sockaddr *addr argument
+        push 0x16       ; length of sockaddr struct, 16
+        push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
+        push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
+        mov al, 0x66    ; hex value for socket
+        mov bl, 2       ; sys_bind = 2
+        mov ecx, esp    ; pointer to the arguments
+        int 0x80        ; call the interrupt to execute the bind syscall
 ```
 
 #### 3rd Syscall (Listen for incoming connections)
@@ -355,63 +348,24 @@ DESCRIPTION
        retransmission, the request may be ignored so that a later reattempt at connection succeeds.
 ```
 
-The 3 required arguments would result in:
+A byte of 1 is pushed onto the stack to listen for 1 client at a time, the socket value is moved into the lower portion of memory in EAX.
 
-* listen - EAX
-* sockfd - EBX (reference of socket initially stored in EDI)
-* backlog - ECX == 0 (accept first incoming connection)
-
-The listen syscall begins with its code value of 363, converting from decimal to hex equals 0x16b:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep listen
-#define __NR_listen 363 
-```
-
-The EAX register is cleared to store the listen syscall value into the lower memory region:
-
-```nasm
-	xor eax, eax	; clear register
-    	mov ax, 0x16b	; syscall for listen moved into eax
-```
-
-The stored socket value from the EDI register is moved into the EBX register. 
-
-The ECX memory register is then cleared, the  program interrupt is called and the listen syscall is executed:
-
-```nasm
-	mov ebx, edi	; move value of socket stored in edi into ebx
-   	xor ecx, ecx	; clear register, place listen
-    	int 0x80	; call the interrupt to execute the listen syscall
-```
+The listen syscall is executed using the code of 4, the program interrupt is called to execute the listen syscall.
 
 3rd syscall (Assembly code section):
 
 ```nasm
-	; 3rd syscall - listen for incoming connections 
-	xor eax, eax	; clear register
-    	mov ax, 0x16b	; syscall for listen moved into eax
-	mov ebx, edi	; move value of socket stored in edi into ebx
-   	xor ecx, ecx	; clear register, place listen
-    	int 0x80	; call the interrupt to execute the listen syscall
+        ; 3rd syscall - listen for incoming connections
+        push byte 0x1   ; listen for 1 client at a time
+        push edx        ; pointer to stack
+        mov al, 0x66    ; socketcall
+        mov bl, 0x4     ; sys_listen = 4
+        mov ecx, esp    ; pointer to the arguments pushed
+        int 0x80        ; call the interrupt to execute the listen syscall
 ```
 
 #### 4th Syscall (Accept incoming connections)
 ----
-
-The accept4 syscall begins with its code value of 364, converting from decimal to hex equals 0x16c:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep accept
-#define __NR_accept4 364
-```
-
-The EAX register is cleared to store the accept4 syscall value into the lower memory region:
-
-```nasm
-	xor eax, eax    ; clear register
-   	mov ax, 0x16c	; syscall for accept4 moved into eax
-```
 
 The accept syscall is defined by the man pages as follows:
 
@@ -442,6 +396,14 @@ DESCRIPTION
        referring to that socket.  The newly created socket is not in the listening state.  The  origi-
        nal socket sockfd is unaffected by this call.
 ```
+
+The EAX register is cleared to store the accept4 syscall value into the lower memory region:
+
+```nasm
+	xor eax, eax    ; clear register
+   	mov ax, 0x16c	; syscall for accept4 moved into eax
+```
+
 EBX will contain the reference of socket initially stored in EDI. 
 
 The next 3 arguments can all equal '0' according to the man pages definition of accept.
@@ -477,16 +439,14 @@ The RETURN VALUE defined in the man pages for accept4 describes a new sockfd val
 4th syscall (Assembly code section):
 
 ```nasm
-	; 4th syscall - accept incoming connections 
-	xor eax, eax	; clear register 
-   	mov ax, 0x16c	; syscall for accept4 moved into eax
-	mov ebx, edi    ; reference in stored EDI
-	xor ecx, ecx    ; addr = 0
-	xor edx, edx    ; addrlen = 0
-	xor esi, esi    ; flags = 0
-	int 0x80	; call the interrupt to execute accept syscall
-	xor edi, edi    ; clear socket value stored in edi
-	mov edi, eax    ; save return value from eax into edi		
+	; 4th syscall - accept incoming connections
+        push esi        ; NULL
+        push esi        ; NULL
+        push edx        ; pointer to sockfd
+        mov al, 0x66    ; socketcall
+        mov bl, 5       ; sys_accept = 5
+        mov ecx, esp    ; pointer to arguments pushed
+        int 0x80        ; call the interrupt to execute accept syscall
 ```
 
 #### 5th Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
