@@ -81,12 +81,12 @@ int main()
 
 Note the various syscalls in the C code which will be utilised in the upcoming Assembly code:
 
-* socket
-* bind
-* listen
-* accept
-* dup2
-* execve
+* socket (Creates a socket)
+* bind (Binds the socket to a port)
+* listen (Configures the socket to listen for incoming connections)
+* accept (Accepts connections on the created socket)
+* dup2 (Redirects STDIN, STDOUT, and STDERR to the incoming client connection)
+* execve (Executes a shell)
 
 The syscalls in the C code relate to the socket network access protocol as referenced below in the Linux master header file:
 
@@ -128,15 +128,6 @@ DESCRIPTION
        AF_INET             IPv4 Internet protocols          ip(7)
 ```
 
-The C code achieves the following objectives:
-
-* Creates a socket
-* Binds the socket to a port
-* Configures the socket to listen for incoming connections
-* Accepts connections on the created socket
-* Redirects STDIN, STDOUT, and STDERR to the incoming client connection
-* Executes a shell
-
 #### POC (C Code)
 ------
 
@@ -164,11 +155,10 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to '0':
 
 ```nasm
-	; initialize registers
-	xor eax, eax
-	xor ebx, ebx
-	xor ecx, ecx
-	xor edx, edx
+        ; initialize registers
+        xor eax, eax
+        xor ebx, ebx
+        xor esi, esi
 ```
 
 #### 1st Syscall (Create Socket)
