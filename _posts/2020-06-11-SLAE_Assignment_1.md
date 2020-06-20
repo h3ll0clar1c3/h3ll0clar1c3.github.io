@@ -173,7 +173,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX (avoid Null Bytes with padding).
 
-The next values are that of the socket properties defined earlier with the man pages, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
+The next values are that of the socket properties as defined, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/bits/socket.h
