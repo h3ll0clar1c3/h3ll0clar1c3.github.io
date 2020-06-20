@@ -400,7 +400,7 @@ DESCRIPTION
        nal socket sockfd is unaffected by this call.
 ```
 
-The next 3 arguments can all equal '0' according to the man pages definition of accept.
+The next 3 arguments can all equal '0' according to the man pages definition of the accept syscall.
 
 The 4 arguments required for accept4:
 
@@ -865,7 +865,7 @@ unsigned char code[] =
 #### POC (Final Shellcode) 
 ------
 
-The C program is compiled as an executable binary and executed:
+The C program is compiled as an executable binary with stack protection disabled, and executed resulting in a shellcode size of 105 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final
