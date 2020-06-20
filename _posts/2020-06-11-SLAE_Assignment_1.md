@@ -572,14 +572,14 @@ ECX should point to the location of EBX, push EBX onto the stack and then move E
         mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
 ```
 
-The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals 0x0b:
+The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals 0xb:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep execve
 #define __NR_execve 11
 ```
 
-The value of 0x0b is placed into the lower memory region of EAX.
+The value of 0xb is placed into the lower memory region of EAX.
 
 Finally the execve syscall and the the program interrupt are called to execute the program and initiate the full TCP bind shell on the target machine:
 
