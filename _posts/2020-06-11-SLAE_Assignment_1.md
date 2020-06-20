@@ -256,10 +256,10 @@ struct sockaddr_in {
 
 4 structures can be defined:
 
+* struct sockaddr 
 * AF_INET (Address family)
 * Port Number
 * Internet address
-* 0 (choose an unused port at random)
 
 Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
 
@@ -283,7 +283,7 @@ Finally the word value of 0x2 is pushed onto the stack which loads the value for
 
 Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
 
-The value of 16 (sizeof function) will be pushed onto the stack.
+The value of 16 (struct sockaddr) will be pushed onto the stack.
     
 The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
 
