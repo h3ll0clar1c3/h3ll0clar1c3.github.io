@@ -274,7 +274,7 @@ The word value of 0x2 is pushed onto the stack which loads the value for AF_INET
 
 Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
 
-The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equal the IP address:
+The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equate to the IP address:
 
 ```nasm
 	push esi        ; push 0 for bind address 0.0.0.0
