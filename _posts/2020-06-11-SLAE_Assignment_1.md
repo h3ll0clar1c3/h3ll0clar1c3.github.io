@@ -90,7 +90,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc
 
 ```
 
-Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+A seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
@@ -741,7 +741,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp
 
 ```
 
-Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+A seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
@@ -874,7 +874,7 @@ Shellcode length: 105
 
 ```
 
-Seperate terminal demonstrating a successful bind connection and shell on the local host via port 5555:
+A seperate terminal demonstrating a successful bind connection and shell on the local host via port 5555:
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 5555
