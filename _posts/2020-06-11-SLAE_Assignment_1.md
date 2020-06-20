@@ -264,13 +264,17 @@ struct sockaddr_in {
 
 Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
 
-The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
-
 The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX and EDX.
+
+The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
 
 The chosen port number is then pushed onto the stack as the next argument. The word value 0x5c11 relates to port number 4444 in Little Endian format. 
 
-Finally the word value of 0x2 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct:
+The word value of 0x2 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct.
+
+Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
+
+The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equal the IP address:
 
 ```nasm
 	push esi        ; push 0 for bind address 0.0.0.0
@@ -281,10 +285,6 @@ Finally the word value of 0x2 is pushed onto the stack which loads the value for
         push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
         push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
 ```    
-
-Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
-
-The value of 16 (struct sockaddr) will be pushed onto the stack.
     
 The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
 
