@@ -399,34 +399,32 @@ DESCRIPTION
        nal socket sockfd is unaffected by this call.
 ```
 
-EDX will contain the reference of socket initially stored in EAX. 
-
 The next 3 arguments can all equal '0' according to the man pages definition of accept.
 
 The 4 arguments required for accept4:
 
 * sockfd - EDX (reference of socket initially stored in EAX)
-* addr - ECX == 0
-* addrlen - EDX == 0
+* addr - ESI == 0
+* addrlen - ESI == 0
 * flags - ESI == 0
 
-The program interrupt is then called which executes the accept syscall:
+The socket value (stored in EDX) is pushed onto the stack: 
 
 ```nasm
-	mov ebx, edi    ; reference in stored EDI
-	xor ecx, ecx    ; addr = 0
-	xor edx, edx    ; addrlen = 0
-	xor esi, esi    ; flags = 0
-	int 0x80	; call the interrupt to execute accept syscall
+        push esi        ; NULL
+        push esi        ; NULL
+        push edx        ; pointer to sockfd
 ```
 
-The socket value stored in EDI is then set to '0' with an XOR operation. 
+The RETURN VALUE defined in the man pages for accept4 describes a new sockfd value returned after the accept syscall is executed.
 
-The RETURN VALUE defined in the man pages for accept4 describes a new sockfd value returned after the accept syscall is executed, this return value can be moved into EDI as with the previous sockfd value:
+The accept syscall is executed using the code of 5, the program interrupt is then called which executes the accept syscall:
 
 ```nasm
-	xor edi, edi    ; clear socket value stored in edi
-	mov edi, eax    ; save return value from eax into edi	
+	mov al, 0x66    ; socketcall
+        mov bl, 5       ; sys_accept = 5
+        mov ecx, esp    ; pointer to arguments pushed
+        int 0x80        ; call the interrupt to execute accept syscall
 ```
 
 4th syscall (Assembly code section):
