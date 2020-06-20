@@ -721,12 +721,11 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Linking ...
 [+] Done!
 ```
-The binary is executed returning an interactive shell:
+The binary is executed:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+
 ```
 
 Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
@@ -734,8 +733,9 @@ Seperate terminal demonstrating a successful bind connection and shell on the lo
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
 tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      3709/shell_bind_tcp
-osboxes@osboxes:~$ nc 127.0.0.1 4444
-$ id
+osboxes@osboxes:~$ nc -nv 127.0.0.1 4444
+Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
+id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
