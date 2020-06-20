@@ -403,10 +403,10 @@ The next 3 arguments can all equal '0' according to the man pages definition of 
 
 The 4 arguments required for accept4:
 
-* sockfd - EDX (reference of socket initially stored in EAX)
-* addr - ESI == 0
-* addrlen - ESI == 0
-* flags - ESI == 0
+* sockfd -> EDX (reference of socket initially stored in EAX)
+* addr -> ESI == 0
+* addrlen -> ESI == 0
+* flags -> ESI == 0
 
 The socket value (stored in EDX) is pushed onto the stack: 
 
