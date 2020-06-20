@@ -79,14 +79,38 @@ int main()
 }
 ```
 
+#### POC (C Code)
+------
+
+The C code is compiled as an executable binary and executed:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp_poc.c -o shell_bind_tcp_poc
+osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc 
+
+```
+
+Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+
+```bash
+osboxes@osboxes:~$ netstat -antp | grep 4444
+tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp_poc
+osboxes@osboxes:~$ nc 127.0.0.1 4444
+id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+```
+
+#### TCP Bind Shell in Assembly
+--------------
+
 Note the various syscalls in the C code which will be utilised in the upcoming Assembly code:
 
-* socket (Creates a socket)
-* bind (Binds the socket to a port)
-* listen (Configures the socket to listen for incoming connections)
-* accept (Accepts connections on the created socket)
-* dup2 (Redirects STDIN, STDOUT, and STDERR to the incoming client connection)
-* execve (Executes a shell)
+* socket -> Creates a socket
+* bind -> Binds the socket to a port
+* listen -> Configures the socket to listen for incoming connections
+* accept -> Accepts connections on the created socket
+* dup2 -> Redirects STDIN, STDOUT, and STDERR to the incoming client connection
+* execve -> Executes a shell
 
 The syscalls in the C code relate to the socket network access protocol as referenced below in the Linux master header file:
 
@@ -127,30 +151,6 @@ DESCRIPTION
        AF_UNIX, AF_LOCAL   Local communication              unix(7)
        AF_INET             IPv4 Internet protocols          ip(7)
 ```
-
-#### POC (C Code)
-------
-
-The C code is compiled as an executable binary and executed:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp_poc.c -o shell_bind_tcp_poc
-osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc 
-
-```
-
-Seperate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
-
-```bash
-osboxes@osboxes:~$ netstat -antp | grep 4444
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp_poc
-osboxes@osboxes:~$ nc 127.0.0.1 4444
-id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-```
-
-#### TCP Bind Shell in Assembly
---------------
 
 Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to '0':
 
