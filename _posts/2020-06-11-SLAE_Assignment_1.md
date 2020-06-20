@@ -237,9 +237,9 @@ DESCRIPTION
 
 The 3 arguments required:
 
-* int sockfd - a reference to the newly created socket (EAX was moved into EDX)
-* const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
-* socklen_t addrlen – the length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
+* int sockfd -> A reference to the newly created socket (EAX was moved into EDX)
+* const struct sockaddr *addr -> A pointer to the location on the stack of the sockaddr struct to be created
+* socklen_t addrlen -> The length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
 
 The structure for handling internet addresses can be viewed via man pages for the header file:
 
@@ -350,7 +350,7 @@ DESCRIPTION
        retransmission, the request may be ignored so that a later reattempt at connection succeeds.
 ```
 
-A byte of 1 is pushed onto the stack to listen for 1 client at a time, the socket value is moved into the lower portion of memory in EAX.
+A byte of 1 is pushed onto the stack to listen for 1 client at a time, the socket value is moved into the lower memory portion of EAX.
 
 The listen syscall is executed using the code of 4, the program interrupt is called to execute the listen syscall.
 
@@ -399,25 +399,16 @@ DESCRIPTION
        nal socket sockfd is unaffected by this call.
 ```
 
-The EAX register is cleared to store the accept4 syscall value into the lower memory region:
-
-```nasm
-	xor eax, eax    ; clear register
-   	mov ax, 0x16c	; syscall for accept4 moved into eax
-```
-
-EBX will contain the reference of socket initially stored in EDI. 
+EDX will contain the reference of socket initially stored in EAX. 
 
 The next 3 arguments can all equal '0' according to the man pages definition of accept.
 
 The 4 arguments required for accept4:
 
-* sockfd - EBX (reference of socket initially stored in EDI)
+* sockfd - EDX (reference of socket initially stored in EAX)
 * addr - ECX == 0
 * addrlen - EDX == 0
 * flags - ESI == 0
-
-The reference of socket is moved into EBX, with the remaining 3 argument values equal to '0' with their respective XOR operations.
 
 The program interrupt is then called which executes the accept syscall:
 
