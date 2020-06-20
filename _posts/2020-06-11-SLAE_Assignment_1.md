@@ -171,7 +171,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 #define __NR_socketcall	102
 ```
 
-The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX (avoid Null Bytes with padding).
+The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX.
 
 The next values are that of the socket properties as defined, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
 
@@ -181,7 +181,7 @@ SOCK_STREAM = 1,		/* Sequenced, reliable, connection-based
 #define	PF_INET		2	/* IP protocol family.  */
 ```
 
-The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket. 
+The last argument value for int protocol is going to be ‘0’ to accept any protocol according to the man pages definition for socket: 
 
 ```nasm
         ; push socket values onto the stack
@@ -193,7 +193,7 @@ The last argument value for int protocol is going to be ‘0’ to accept any pr
 The newly created socket can be identified by storing the value of EAX into the EDX register as reference for a later stage (with the ability to use EAX in subsequent system calls):
 
 ```nasm
-	mov edx, eax   ; move the value of eax into edx for later reference
+	mov edx, eax   ; save the return value
 ```
 
 1st Syscall (Assembly code section):
@@ -213,6 +213,8 @@ The newly created socket can be identified by storing the value of EAX into the 
 The definition of the bind syscall function in the man pages describes the arguments required:
 
 ```bash
+osboxes@osboxes:~/Downloads/SLAE$ man bind
+
 BIND(2)                                Linux Programmer's Manual                               BIND(2)
 
 NAME
@@ -235,7 +237,7 @@ DESCRIPTION
 
 The 3 arguments required:
 
-* int sockfd - a reference to the newly created socket (EAX was moved into EDI)
+* int sockfd - a reference to the newly created socket (EAX was moved into EDX)
 * const struct sockaddr *addr – a pointer to the location on the stack of the sockaddr struct to be created
 * socklen_t addrlen – the length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
 
