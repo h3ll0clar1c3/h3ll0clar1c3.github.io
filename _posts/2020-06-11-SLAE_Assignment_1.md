@@ -23,7 +23,7 @@ classes: wide
 #### Concept 
 -----
 
-A TCP bind shellcode will bind a shell to a specific network port on a host listening for an incoming connection via the TCP protocol.
+A TCP bind shellcode will bind a shell to a specific network port on a host listening for an incoming connection (via the TCP protocol).
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
