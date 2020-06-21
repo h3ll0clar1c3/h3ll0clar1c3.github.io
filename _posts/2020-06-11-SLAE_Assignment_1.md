@@ -582,7 +582,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The value of 0xb is placed into the lower memory region of EAX.
 
-Finally, the execve syscall and the the program interrupt are called to execute the program, and initiate the full TCP bind shell on the target machine:
+Finally, the execve syscall and the program interrupt are called to execute the program, and initiate the full TCP bind shell on the target machine:
 
 ```nasm
 	mov al, 0xb     ; move syscall code for execve into al
