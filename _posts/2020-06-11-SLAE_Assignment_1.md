@@ -27,7 +27,7 @@ A TCP bind shellcode will bind a shell to a specific network port on a host list
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
-Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports/well-known services). 
+Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT, preventing unsolicited incoming connections (except for certain ports/well-known services). 
 
 #### TCP Bind Shell in C
 --------
