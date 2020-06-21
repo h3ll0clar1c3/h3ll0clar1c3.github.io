@@ -444,7 +444,7 @@ The accept syscall is executed using the code of 5, the program interrupt is the
 #### 5th Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
 ------
 
-The dup2 syscall works by creating a loop and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
+The dup2 syscall works by creating a loop, and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
 
 To redirect IO to the descriptor, a loop is initiated with the ECX register, commonly known as the counter register. 
 
