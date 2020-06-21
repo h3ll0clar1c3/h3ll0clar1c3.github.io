@@ -27,7 +27,7 @@ A TCP bind shellcode will bind a shell to a specific network port on a host list
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
-Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports/well-known services). Limiting the target host's exposure and preventing a port-binding shellcode from achieving a successful connection.
+Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT preventing unsolicited incoming connections (except for certain ports/well-known services). 
 
 #### TCP Bind Shell in C
 --------
@@ -82,7 +82,7 @@ int main()
 #### POC (C Code)
 ------
 
-The C code is compiled as an executable binary and executed:
+The C code is compiled as an executable ELF binary and executed:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp_poc.c -o shell_bind_tcp_poc
@@ -90,7 +90,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+A separate terminal demonstrating a successful bind connection and shell on the local host (via port 4444):
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
@@ -174,7 +174,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The header file reveals the code for socket is 102. Converting 102 from decimal to hex equates to the hex equivalent of 0x66, this value will be placed in the lower half of EAX.
 
-The next values are that of the socket properties as defined, the integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
+The next values are that of the socket properties as defined. The integer values for type (SOCK_STREAM) and domain (AF_INET/PF_INET) can be found in the socket header file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/bits/socket.h
@@ -240,9 +240,9 @@ The 3 arguments required:
 
 * int sockfd -> A reference to the newly created socket (EAX was moved into EDX)
 * const struct sockaddr *addr -> A pointer to the location on the stack of the sockaddr struct to be created
-* socklen_t addrlen -> The length of an IP socket address is 16 according to the header file /usr/include/linux/in.h
+* socklen_t addrlen -> The length of an IP socket address is 16  
 
-The structure for handling internet addresses can be viewed via man pages for the header file:
+The structure for handling internet addresses can be viewed via the man pages for the header file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/netinet/in.h
@@ -264,7 +264,7 @@ struct sockaddr_in {
 
 Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
 
-The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces) and pushed onto the stack with the value of ECX and EDX.
+The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces), and pushed onto the stack with the value of ECX and EDX.
 
 The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
 
@@ -272,7 +272,7 @@ The chosen port number is then pushed onto the stack as the next argument. The w
 
 The word value of 0x2 is pushed onto the stack which loads the value for AF_INET executing the syscall, which completes the creation of sockaddr struct.
 
-Move the ESP stack pointer (top of the stack) into the ECX register to store the const struct sockaddr *addr argument. 
+The ESP stack pointer (top of the stack) is moved into the ECX register to store the const struct sockaddr *addr argument. 
 
 The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equate to the IP address:
 
@@ -286,7 +286,7 @@ The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros
         push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
 ```    
     
-The next instruction set moves the hex value for the socket function into the lower half of EAX which is required for the bind syscall:
+The next instruction set moves the hex value for the socket function into the lower half of EAX, which is required for the bind syscall:
 
 ```nasm
 	mov al, 0x66	; hex value for socket
@@ -517,7 +517,7 @@ DESCRIPTION
 
 This objective is achieved when a connection is made to the newly created bind port, in turn excuting an interactive shell for an attacker on the target machine.
 
-This instuction set will load the string '/bin/sh' onto the stack in reverse order since the stack grows from high to low memory.
+This instuction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
 
 The execve syscall works with Null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
@@ -530,7 +530,7 @@ Before placing the string '/bin/sh' onto the stack (reverse order), it is import
 
 To ensure that the string is divisible by 4, an additional character '/' is added to increase the characters from 7 to 8 resulting in '//bin/sh'.
 
-Python can be used to interpret and extract the hex address, along with splitting up the string into 4 byte halves to have a clean hex address to use for the calls:
+Python can be used to interpret and extract the hex address, along with splitting the string up into 4 byte halves (clean hex address to use for the calls):
 
 ```python
 osboxes@osboxes:~/Downloads/SLAE$ python
@@ -582,7 +582,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The value of 0xb is placed into the lower memory region of EAX.
 
-Finally the execve syscall and the the program interrupt are called to execute the program and initiate the full TCP bind shell on the target machine:
+Finally, the execve syscall and the the program interrupt are called to execute the program, and initiate the full TCP bind shell on the target machine:
 
 ```nasm
 	mov al, 0xb     ; move syscall code for execve into al
@@ -700,7 +700,7 @@ section .text
 #### POC (Assembly Code) 
 ------
 
-The Assembly code is compiled by assembling with Nasm and linking with the following bash script whilst outputting an executable binary:
+The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
@@ -734,14 +734,14 @@ listen(3, 1)                            = 0
 accept(3, 
 ```
 
-The binary is executed:
+The compiled ELF binary is executed:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host via port 4444:
+A separate terminal demonstrating a successful bind connection and shell on the local host (via port 4444):
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 4444
@@ -865,7 +865,7 @@ unsigned char code[] =
 #### POC (Final Shellcode) 
 ------
 
-The C program is compiled as an executable binary with stack protection disabled, and executed resulting in a shellcode size of 105 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 105 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final
@@ -874,7 +874,7 @@ Shellcode length: 105
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host via port 5555:
+A separate terminal demonstrating a successful bind connection and shell on the local host (via port 5555):
 
 ```bash
 osboxes@osboxes:~$ netstat -antp | grep 5555
