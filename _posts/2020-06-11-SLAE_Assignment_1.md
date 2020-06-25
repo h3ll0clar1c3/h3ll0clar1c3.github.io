@@ -1,5 +1,5 @@
 ---
-title:  "SLAE x86 Assignment 1: TCP Bind Shellcode"
+title:  "SLAE x86 Assignment 1: TCP Bind Shell"
 header:
   teaser: "/assets/images/slae32.png"
   teaser_home_page: true
@@ -13,7 +13,7 @@ classes: wide
 
 ![Shellcoding](/assets/images/slae32.png)
 
-### TCP Bind Shellcode
+### TCP Bind Shell
 ------
 
 * Binds to a port
@@ -23,7 +23,7 @@ classes: wide
 #### Concept 
 -----
 
-A TCP bind shellcode will bind a shell to a specific network port on a host, listening for an incoming connection (via the TCP protocol).
+A TCP bind shell will bind a shell to a specific network port on a host, listening for an incoming connection (via the TCP protocol).
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
@@ -612,7 +612,7 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 ````nasm
 ; Filename: shell_bind_tcp.nasm
 ; Author: h3ll0clar1c3
-; Purpose: Bbind shellcode on TCP port 4444, spawn a shell on incoming connection
+; Purpose: Bind shellcode on TCP port 4444, spawn a shell on incoming connection
 ; Compilation: ./compile.sh shell_bind_tcp
 ; Usage: ./shell_bind_tcp
 ; Testing: nc -nv 127.0.0.1 4444
