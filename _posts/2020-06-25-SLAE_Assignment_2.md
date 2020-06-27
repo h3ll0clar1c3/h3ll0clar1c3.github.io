@@ -110,53 +110,54 @@ Note the various syscalls in the C code which will be utilised in the upcoming A
 * dup2 -> Redirects STDIN, STDOUT, and STDERR to the incoming client connection
 * execve -> Executes a shell
 
-The syscalls in the C code relate to the socket network access protocol as referenced below in the Linux master header file:
+The syscalls in the C code relate to the following numbers as referenced below in the header file:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h 
+osboxes@osboxes:~/Downloads/SLAE$ egrep "execve|dup2|socketcall" /usr/include/i386-linux-gnu/asm/unistd_32.h
+#define __NR_execve		 11
+#define __NR_dup2		 63
+#define __NR_socketcall		102
+```
+
+A socketcall is defined in the man pages requiring 2 arguments, call and args:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ man socketcall
+
+SOCKETCALL(2)                              Linux Programmer's Manual                             SOCKETCALL(2)
+
+NAME
+       socketcall - socket system calls
+
+SYNOPSIS
+       int socketcall(int call, unsigned long *args);
+
+DESCRIPTION
+       socketcall()  is a common kernel entry point for the socket system calls.  call determines which socket
+       function to invoke.  args points to a block containing the actual arguments, which are  passed  through
+       to the appropriate call.
+```
+
+A look up in the net header file reveals the values for the socket and connect syscalls:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h
 
 #define SYS_SOCKET	1		/* sys_socket(2)		*/
 #define SYS_BIND	2		/* sys_bind(2)			*/
 #define SYS_CONNECT	3		/* sys_connect(2)		*/
-#define SYS_LISTEN	4		/* sys_listen(2)		*/
-#define SYS_ACCEPT	5		/* sys_accept(2)		*/
 ```
 
-A socket is defined in the man pages with domain, type and protocol arguments:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ man socket
-
-SOCKET(2)                              Linux Programmer's Manual                             SOCKET(2)
-
-NAME
-       socket - create an endpoint for communication
-
-SYNOPSIS
-       #include <sys/types.h>          /* See NOTES */
-       #include <sys/socket.h>
-
-       int socket(int domain, int type, int protocol);
-
-DESCRIPTION
-       socket() creates an endpoint for communication and returns a descriptor.
-
-       The  domain  argument  specifies a communication domain; this selects the protocol family which
-       will be used for communication.  These families are defined in <sys/socket.h>.   The  currently
-       understood formats include:
-
-       Name                Purpose                          Man page
-       AF_UNIX, AF_LOCAL   Local communication              unix(7)
-       AF_INET             IPv4 Internet protocols          ip(7)
-```
-
-Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves which sets their values to '0':
+Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves (sets their values to '0'), and the frame pointer set:
 
 ```nasm
-        ; initialize registers
-        xor eax, eax
-        xor ebx, ebx
-        xor esi, esi
+	; set the frame pointer
+	mov ebp, esp
+
+	; initialize registers
+	xor eax, eax
+	xor ecx, ecx
+	xor edx, edx
 ```
 
 #### 1st Syscall (Create Socket)
