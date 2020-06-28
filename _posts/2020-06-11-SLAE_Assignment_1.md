@@ -242,7 +242,7 @@ The 3 arguments required:
 * const struct sockaddr *addr -> A pointer to the location on the stack of the sockaddr struct to be created
 * socklen_t addrlen -> The length of an IP socket address is 16  
 
-The structure for handling internet addresses can be viewed via the man pages for the header file:
+The structure for handling internet addresses can be viewed via the man pages in the header file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/netinet/in.h
