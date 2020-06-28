@@ -23,7 +23,7 @@ classes: wide
 #### Concept 
 -----
 
-A TCP bind shell will bind a shell to a specific network port on a host, listening for an incoming connection (via the TCP protocol).
+A TCP Bind shell will bind a shell to a specific network port on a host, listening for an incoming connection (via the TCP protocol).
 
 ![Bind Shell](/assets/images/bind_shell.png)
 
@@ -32,7 +32,7 @@ Bind shells are easily blocked by firewalls and inbound filtering rules along wi
 #### TCP Bind Shell in C
 --------
 
-The following C skeleton code will be used to demonstrate the TCP bind shell from a high-level language perspective. 
+The following C skeleton code will be used to demonstrate the TCP Bind shell from a high-level language perspective. 
 
 This will be used as a template for the low-level assembly code to follow:
 
@@ -582,7 +582,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 
 The value of 0xb is placed into the lower memory region of EAX.
 
-Finally, the execve syscall and the program interrupt are called to execute the program, and initiate the full TCP bind shell on the target machine:
+Finally, the execve syscall and the program interrupt are called to execute the program, and initiate the full TCP Bind shell on the target machine:
 
 ```nasm
 	mov al, 0xb     ; move syscall code for execve into al
@@ -723,7 +723,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh shell_bind_tcp
 [+] Done!
 ```
 
-Strace is used to debug and monitor the interactions between the executable process and the Linux kernel, visually showing the system calls for the TCP bind shell:
+Strace is used to debug and monitor the interactions between the executable process and the Linux kernel, visually showing the system calls for the TCP Bind shell:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ strace -e socket,bind,listen,accept,dup2,execve ./shell_bind_tcp
@@ -755,7 +755,7 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 #### Configurable Port (Customize Shellcode) 
 ------
 
-Objdump is used to extract the shellcode from the TCP bind shell in hex format (Null free):
+Objdump is used to extract the shellcode from the TCP Bind shell in hex format (Null free):
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./shell_bind_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
