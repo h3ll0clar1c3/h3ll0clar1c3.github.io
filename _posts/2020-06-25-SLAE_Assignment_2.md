@@ -293,7 +293,7 @@ The next instruction set moves the hex value for the socket function into the lo
 Followed by an instruction to call the interrupt to execute the connect syscall: 
 
 ```nasm
-    	mov bl, 3       ; sys_bind = 3
+    	mov bl, 3       ; sys_connect = 3
         mov ecx, esp    ; pointer to the arguments
         int 0x80        ; call the interrupt to execute the connect syscall
 ```
