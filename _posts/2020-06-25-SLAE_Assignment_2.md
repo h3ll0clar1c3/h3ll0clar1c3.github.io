@@ -467,7 +467,7 @@ Finally, the execve syscall and the program interrupt are called to execute the 
         int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
-6th syscall (Assembly code section):
+4th syscall (Assembly code section):
 
 ```nasm
 	; 4th syscall - execute /bin/sh using execve
