@@ -515,9 +515,9 @@ DESCRIPTION
            int main(int argc, char *argv[], char *envp[])
 ```
 
-This objective is achieved when a connection is made to the newly created bind port, in turn excuting an interactive shell for an attacker on the target machine.
+This objective is achieved when a connection is made to the newly created bind port, in turn executing an interactive shell for an attacker on the target machine.
 
-This instuction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
+This instruction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
 
 The execve syscall works with Null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
