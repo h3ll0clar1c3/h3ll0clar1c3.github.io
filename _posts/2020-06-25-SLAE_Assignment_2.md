@@ -764,4 +764,4 @@ Student ID: SLAE-xxxx
 GitHub Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
-[github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment1
+[github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment2
