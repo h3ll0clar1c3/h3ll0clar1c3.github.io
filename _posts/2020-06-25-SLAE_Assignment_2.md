@@ -320,7 +320,7 @@ Followed by an instruction to call the interrupt to execute the connect syscall:
 #### 3rd Syscall (Duplicate File Descriptors for STDIN, STDOUT and STDERR)
 ------
 
-The dup2 syscall works by creating a loop, and iterating 3 times to accomodate all 3 file descriptors loading into the accepted connection (providing an interactive reverse shell session).
+The dup2 syscall works by creating a loop, and iterating 3 times to accommodate all 3 file descriptors loading into the accepted connection (providing an interactive reverse shell session).
 
 To redirect IO to the descriptor, a loop is initiated with the ECX register, commonly known as the counter register. 
 
@@ -390,9 +390,9 @@ DESCRIPTION
            int main(int argc, char *argv[], char *envp[])
 ```
 
-This objective is achieved when a reverse connection is made to the newly created socket port, in turn excuting an interactive shell for an attacker on the target machine.
+This objective is achieved when a reverse connection is made to the newly created socket port, in turn executing an interactive shell for an attacker on the target machine.
 
-This instuction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
+This instruction set will load the string '/bin/sh' onto the stack in reverse order, since the stack grows from high to low memory.
 
 The execve syscall works with Null pointers and terminators, which requires a terminator to be placed onto the stack after clearing the EAX register and setting the value to '0':
 
