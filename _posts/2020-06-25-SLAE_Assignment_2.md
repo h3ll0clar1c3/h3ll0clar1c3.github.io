@@ -759,7 +759,7 @@ uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sud
 
 This blog post has been created for completing the requirements of the [SLAE certification] [slae-link].
 
-Student ID: SLAE-xxxx
+Student ID: PA-14936
 
 GitHub Repo: [Code][github-code]
 
