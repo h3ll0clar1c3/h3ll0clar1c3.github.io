@@ -23,13 +23,13 @@ classes: wide
 #### Concept 
 -----
 
-Egg hunting is the technique whereby an Egg Hunter is used to 'hunt' for the actual payload to be executed, which is in this case is marked or tagged by an egg. 
+Egg hunting is the technique whereby an Egg Hunter is used to hunt for the actual payload to be executed, which is in this case is marked or tagged by an egg, similar to a staged payload in Msfvenom. 
 
-This concept can be thought of as a staged payload in Msfvenom, the technique is used to avoid the limitation of consecutive memory locations available to insert the payload after an overwrite (typically seen in a Stack-based Buffer Overlfow). Once the Egg Hunter is executed it searches for the egg which is prefixed with the larger payload - effectively triggering the execution of the payload.
+The technique is used to avoid the limitation of consecutive memory locations available to insert the payload after an overwrite (typically seen in a Stack-based Buffer Overlfow). Once the Egg Hunter is executed it searches for the egg which is prefixed with the larger payload - effectively triggering the execution of the payload.
 
 ![Reverse Shell](/assets/images/reverse_shell.jpg)
 
-Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, a user would typically initiate outbound requests when browsing the web and related resources.
+Caveats to an Egg Hunter, it must avoid locating itself in memory and jumping to the incorrect address, it must be robust, small in size and fast. A 4 byte egg can be used and repeated twice to mark the payload, the Virtual Address Space (VAS) is searched for these two consecutive tags and redirects execution flow once the pattern matches.
 
 #### Reverse TCP Shell in C
 --------
