@@ -27,7 +27,7 @@ Egg hunting is the technique whereby an Egg Hunter is used to hunt for the actua
 
 The technique is used to avoid the limitation of consecutive memory locations available to insert the payload after an overwrite (typically seen in a Stack-based Buffer Overlfow). Once the Egg Hunter is executed it searches for the egg which is prefixed with the larger payload - effectively triggering the execution of the payload.
 
-![Reverse Shell](/assets/images/EggHunter.png)
+![Reverse Shell](/assets/images/EggHunter.jpg)
 
 Caveats to an Egg Hunter, it must avoid locating itself in memory and jumping to the incorrect address, it must be robust, small in size and fast. A 4 byte egg can be used and repeated twice to mark the payload, the Virtual Address Space (VAS) is searched for these two consecutive tags and redirects execution flow once the pattern matches.
 
