@@ -25,7 +25,7 @@ classes: wide
 
 A TCP Bind shell will bind a shell to a specific network port on a host, listening for an incoming connection (via the TCP protocol).
 
-![Bind Shell](/assets/images/bind_shell.png)
+![Bind Shell](/assets/images/bind_shell.jpg)
 
 Bind shells are easily blocked by firewalls and inbound filtering rules along with NAT, preventing unsolicited incoming connections (except for certain ports/well-known services). 
 
