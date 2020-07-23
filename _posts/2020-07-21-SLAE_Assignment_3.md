@@ -247,12 +247,12 @@ ret();
 The C code is compiled as an executable ELF binary and executed:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc reverse_shell_tcp_poc.c -o reverse_shell_tcp_poc
-osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_poc 
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o egghunter_final
+osboxes@osboxes:~/Downloads/SLAE$ ./egghunter_final
 
 ```
 
-A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 4444):
 
 
 
