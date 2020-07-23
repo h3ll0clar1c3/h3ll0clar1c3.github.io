@@ -31,6 +31,10 @@ The technique is used to avoid the limitation of consecutive memory locations av
 
 Caveats to an Egg Hunter, it must avoid locating itself in memory and jumping to the incorrect address, it must be robust, small in size and fast. A 4 byte egg can be used and repeated twice to mark the payload, the Virtual Address Space (VAS) is searched for these two consecutive tags and redirects execution flow once the pattern is matched.
 
+The popular Skape paper was referenced to better understand the implementation of the Egg Hunter, the link to the research can be found [here] [skape-link].
+
+[skape-link]: http://www.hick.org/code/skape/papers/egghunt-shellcode.pdf
+
 #### Reverse TCP Shell in C
 --------
 
