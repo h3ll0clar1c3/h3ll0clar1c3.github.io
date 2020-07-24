@@ -44,10 +44,12 @@ The popular paper by Skape was referenced to better understand the implementatio
 
 In summary, the following steps will be implemented:
 
-* Generate shellcode
-* Define Egg value
 * Define Egg Hunter
+* Set Egg value
+* Generate and extract shellcode from Egg Hunter
 * Generate customized shellcode
+* Prepend Egg value to the customized shellcode
+* Generate final Egg Hunter shellcode
 
 #### Access Syscall
 ----
@@ -217,12 +219,12 @@ unsigned char buf[] =
 "\xc8\x71\x59\x79\x41\x25\x10\x98\xa0\x49";
 ```
 
-The Egg is appended twice to this newly generated payload, the tagged Egg would precede the payload with the value "\x90\x50\x90\x50\x90\x50\x90\x50".
+The Egg is prepended twice to this newly generated payload, the tagged Egg would precede the payload with the value "\x90\x50\x90\x50\x90\x50\x90\x50".
 
 #### Egg Hunter in C
 --------
 
-The following C skeleton code will be used to demonstrate the Egg Hunter from a high-level language perspective. 
+The following C code will be used to demonstrate the Egg Hunter from a high-level language perspective. 
 
 ```c
 /**
