@@ -25,7 +25,7 @@ classes: wide
 
 Egg hunting is the technique whereby an Egg Hunter is used to hunt for the actual payload to be executed, which in this case is marked or tagged by an Egg. 
 
-The technique is used to avoid the limitation of consecutive memory locations available to insert the payload after an overwrite (typically seen in a Stack-based Buffer Overlfow). Once the Egg Hunter is executed it searches for the Egg which is prefixed with the larger payload - effectively triggering the execution of the payload.
+The technique is used to avoid the limitation of consecutive memory locations available to insert the payload after an overwrite (typically seen in a Stack-based Buffer Overflow). Once the Egg Hunter is executed it searches for the Egg which is prefixed with the larger payload - effectively triggering the execution of the payload.
 
 ![Reverse Shell](/assets/images/EggHunter.jpg)
 
