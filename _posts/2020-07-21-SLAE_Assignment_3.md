@@ -255,7 +255,7 @@ unsigned char egg[] = \
 int main()
 {
         printf("Hunter length: %d bytes\n", strlen(hunter));
-        printf("Egg length: %d bytes\nHunting the egg...\n", strlen(egg));
+        printf("Egg length: %d bytes\nHunting the egg ...\n", strlen(egg));
         int (*ret)() = (int(*)())hunter;
         ret();
 }
@@ -271,7 +271,7 @@ osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 she
 osboxes@osboxes:~/Downloads/SLAE$ ./egghunter_final 
 Hunter length: 35 bytes
 Egg length: 78 bytes
-Hunting the egg...
+Hunting the egg ...
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 $ 
