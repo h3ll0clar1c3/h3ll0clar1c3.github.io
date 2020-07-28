@@ -16,14 +16,15 @@ classes: wide
 ### Custom Encoder
 ------
 
-* Reverse connects to a configured IP address and port number
-* Executes a shell on a successful connection
-* IP address and port number should be easily configurable
+* Create a custom encoding scheme such as the 'Insertion Encoder' exhibited in the course
+* POC with the execve-stack shellcode to encode the schema and execute
 
 #### Concept 
 -----
 
-A Reverse TCP shell initiates a connection from the target host back to the attacker's IP address and listening port, executing a shell on the target host's machine (via the TCP protocol).
+Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the Encoder's main objective is to obfuscate the shellcode to avoid signature detection.
+
+Note the Encoder is built on the principle of an encoding scheme, and not encryption with the use of an encryption key, it is possible to reverse the encoding scheme with the source code.
 
 ![Reverse Shell](/assets/images/reverse_shell.jpg)
 
