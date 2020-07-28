@@ -22,9 +22,9 @@ classes: wide
 #### Concept 
 -----
 
-Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the Encoder's main objective is to obfuscate the shellcode to avoid signature detection.
+Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the encoder's main objective is to obfuscate the shellcode to avoid signature detection.
 
-Note the Encoder is built on the principle of an encoding scheme, and not encryption with the use of an encryption key, it is possible to reverse the encoding scheme with the source code.
+Note the Encoder is built on the principle of an encoding scheme, and not encryption with the use of an encryption key, it is possible to reverse the encoding scheme found within the source code.
 
 ![Reverse Shell](/assets/images/reverse_shell.jpg)
 
