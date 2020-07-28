@@ -30,7 +30,7 @@ Note the Encoder is built on the principle of an encoding scheme - security thro
 
 Choose this one ... 
 
-![Encoder](/assets/images/encoder2.jpg)
+![Encoder2](/assets/images/encoder2.jpg)
 
 Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, a user would typically initiate outbound requests when browsing the web and related resources.
 
