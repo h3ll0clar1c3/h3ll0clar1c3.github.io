@@ -102,7 +102,7 @@ osboxes@osboxes:~/Downloads/SLAE$
 The Assembly code will consist of the the following components:
 
 * Encoded shellcode
-* Decoder stub (Loop through the sequence of bytes 15 times - as the encoded shellcode is 30 bytes in length)
+* Decoder (Loop through the sequence of bytes 15 times - as the encoded shellcode is 30 bytes in length)
 * Decoded shellcode
 * Execution of decoded shellcode
 
