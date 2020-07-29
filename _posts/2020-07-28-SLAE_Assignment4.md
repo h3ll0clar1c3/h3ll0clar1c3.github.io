@@ -24,13 +24,9 @@ classes: wide
 
 Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the encoder's main objective is to obfuscate the shellcode to avoid signature detection.
 
-Note the Encoder is built on the principle of an encoding scheme - security through obscurity. Not to be confused with traditional encryption with the use of an encryption key, for this reason it is possible to reverse the encoding scheme found within the source code.
+Note the Encoder is built on the principle of an encoding scheme, much like security through obscurity. Not to be confused with traditional encryption with the use of an encryption key, when obfuscated it is possible to reverse the encoding scheme found within the source code.
 
 ![Encoder](/assets/images/encoder.jpg)
-
-Choose this one ... 
-
-![Encoder2](/assets/images/encoder 2.jpg)
 
 Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, a user would typically initiate outbound requests when browsing the web and related resources.
 
