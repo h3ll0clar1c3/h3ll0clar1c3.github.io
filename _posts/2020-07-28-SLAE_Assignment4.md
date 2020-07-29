@@ -26,11 +26,11 @@ Shellcode encoders are typically used as a technique to evade Anti-Virus securit
 
 Note the Encoder is founded on the principle of an encoding scheme, which relates to security through obscurity. Not to be confused with encryption via the use of an encryption key, when obfuscated it is possible to reverse the encoding scheme found within the source code.
 
+For the purpose of this POC, a simplist Insertion encoding scheme will be used whereby 2 consecutive bytes will be swopped around within a 4 byte segment. A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation. 
+
 ![Encoder](/assets/images/encoder.jpg)
 
-Reverse shells have a significantly higher success rate than their bind shell counterparts due to the inherent nature of firewalls not filtering outbound connections. From the perspective of a firewall, a user would typically initiate outbound requests when browsing the web and related resources.
-
-#### Reverse TCP Shell in C
+#### Insertion Encoder in Python
 --------
 
 The following C skeleton code will be used to demonstrate the Reverse TCP shell from a high-level language perspective. 
