@@ -162,6 +162,15 @@ ld -o $1 $1.o
 echo '[+] Done!'
 ```
 
+The Assembly code compiled as an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh encoder
+[+] Assembling with Nasm ... 
+[+] Linking ...
+[+] Done!
+```
+
 #### Insertion Encoder in C
 ------
 
