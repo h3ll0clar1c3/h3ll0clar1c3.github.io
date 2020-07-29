@@ -26,18 +26,20 @@ Shellcode encoders are typically used as a technique to evade Anti-Virus securit
 
 Note the Encoder is founded on the principle of an encoding scheme, which relates to security through obscurity. Not to be confused with encryption via the use of an encryption key, when obfuscated it is possible to reverse the encoding scheme found within the source code.
 
-For the purpose of this POC, a simplist Insertion encoding scheme will be used whereby 2 consecutive bytes will be swopped around within a 4 byte segment. A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation. 
+For the purpose of this POC, a simplistic Insertion encoding scheme will be used whereby 2 consecutive bytes will be swopped around within a 4 byte segment. 
+
+A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation. 
 
 ![Encoder](/assets/images/encoder.jpg)
 
 #### Insertion Encoder in Python
 --------
 
-The following C skeleton code will be used to demonstrate the Reverse TCP shell from a high-level language perspective. 
+The execve-stack shellcode from the course material will be used as a reference for the shellcode in use, this shellcode will spawn a '/bin/sh' shell.
 
-This will be used as a template for the low-level assembly code to follow:
+The following Python code will be used as a shellcode wrapper: 
 
-```c
+```python
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
