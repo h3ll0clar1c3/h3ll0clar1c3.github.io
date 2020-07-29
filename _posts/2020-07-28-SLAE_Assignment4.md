@@ -35,7 +35,7 @@ A true Insertion Encoder would insert junk data with more complex algorithms to 
 #### Insertion Encoder in Python
 --------
 
-The execve-stack shellcode from the course material will be used as a reference for the shellcode in use, this shellcode will spawn a '/bin/sh' shell.
+The execve-stack shellcode from the course material will be used as a reference for the shellcode in use, this shellcode will spawn a '''bash /bin/sh''' shell.
 
 The following Python code will be used as a shellcode wrapper: 
 
