@@ -24,7 +24,7 @@ classes: wide
 
 Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the encoder's main objective is to obfuscate the shellcode to avoid signature detection.
 
-Note the Encoder is built on the principle of an encoding scheme, much like security through obscurity. Not to be confused with traditional encryption with the use of an encryption key, when obfuscated it is possible to reverse the encoding scheme found within the source code.
+Note the Encoder is founded on the principle of an encoding scheme, which relates to security through obscurity. Not to be confused with encryption via the use of an encryption key, when obfuscated it is possible to reverse the encoding scheme found within the source code.
 
 ![Encoder](/assets/images/encoder.jpg)
 
