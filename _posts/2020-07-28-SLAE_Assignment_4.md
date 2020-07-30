@@ -28,7 +28,7 @@ Note the Encoder is founded on the principle of an encoding scheme, which relate
 
 For the purpose of this POC, a simplistic Insertion encoding scheme will be used whereby 2 consecutive bytes will be swopped around within a 4 byte segment and looped through the entire shellcode sequence. 
 
-A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation. 
+A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation thereof.
 
 ![Encoder](/assets/images/encoder.jpg)
 
