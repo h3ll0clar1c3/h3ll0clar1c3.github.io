@@ -239,11 +239,11 @@ Msfvenom -p linux/x86/shell_bind_tcp:
 
 VirusTotal result of the original (unobfuscated) shellcode binary:
 
-place image here ... 
+![Encoder](/assets/images/original_virustotal.jpg)
 
 VirusTotal result of the obfuscated shellcode binary:
 
-place image here ... 
+![Encoder](/assets/images/obfuscated_virustotal.jpg)
 
 ##### SLAE Disclaimer ####
 ---------
