@@ -72,8 +72,8 @@ unsigned char code[] = \
 
 int main()
 {
-        printf("Shellcode length:  %d\n", strlen(decoder));
-        int (*ret)() = (int(*)())decoder;
+        printf("Shellcode length:  %d\n", strlen(code));
+        int (*ret)() = (int(*)())code;
         ret();
 }
 ```
