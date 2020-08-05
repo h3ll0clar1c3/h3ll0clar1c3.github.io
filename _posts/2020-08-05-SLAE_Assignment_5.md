@@ -23,7 +23,7 @@ classes: wide
 #### Concept 
 -----
 
-Msfvenom will be used to generate the payloads for each of the 3 examples, along with an analysis and debugging of the shellcode and the associated system calls required to execute the payloads.
+Msfvenom will be used to generate the payloads for each of the 3 examples, along with an analysis/debugging of the shellcode and the associated system calls required to execute the payloads.
 
 ![Encoder](/assets/images/msfvenom.jpg)
 
