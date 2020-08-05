@@ -138,36 +138,42 @@ Dump of assembler code for function code:
    0x0804a045 <+5>:	pushw  0x632d
    0x0804a049 <+9>:	mov    edi,esp
    0x0804a04b <+11>:	push   0x68732f
-   0x0804a050 <+16>:	push   0x6e69622f
-   0x0804a055 <+21>:	mov    ebx,esp
-   0x0804a057 <+23>:	push   edx
-   0x0804a058 <+24>:	call   0x804a065 <code+37>
-   0x0804a05d <+29>:	das    
-   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
-   0x0804a061 <+33>:	das    
-   0x0804a062 <+34>:	jae    0x804a0cc
-   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
-   0x0804a067 <+39>:	mov    ecx,esp
-=> 0x0804a069 <+41>:	int    0x80
-   0x0804a06b <+43>:	add    BYTE PTR [eax],al
-End of assembler dump.
-(gdb) stepi
-process 6223 is executing new program: /bin/dash
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ exit
-[Inferior 1 (process 6223) exited normally]
-(gdb) 
+   0x0804a050 <+16>:	push   0x6e6962
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ man execve
+
+EXECVE(2)                              Linux Programmer's Manual                             EXECVE(2)
+
+NAME
+       execve - execute program
+
+SYNOPSIS
+       #include <unistd.h>
+
+       int execve(const char *filename, char *const argv[],
+                  char *const envp[]);
+
+DESCRIPTION
+       execve()  executes  the  program pointed to by filename.  filename must be either a binary exe-
+       cutable, or a script starting with a line of the form:
+
+           #! interpreter [optional-arg]
+
+       For details of the latter case, see "Interpreter scripts" below.
+
+       argv is an array of argument strings passed to the new program.  By convention,  the  first  of
+       these  strings should contain the filename associated with the file being executed.  envp is an
+       array of strings, conventionally of the form key=value, which are passed as environment to  the
+       new program.  Both argv and envp must be terminated by a NULL pointer.  The argument vector and
+       environment can be accessed by the called program's main function, when it is defined as:
+
+           int main(int argc, char *argv[], char *envp[])
 ```
 
-The disassembled code consists of the following components:
 
-* execve syscall -> <code class="language-plaintext highlighter-rouge">0xb</code>
-* -c argument -> <code class="language-plaintext highlighter-rouge">0x632d</code>
-* <code class="language-plaintext highlighter-rouge">/bin/sh</code> <code class="language-plaintext highlighter-rouge">0x68732f</code>
+
+
+
 
 
 
