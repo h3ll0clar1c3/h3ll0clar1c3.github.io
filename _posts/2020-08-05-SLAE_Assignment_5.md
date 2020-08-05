@@ -23,15 +23,15 @@ classes: wide
 #### Concept 
 -----
 
-Shellcode encoders are typically used as a technique to evade Anti-Virus security controls. An Encoder comes in handy when deploying malicious payloads onto a system, the encoder's main objective is to obfuscate the shellcode to avoid signature detection.
-
-Note the Encoder is founded on the principle of an encoding scheme, which relates to security through obscurity. Not to be confused with encryption via the use of an encryption key, it is possible to reverse the encoding scheme with the aid of the source code.
-
-For the purpose of this POC, a simplistic Insertion encoding scheme will be used whereby 2 consecutive bytes will be swopped around within a 4 byte segment and looped through the entire shellcode sequence. 
-
-A true Insertion Encoder would insert junk data with more complex algorithms to obfuscate the original shellcode, this encoding scheme will serve the same purpose and allow for a simpler explanation and interpretation thereof.
+Msfvenom will be used to generate the payloads for each of the 3 examples, along with an analysis and debugging of the shellcode and the associated system calls required to execute the payloads.
 
 ![Encoder](/assets/images/msfvenom.jpg)
+
+The 3 Msfvenom examples that will be presented:
+
+* <code class="language-plaintext highlighter-rouge">linux/x86/exec</code> 
+* <code class="language-plaintext highlighter-rouge">linux/x86/shell_reverse_tcp</code> 
+* <code class="language-plaintext highlighter-rouge">linux/x86/read_file</code> 
 
 #### Insertion Encoder in Python
 --------
