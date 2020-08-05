@@ -53,10 +53,10 @@ A C program scripted with the newly generated shellcode:
 
 ```c
 /**
-* Filename: shellcode.c
+* Filename: exec_shellcode.c
 * Author: h3ll0clar1c3
 * Purpose: Spawn a shell on the local host  
-* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o exec  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 exec_shellcode.c -o exec  
 * Usage: ./exec
 * Shellcode size: 15 bytes
 * Architecture: x86
@@ -78,6 +78,92 @@ int main()
 }
 ```
 
+As a POC, The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 15 bytes:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack exec_shellcode.c -o exec
+osboxes@osboxes:~/Downloads/SLAE$ ./exec 
+Shellcode length:  15
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+```
+
+The GDB (GNU Debugger) tool is used to step through the program code and analyze the system calls:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gdb ./exec --quiet
+Reading symbols from /home/osboxes/Downloads/SLAE/exec...(no debugging symbols found)...done.
+(gdb) set disassembly-flavor intel
+(gdb) break *&code
+Breakpoint 1 at 0x804a040
+(gdb) run
+Starting program: /home/osboxes/Downloads/SLAE/exec 
+Shellcode length:  15
+
+Breakpoint 1, 0x0804a040 in code ()
+(gdb) disassemble 
+Dump of assembler code for function code:
+=> 0x0804a040 <+0>:	push   0xb
+   0x0804a042 <+2>:	pop    eax
+   0x0804a043 <+3>:	cdq    
+   0x0804a044 <+4>:	push   edx
+   0x0804a045 <+5>:	pushw  0x632d
+   0x0804a049 <+9>:	mov    edi,esp
+   0x0804a04b <+11>:	push   0x68732f
+   0x0804a050 <+16>:	push   0x6e69622f
+   0x0804a055 <+21>:	mov    ebx,esp
+   0x0804a057 <+23>:	push   edx
+   0x0804a058 <+24>:	call   0x804a065 <code+37>
+   0x0804a05d <+29>:	das    
+   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
+   0x0804a061 <+33>:	das    
+   0x0804a062 <+34>:	jae    0x804a0cc
+   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
+   0x0804a067 <+39>:	mov    ecx,esp
+   0x0804a069 <+41>:	int    0x80
+   0x0804a06b <+43>:	add    BYTE PTR [eax],al
+End of assembler dump.
+(gdb) break *0x0804a069
+Breakpoint 2 at 0x804a069
+(gdb) c
+Continuing.
+
+Breakpoint 2, 0x0804a069 in code ()
+(gdb) disassemble 
+Dump of assembler code for function code:
+   0x0804a040 <+0>:	push   0xb
+   0x0804a042 <+2>:	pop    eax
+   0x0804a043 <+3>:	cdq    
+   0x0804a044 <+4>:	push   edx
+   0x0804a045 <+5>:	pushw  0x632d
+   0x0804a049 <+9>:	mov    edi,esp
+   0x0804a04b <+11>:	push   0x68732f
+   0x0804a050 <+16>:	push   0x6e69622f
+   0x0804a055 <+21>:	mov    ebx,esp
+   0x0804a057 <+23>:	push   edx
+   0x0804a058 <+24>:	call   0x804a065 <code+37>
+   0x0804a05d <+29>:	das    
+   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
+   0x0804a061 <+33>:	das    
+   0x0804a062 <+34>:	jae    0x804a0cc
+   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
+   0x0804a067 <+39>:	mov    ecx,esp
+=> 0x0804a069 <+41>:	int    0x80
+   0x0804a06b <+43>:	add    BYTE PTR [eax],al
+End of assembler dump.
+(gdb) stepi
+process 6223 is executing new program: /bin/dash
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ exit
+[Inferior 1 (process 6223) exited normally]
+(gdb) 
+```
+
+blah bla bla ... ->
 
 The following Python code will be used as a shellcode wrapper to generate the obfuscated shellcode from the original shellcode: 
 
