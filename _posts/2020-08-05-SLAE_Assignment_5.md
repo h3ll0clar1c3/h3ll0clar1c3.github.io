@@ -136,7 +136,7 @@ Dump of assembler code for function code:
    0x0804a043 <+3>:     cdq    
    0x0804a044 <+4>:	push   edx
    0x0804a045 <+5>:	pushw  0x632d
-   0x0804a049 <+9>:	  mov    edi,esp
+   0x0804a049 <+9>:	mov    edi,esp
    0x0804a04b <+11>:	push   0x68732f
    0x0804a050 <+16>:	push   0x6e6962
    0x0804a055 <+21>:	mov    ebx,esp
