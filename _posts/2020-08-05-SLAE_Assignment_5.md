@@ -103,24 +103,24 @@ Shellcode length:  15
 Breakpoint 1, 0x0804a040 in code ()
 (gdb) disassemble 
 Dump of assembler code for function code:
-=> 0x0804a040 <+0>:	push   0xb
-   0x0804a042 <+2>:	pop    eax
-   0x0804a043 <+3>:	cdq    
-   0x0804a044 <+4>:	push   edx
-   0x0804a045 <+5>:	pushw  0x632d
-   0x0804a049 <+9>:	mov    edi,esp
-   0x0804a04b <+11>:	push   0x68732f
-   0x0804a050 <+16>:	push   0x6e69622f
-   0x0804a055 <+21>:	mov    ebx,esp
-   0x0804a057 <+23>:	push   edx
-   0x0804a058 <+24>:	call   0x804a065 <code+37>
+=> 0x0804a040 <+0>:	push   0xb                            ; push 0xb (11) onto the stack         
+   0x0804a042 <+2>:	pop    eax                            ; pop 0xb into eax
+   0x0804a043 <+3>:	cdq                                   ; set edx to 0
+   0x0804a044 <+4>:	push   edx                            ; push 0 onto the stack
+   0x0804a045 <+5>:	pushw  0x632d                         ; push -c argument onto the stack
+   0x0804a049 <+9>:	mov    edi,esp                        ; move stack pointer into edi
+   0x0804a04b <+11>:	push   0x68732f                     ; push hs/ onto the stack (/bin/sh in reverse order)
+   0x0804a050 <+16>:	push   0x6e69622f                   ; push nib/ onto the stack (/bin/sh in reverse order)
+   0x0804a055 <+21>:	mov    ebx,esp                      ; move stack pointer into ebx
+   0x0804a057 <+23>:	push   edx                          ; push 0 onto the stack
+   0x0804a058 <+24>:	call   0x804a065 <code+37>          ; call address 0x804a065 (/usr/bin/id)
    0x0804a05d <+29>:	das    
    0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
    0x0804a061 <+33>:	das    
    0x0804a062 <+34>:	jae    0x804a0cc
    0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
-   0x0804a067 <+39>:	mov    ecx,esp
-   0x0804a069 <+41>:	int    0x80
+   0x0804a067 <+39>:	mov    ecx,esp                      ; move stack pointer into ecx
+   0x0804a069 <+41>:	int    0x80                         ; call the interrupt to execute the execve syscall 
    0x0804a06b <+43>:	add    BYTE PTR [eax],al
 End of assembler dump.
 (gdb) break *0x0804a069
@@ -198,50 +198,10 @@ The disassembled code consists of the following components:
 * <code class="language-plaintext highlighter-rouge">/bin/sh</code> -> <code class="language-plaintext highlighter-rouge">0x68732f & <code class="language-plaintext highlighter-rouge">0x6e69622f</code> 
 * call instruction -> <code class="language-plaintext highlighter-rouge">/usr/bin/id</code> 
 
-The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals <code class="language-plaintext highlighter-rouge">0xb</code>:
+#### 2nd Shellcode (linux/x86/shell_reverse_tcp)
+--------------
 
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep execve
-#define __NR_execve 11
-```   
-   
-The execve syscall is defined by the man pages as follows: 
-   
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ man execve
-
-EXECVE(2)                              Linux Programmer's Manual                             EXECVE(2)
-
-NAME
-       execve - execute program
-
-SYNOPSIS
-       #include <unistd.h>
-
-       int execve(const char *filename, char *const argv[],
-                  char *const envp[]);
-
-DESCRIPTION
-       execve()  executes  the  program pointed to by filename.  filename must be either a binary exe-
-       cutable, or a script starting with a line of the form:
-
-           #! interpreter [optional-arg]
-
-       For details of the latter case, see "Interpreter scripts" below.
-
-       argv is an array of argument strings passed to the new program.  By convention,  the  first  of
-       these  strings should contain the filename associated with the file being executed.  envp is an
-       array of strings, conventionally of the form key=value, which are passed as environment to  the
-       new program.  Both argv and envp must be terminated by a NULL pointer.  The argument vector and
-       environment can be accessed by the called program's main function, when it is defined as:
-
-           int main(int argc, char *argv[], char *envp[])
-```
-
-
-
-
-
+some stuff here :-)
 
 
 
