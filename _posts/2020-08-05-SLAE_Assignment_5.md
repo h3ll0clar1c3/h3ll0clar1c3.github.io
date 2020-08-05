@@ -78,7 +78,7 @@ int main()
 }
 ```
 
-As a POC, The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 15 bytes:
+As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 15 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack exec_shellcode.c -o exec
@@ -195,7 +195,7 @@ The disassembled code consists of the following components:
 
 * execve syscall -> <code class="language-plaintext highlighter-rouge">0xb</code>
 * -c argument -> <code class="language-plaintext highlighter-rouge">0x632d</code>
-* <code class="language-plaintext highlighter-rouge">/bin/sh</code> -> <code class="language-plaintext highlighter-rouge">0x68732f & 0x6e69622f</code> 
+* <code class="language-plaintext highlighter-rouge">/bin/sh</code> -> <code class="language-plaintext highlighter-rouge">0x68732f & <code class="language-plaintext highlighter-rouge">0x6e69622f</code> 
 * call instruction -> <code class="language-plaintext highlighter-rouge">/usr/bin/id</code> 
 
 The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals <code class="language-plaintext highlighter-rouge">0xb</code>:
@@ -205,7 +205,7 @@ osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.
 #define __NR_execve 11
 ```   
    
- ddd  
+The execve syscall is defined by the man pages as follows: 
    
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ man execve
