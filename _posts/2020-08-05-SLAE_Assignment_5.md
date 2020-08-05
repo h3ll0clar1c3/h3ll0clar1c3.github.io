@@ -36,10 +36,10 @@ The 3 Msfvenom examples that will be presented:
 #### 1st Shellcode (linux/x86/exec)
 --------
 
-The exec payload will generate shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell:
+The exec payload will generate shellcode which spawns a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell using the <code class="language-plaintext highlighter-rouge">CMD</code> parameter:
 
 ```bash
-msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
+osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
 No encoder or badchars specified, outputting raw payload
 Payload size: 43 bytes
 Final size of c file: 205 bytes
@@ -48,6 +48,36 @@ unsigned char buf[] =
 "\x00\x68\x2f\x62\x69\x6e\x89\xe3\x52\xe8\x08\x00\x00\x00\x2f"
 "\x62\x69\x6e\x2f\x73\x68\x00\x57\x53\x89\xe1\xcd\x80";
 ```
+
+A C program scripted with the newly generated shellcode:
+
+```c
+/**
+* Filename: shellcode.c
+* Author: h3ll0clar1c3
+* Purpose: Spawn a shell on the local host  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 shellcode.c -o exec  
+* Usage: ./exec
+* Shellcode size: 15 bytes
+* Architecture: x86
+**/
+
+#include <stdio.h>
+#include <string.h>
+
+unsigned char code[] = \
+"\x6a\x0b\x58\x99\x52\x66\x68\x2d\x63\x89\xe7\x68\x2f\x73\x68"
+"\x00\x68\x2f\x62\x69\x6e\x89\xe3\x52\xe8\x08\x00\x00\x00\x2f"
+"\x62\x69\x6e\x2f\x73\x68\x00\x57\x53\x89\xe1\xcd\x80";
+
+int main()
+{
+        printf("Shellcode length:  %d\n", strlen(decoder));
+        int (*ret)() = (int(*)())decoder;
+        ret();
+}
+```
+
 
 The following Python code will be used as a shellcode wrapper to generate the obfuscated shellcode from the original shellcode: 
 
