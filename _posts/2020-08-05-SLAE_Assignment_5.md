@@ -1,4 +1,3 @@
-
 ---
 title:  "SLAE x86 Assignment 5: Msfvenom Shellcode Analysis"
 header:
