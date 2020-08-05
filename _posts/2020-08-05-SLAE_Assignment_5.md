@@ -139,6 +139,74 @@ Dump of assembler code for function code:
    0x0804a049 <+9>:	mov    edi,esp
    0x0804a04b <+11>:	push   0x68732f
    0x0804a050 <+16>:	push   0x6e6962
+   0x0804a055 <+21>:	mov    ebx,esp
+   0x0804a057 <+23>:	push   edx
+   0x0804a058 <+24>:	call   0x804a065 <code+37>
+   0x0804a05d <+29>:	das    
+   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
+   0x0804a061 <+33>:	das    
+   0x0804a062 <+34>:	jae    0x804a0cc
+   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
+   0x0804a067 <+39>:	mov    ecx,esp
+   0x0804a069 <+41>:	int    0x80
+   0x0804a06b <+43>:	add    BYTE PTR [eax],al
+End of assembler dump.
+(gdb) break *0x0804a069
+Breakpoint 2 at 0x804a069
+(gdb) c
+Continuing.
+
+Breakpoint 2, 0x0804a069 in code ()
+(gdb) disassemble 
+Dump of assembler code for function code:
+   0x0804a040 <+0>:	push   0xb
+   0x0804a042 <+2>:	pop    eax
+   0x0804a043 <+3>:	cdq    
+   0x0804a044 <+4>:	push   edx
+   0x0804a045 <+5>:	pushw  0x632d
+   0x0804a049 <+9>:	mov    edi,esp
+   0x0804a04b <+11>:	push   0x68732f
+   0x0804a050 <+16>:	push   0x6e69622f
+   0x0804a055 <+21>:	mov    ebx,esp
+   0x0804a057 <+23>:	push   edx
+   0x0804a058 <+24>:	call   0x804a065 <code+37>
+   0x0804a05d <+29>:	das    
+   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
+   0x0804a061 <+33>:	das    
+   0x0804a062 <+34>:	jae    0x804a0cc
+   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
+   0x0804a067 <+39>:	mov    ecx,esp
+=> 0x0804a069 <+41>:	int    0x80
+   0x0804a06b <+43>:	add    BYTE PTR [eax],al
+End of assembler dump.
+(gdb) stepi
+process 6223 is executing new program: /bin/dash
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ exit
+[Inferior 1 (process 6223) exited normally]
+(gdb) quit
+```   
+ 
+The disassembled code consists of the following components:
+
+* execve syscall -> <code class="language-plaintext highlighter-rouge">0xb</code>
+* -c argument -> <code class="language-plaintext highlighter-rouge">0x632d</code>
+* <code class="language-plaintext highlighter-rouge">/bin/sh</code> -> <code class="language-plaintext highlighter-rouge">0x68732f & 0x6e69622f</code> 
+* call instruction -> <code class="language-plaintext highlighter-rouge">/usr/bin/id</code> 
+
+The execve syscall code can be found in the header file below, converting 11 from decimal to hex equals <code class="language-plaintext highlighter-rouge">0xb</code>:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat /usr/include/i386-linux-gnu/asm/unistd_32.h | grep execve
+#define __NR_execve 11
+```   
+   
+ ddd  
+   
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ man execve
 
