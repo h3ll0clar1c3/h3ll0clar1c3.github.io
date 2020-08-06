@@ -252,7 +252,7 @@ The required syscalls are shown:
 #### 3rd Shellcode (linux/x86/read_file)
 --------------
 
-Read File definition ... :
+The Read File payload literally reads a file, which requires 2 arguments, the file descriptor to write the output to (standard output), and the path to the file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux -f c
@@ -266,6 +266,7 @@ unsigned char buf[] =
 "\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
 "\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
 ```
+The Ndiasm tool is used to inspect the program code and analyze the system calls:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux | ndisasm -u -
@@ -300,7 +301,14 @@ Payload size: 73 bytes
 00000048  00            db 0x00
 ```
 
-This one is pretty straight forward. We can see four different syscalls (in order: open, read, write, exit) that gets executed with different parameters. The shellcode ends in outputting /etc/passwd in the terminal, if ran. To check the different syscall numbers please refer to /usr/include/i386-linux-gnu/asm/unistd_32.h or any online variation of it.
+Ndiasm is used to emulate the specific instructions in the shellcode visually displaying the execution of the file read payload. The parameters included in the Msfvenom payload are all visibly shown, namely the <code class="language-plaintext highlighter-rouge">/etc/passwd</code> path argument.
+
+The required syscalls are shown:
+
+* open
+* read
+* write
+* exit
 
 ##### SLAE Disclaimer ####
 ---------
