@@ -16,7 +16,7 @@ classes: wide
 ### Msfvenom Shellcode Analysis
 ------
 
-* Take up at least 3 shellcode samples created using Msfvenom for linux/x86
+* Analyze 3 shellcode samples created using Msfvenom for linux/x86
 * Use GDB/Ndisasm/Libemu to dissect the functionality of the shellcode
 * Present the analysis
 
