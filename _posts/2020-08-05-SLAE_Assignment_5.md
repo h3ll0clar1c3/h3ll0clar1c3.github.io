@@ -252,7 +252,7 @@ The required syscalls are shown:
 #### 3rd Shellcode (linux/x86/read_file)
 --------------
 
-A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine:
+Read File definition ... :
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux -f c
@@ -266,6 +266,41 @@ unsigned char buf[] =
 "\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
 "\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
 ```
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux | ndisasm -u -
+No encoder or badchars specified, outputting raw payload
+Payload size: 73 bytes
+
+00000000  EB36		jmp short 0x38		        ; jmp to address 0x38 (jmp, call, pop)
+00000002  B805000000    mov eax,0x5			; 0x5 syscall = open
+00000007  5B            pop ebx				; pop address of /etc/passwd into ebx
+00000008  31C9          xor ecx,ecx			; zero ecx to open file as O_RDONLY
+0000000A  CD80          int 0x80			; syscall int open(const char *pathname, int flags);
+0000000C  89C3          mov ebx,eax			; move 5 into ebx (fd)
+0000000E  B803000000    mov eax,0x3			; 0x3 syscall = read
+00000013  89E7          mov edi,esp			; stack pointer into edi
+00000015  89F9          mov ecx,edi			; stack pointer to ecx
+00000017  BA00100000    mov edx,0x1000		        ; 0x1000 = 4096 
+0000001C  CD80          int 0x80			; syscall ssize_t read(int fd, void *buf, size_t count);
+0000001E  89C2          mov edx,eax			; size of read data
+00000020  B804000000    mov eax,0x4			; 0x4 syscall = write
+00000025  BB01000000    mov ebx,0x1			; stdout = 1 (our fd)
+0000002A  CD80          int 0x80			; syscall ssize_t write(int fd, const void *buf, size_t count); 
+0000002C  B801000000    mov eax,0x1			; 0x1 syscall = exit
+00000031  BB00000000    mov ebx,0x0			; 0 exit/return code
+00000036  CD80          int 0x80			; syscall  void exit(int status);
+00000038  E8C5FFFFFF    call 0x2			; jmp up, putting next instruction on stack
+0000003D  2F            das				; rest is /etc/passwd
+0000003E  657463        gs jz 0xa4
+00000041  2F            das
+00000042  7061          jo 0xa5
+00000044  7373          jnc 0xb9
+00000046  7764          ja 0xac
+00000048  00            db 0x00
+```
+
+This one is pretty straight forward. We can see four different syscalls (in order: open, read, write, exit) that gets executed with different parameters. The shellcode ends in outputting /etc/passwd in the terminal, if ran. To check the different syscall numbers please refer to /usr/include/i386-linux-gnu/asm/unistd_32.h or any online variation of it.
 
 ##### SLAE Disclaimer ####
 ---------
