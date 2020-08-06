@@ -361,7 +361,7 @@ www-data:x:33:33:www-data:/var/www:/bin/sh
 osboxes:x:1000:1000:osboxes.org,,,:/home/osboxes:/bin/bash
 ```
 
-The Ndiasm tool (similar to GDB) is used to step through the program code and analyze the system calls:
+The Ndisasm tool (similar to GDB) is used to step through the program code and analyze the system calls:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux | ndisasm -u -
