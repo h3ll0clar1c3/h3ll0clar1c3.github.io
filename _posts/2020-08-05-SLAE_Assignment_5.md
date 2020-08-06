@@ -252,7 +252,7 @@ The required syscalls are shown:
 #### 3rd Shellcode (linux/x86/read_file)
 --------------
 
-The Read File payload literally reads a chosen file, which requires 2 arguments, the file descriptor to write the output to (standard output), and the path to the file:
+The Read File payload reads a chosen file as specified, requiring 2 arguments, the file descriptor to write the output to (standard output), and the path to the file:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux -f c
@@ -292,7 +292,7 @@ Payload size: 73 bytes
 00000031  BB00000000    mov ebx,0x0			; 0 exit/return code
 00000036  CD80          int 0x80			; syscall  void exit(int status);
 00000038  E8C5FFFFFF    call 0x2			; jmp up, putting next instruction on stack
-0000003D  2F            das				; rest is /etc/passwd
+0000003D  2F            das				; read the file contents (/etc/passwd)
 0000003E  657463        gs jz 0xa4
 00000041  2F            das
 00000042  7061          jo 0xa5
