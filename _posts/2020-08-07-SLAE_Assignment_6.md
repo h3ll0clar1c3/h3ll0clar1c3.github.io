@@ -22,7 +22,7 @@ classes: wide
 
 EDIT from here -> Msfvenom will be used to generate the payloads for each of the 3 examples, along with an analysis/debugging of the shellcode and the associated system calls required to execute the payloads.
 
-![Polymorphic(/assets/images/polymorphic.jpg)
+![Polymorphic](/assets/images/polymorphic.jpg)
 
 The 3 Msfvenom examples that will be presented:
 
