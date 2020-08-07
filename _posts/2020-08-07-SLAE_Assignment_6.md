@@ -92,7 +92,7 @@ $
 
 ```
 
-The polymorphic version based on the original shellcode is ?? bytes long, which equates to ?% increase in size from the reference:
+The polymorphic version based on the original shellcode is 40 bytes long, which equates to 43% increase in size from the reference:
 
 ```nasm
  Filename: execve_poly.nasm
