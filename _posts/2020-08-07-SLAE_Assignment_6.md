@@ -28,14 +28,14 @@ Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evad
 
 The 3 Shell-Storm references that will be modified:
 
-* Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
+* Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> ([Code][execve-shellstorm]
 * Reverse TCP Bind Shell 
 * Chmod <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
-The Execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, referenced from Shell-Storm:
+The Execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm:
 
 ```c
 /*
@@ -456,3 +456,4 @@ GitHub Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment6
+[execve-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-811.php)
