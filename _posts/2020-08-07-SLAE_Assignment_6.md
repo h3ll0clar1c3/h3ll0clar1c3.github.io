@@ -20,7 +20,7 @@ classes: wide
 #### Concept 
 -----
 
-Polymorphism is a method used to alter existing shellcode to look unrecognizeable, the intention is to evade pattern-matching whilst still preserving the intended functionality. Semantics of command instructions is one popular technique, common AV and IDS systems rely on the fingerprinted patterns and signatures found within the malicious code.
+Polymorphism is a method used to alter existing shellcode to look unrecognizeable, the intention is to evade pattern-matching whilst still preserving the intended functionality. Semantics of instruction commands is one popular technique, common AV and IDS systems rely on the fingerprinted patterns and signatures found within the malicious code.
 
 Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade these security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing the detection capabilities based on signature databases.
 
