@@ -11,8 +11,6 @@ classes: wide
 #  - slae
 ---
 
-![Shellcoding](/assets/images/slae32.png)
-
 ### Egg Hunter
 ------
 
