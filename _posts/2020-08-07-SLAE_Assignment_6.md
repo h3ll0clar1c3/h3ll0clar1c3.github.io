@@ -14,15 +14,15 @@ classes: wide
 ### Polymorphic Shellcode
 ------
 
-* Analyze 3 shellcodes from Shell-Storm and create polymorphic versions to evade pattern matching
+* Analyze 3 shellcodes from Shell-Storm, and create polymorphic versions to evade pattern matching
 * The polymorphic versions should not be larger than 150% of the original shellcode
 
 #### Concept 
 -----
 
-Polymorphism is a method used to alter existing shellcode to look unrecognizeable, the intention is to evade pattern-matching whilst still preserving the intended functionality. Semantics of instruction commands is one popular technique, common AV and IDS systems rely on the fingerprinted patterns and signatures found within the malicious code.
+Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern-matching whilst still preserving the intended functionality. Semantics of instruction commands is one popular technique, common AV and IDS systems rely on the fingerprint of patterns and signatures found within malicious code.
 
-Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade these security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing the detection capabilities based on signature databases.
+Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade these security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing signature based detection mechanisms.
 
 ![Polymorphic](/assets/images/polymorphic.jpg)
 
