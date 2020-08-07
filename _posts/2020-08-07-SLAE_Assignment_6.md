@@ -35,7 +35,7 @@ The 3 Shell-Storm references that will be modified:
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
-The [Execve][execve-shellstorm] shellcode shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm:
+The [Execve][execve-shellstorm] shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm:
 
 ```c
 /*
@@ -78,7 +78,19 @@ int main()
 }
 ```
 
-asdfsdf
+As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 28 bytes:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc execve.c -o execve -z execstack
+execve.c: In function 'main':
+execve.c:36:33: warning: incompatible implicit declaration of built-in function 'strlen' [enabled by default]
+osboxes@osboxes:~/Downloads/SLAE/$ ls
+execve  execve.c
+osboxes@osboxes:~/Downloads/SLAE$ ./execve 
+Lenght: 28
+$ 
+
+```
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
