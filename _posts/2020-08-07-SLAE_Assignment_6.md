@@ -100,7 +100,7 @@ The polymorphic version based on the original shellcode is ?? bytes long, which 
 ; Purpose: Spawn a shell on the local host
 ; Compilation: ./compile.sh execve_poly
 ; Usage: ./execve_poly
-; Shellcode size: ??? bytes
+; Shellcode size: 40 bytes
 ; Architecture: x86
 
 global   _start
@@ -127,7 +127,7 @@ section .text
         int 0x80                        ; call the interrupt to execute the execve syscall, execute /bin/sh shell
 ```
 
-What's my shellcode size ??? edit shellcode comments
+What's my shellcode size 40 bytes ... edit stuff here onward
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
