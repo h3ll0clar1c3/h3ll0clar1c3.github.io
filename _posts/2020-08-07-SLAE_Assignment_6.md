@@ -20,7 +20,7 @@ classes: wide
 #### Concept 
 -----
 
-Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality. as common AV and IDS systems rely on the fingerprint of patterns and signatures found within malicious code.
+Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality as common AV and IDS systems rely on the fingerprint of patterns, and signatures found within malicious code.
 
 Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing signature based detection mechanisms.
 
@@ -95,7 +95,7 @@ $
 The polymorphic version of the original shellcode is scripted in Assembly:
 
 ```nasm
- Filename: execve_poly.nasm
+; Filename: execve_poly.nasm
 ; Author: h3ll0clar1c3
 ; Purpose: Spawn a shell on the local host
 ; Compilation: ./compile.sh execve_poly
@@ -208,8 +208,6 @@ $ exit
 ```
 
 The polymorphic version of the shellcode is 43% larger in size as compared to the original reference from Shell-Storm.
-
-CARYY ON HERE >>> ;-)
 
 #### 2nd Shellcode (linux/x86/shell_reverse_tcp)
 --------------
