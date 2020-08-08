@@ -157,7 +157,7 @@ The compiled binary is executed:
 osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly 
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ exit
+$ 
 ```
 
 Objdump is used to extract the shellcode from the Execve shell in hex format (Null free):
@@ -204,7 +204,7 @@ osboxes@osboxes:~/Downloads/SLAE/Assignment_6$ ./execve_poly_final
 Shellcode length:  37
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ exit
+$ 
 ```
 
 The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
