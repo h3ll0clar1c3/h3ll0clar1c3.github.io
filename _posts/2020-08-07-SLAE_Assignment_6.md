@@ -20,7 +20,7 @@ classes: wide
 #### Concept 
 -----
 
-Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality. Semantics of instruction commands is one popular technique, common AV and IDS systems rely on the fingerprint of patterns and signatures found within malicious code.
+Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality. as common AV and IDS systems rely on the fingerprint of patterns and signatures found within malicious code.
 
 Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing signature based detection mechanisms.
 
@@ -92,7 +92,7 @@ $
 
 ```
 
-The polymorphic version of the original shellcode is updated in Assembly:
+The polymorphic version of the original shellcode is scripted in Assembly:
 
 ```nasm
  Filename: execve_poly.nasm
@@ -196,7 +196,7 @@ int main()
 }
 ```
 
-As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 40 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 40 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
