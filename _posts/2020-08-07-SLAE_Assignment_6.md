@@ -37,7 +37,7 @@ The 3 Shell-Storm references that will be modified:
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
-The execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm ([http://shell-storm.org/shellcode/files/shellcode-811.php]) [execve-shellstorm]:
+The execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-811.php] [execve-shellstorm]:
 
 ```c
 /*
