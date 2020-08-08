@@ -92,7 +92,7 @@ $
 
 ```
 
-The polymorphic version based on the original shellcode is 40 bytes long, which equates to 43% increase in size from the reference:
+The polymorphic version of the original shellcode is updated in Assembly:
 
 ```nasm
  Filename: execve_poly.nasm
