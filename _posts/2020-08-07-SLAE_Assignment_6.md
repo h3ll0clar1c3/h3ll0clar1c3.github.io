@@ -31,7 +31,7 @@ Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evad
 The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
-* <code class="language-plaintext highlighter-rouge">killall</code> processes 
+* <code class="language-plaintext highlighter-rouge">Killall</code>  
 * Chmod 666 <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
@@ -211,7 +211,7 @@ $
 
 The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
 
-#### 2nd Shellcode (Killall Processes)
+#### 2nd Shellcode (Killall)
 --------------
 
 The <code class="language-plaintext highlighter-rouge">killall</code> command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
@@ -322,7 +322,7 @@ Connection to 192.168.0.142 closed.
 
 The polymorphic version of the shellcode is 36% larger in size compared to the original reference from Shell-Storm.
 
-#### 3rd Shellcode (chmod 666 /etc/shadow)
+#### 3rd Shellcode (Chmod 666 /etc/shadow)
 --------------
 
 The <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command sets the permission on the shadow file to allow all users to read/write to the file (without execution rights).
