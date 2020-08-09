@@ -448,9 +448,6 @@ osboxes@osboxes:~/Downloads/SLAE$ ls -la /etc/shadow
 -rw-r----- 1 root shadow 1219 May 31 00:14 /etc/shadow
 osboxes@osboxes:~/Downloads/SLAE$ stat --format '%a' /etc/shadow
 640
-osboxes@osboxes:~/Downloads/SLAE$ ./chmod_etc_shadow_poly_final 
-Shellcode length:  40
-Segmentation fault (core dumped)
 osboxes@osboxes:~/Downloads/SLAE$ sudo ./chmod_etc_shadow_poly_final 
 [sudo] password for osboxes: 
 Shellcode length:  40
