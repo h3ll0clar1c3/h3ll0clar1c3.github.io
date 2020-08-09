@@ -31,7 +31,7 @@ Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evad
 The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
-* Killall processes 
+* <code class="language-plaintext highlighter-rouge">killall</code> processes 
 * Chmod <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
@@ -214,9 +214,9 @@ The polymorphic version of the shellcode is 32% larger in size compared to the o
 #### 2nd Shellcode (Killall Processes)
 --------------
 
-A Killall command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
+A <code class="language-plaintext highlighter-rouge">killall</code> command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
 
-Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-212.php] [killall-shellstorm]::
+Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-212.php] [killall-shellstorm]:
 
 ```c
 /* By Kris Katterjohn 11/13/2006
@@ -278,7 +278,7 @@ section .text
 
 The Assembly code is compiled by assembling with Nasm, and compiled as an executable binary.
 
-Objdump is used to extract the shellcode from the Killall command in hex format (Null free):
+Objdump is used to extract the shellcode from the <code class="language-plaintext highlighter-rouge">killall</code> command in hex format (Null free):
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./killall_poly | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
