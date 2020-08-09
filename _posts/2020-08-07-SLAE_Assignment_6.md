@@ -32,7 +32,7 @@ The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
 * <code class="language-plaintext highlighter-rouge">Killall</code>  
-* Chmod 666 <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
+* <code class="language-plaintext highlighter-rouge">Chmod 666 /etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
 --------
