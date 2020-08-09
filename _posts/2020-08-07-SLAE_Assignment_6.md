@@ -22,7 +22,7 @@ classes: wide
 
 Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality as common AV and IDS systems rely on the fingerprint of patterns, and signatures found within malicious code.
 
-Evasion techniques used in polymorphic shellcodes include symantics of command instructions, use of different arithmetic functions and methods, changing the order of instructions as well as adding/removing instructions.
+Evasion techniques used in polymorphic shellcodes include semantics of command instructions, use of different arithmetic functions and methods, changing the order of instructions as well as adding/removing instructions.
 
 Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing signature based detection mechanisms.
 
