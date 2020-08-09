@@ -325,9 +325,9 @@ The polymorphic version of the shellcode is 36% larger in size compared to the o
 #### 3rd Shellcode (chmod 666 /etc/shadow)
 --------------
 
-The <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command sets the permission on the shadow file to allow all users to read/write to the file, but cannot execute the file on the target host’s machine.
+The <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command sets the permission on the shadow file to allow all users to read/write to the file (without execution rights).
 
-The shadow file is a highly valued file as it stores all the user's passwords within this file, the passwords are stored as a long string of characters combined with the hashing algorithm used as well as an optional salt value, revealing the hashed password of all users on the local system.
+The shadow file is a high value file which stores all the user's passwords as a long string of characters combined with the hashing algorithm, as well as an optional salt value, revealing the hashed password of all users on the local system.
 
 Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-608.php] [chmod_etc_shadow-shellstorm]:
 
