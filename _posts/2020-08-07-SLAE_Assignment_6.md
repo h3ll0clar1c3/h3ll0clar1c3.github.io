@@ -192,7 +192,7 @@ unsigned char code[] = \
 
 int main()
 {
-        printf("Shellcode length:  %d\n", strlen(code));
+        printf("Shellcode length: %d bytes\n", strlen(code));
         int (*ret)() = (int(*)())code;
         ret();
 }
@@ -203,7 +203,7 @@ The C program is compiled as an executable binary with stack-protection disabled
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
 osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly_final 
-Shellcode length:  37
+Shellcode length: 37 bytes
 $ id
 uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
 $ 
@@ -306,7 +306,7 @@ unsigned char code[] = \
 
 int main()
 {
-        printf("Shellcode length:  %d\n", strlen(code));
+        printf("Shellcode length: %d bytes\n", strlen(code));
         int (*ret)() = (int(*)())code;
         ret();
 }
@@ -433,7 +433,7 @@ unsigned char code[] = \
 
 int main()
 {
-        printf("Shellcode length:  %d\n", strlen(code));
+        printf("Shellcode length: %d bytes\n", strlen(code));
         int (*ret)() = (int(*)())code;
         ret();
 }
@@ -448,7 +448,7 @@ osboxes@osboxes:~/Downloads/SLAE$ stat --format '%a' /etc/shadow
 640
 osboxes@osboxes:~/Downloads/SLAE$ sudo ./chmod_etc_shadow_poly_final 
 [sudo] password for osboxes: 
-Shellcode length:  40
+Shellcode length: 40 bytes
 osboxes@osboxes:~/Downloads/SLAE$ ls -la /etc/shadow
 -rw-rw-rw- 1 root shadow 1219 May 31 00:14 /etc/shadow
 osboxes@osboxes:~/Downloads/SLAE$ stat --format '%a' /etc/shadow
