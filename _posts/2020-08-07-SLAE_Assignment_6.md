@@ -318,7 +318,6 @@ The C program is compiled as an executable binary with stack-protection disabled
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ ./killall_poly_final Connection to 192.168.0.142 closed by remote host.
 Connection to 192.168.0.142 closed.
-
 ```
 
 The polymorphic version of the shellcode is 36% larger in size compared to the original reference from Shell-Storm.
