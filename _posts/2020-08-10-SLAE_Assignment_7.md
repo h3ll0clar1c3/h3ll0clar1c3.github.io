@@ -30,7 +30,7 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 * Symmetric-key algorithm (same key used to encrypt and decrypt the data)
 * 3 different key sizes - 128/192/256 bits
 * 128-bit block sizes (data is divided into 4x4 arrays each containing 16 bytes)
-* High-speed performance and low RAM (memory) requirement when encrypting/decrypting 
+* High-speed performance and low RAM (memory) utilization when encrypting/decrypting 
 
 ![AES](/assets/images/AES.jpg) 
 
@@ -218,3 +218,4 @@ GitHub Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment7
+[encrytpion-codekoala]: http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto
