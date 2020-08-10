@@ -225,7 +225,7 @@ memmove(addr, sc, size)
 libc.mprotect(addr, size, 0x7)
 run = cast(addr, CFUNCTYPE(c_void_p))
 run()
-``
+```
 
 The final POC, the complete custom Crypter generates encrypted shellcode from the original shellcode, decrypts the encrypted shellcode at run-time, and executes the original <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode spawing a shell on the local host:
 
