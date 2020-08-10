@@ -142,7 +142,7 @@ run = cast(addr, CFUNCTYPE(c_void_p))
 run()
 ```
 
-As a POC, the encrypted shellcode hardcoded within the python wrapper script is decoded with the AES key, along with a base-64 decode to extract the original <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode and executed at run-time spawing a shell on the local host:
+As a POC, the encrypted shellcode hardcoded within the python wrapper script is decoded with the AES key, along with a base-64 decode to extract the original <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode and executed at run-time spawning a shell on the local host:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python AES_decryption.py 
@@ -227,7 +227,7 @@ run = cast(addr, CFUNCTYPE(c_void_p))
 run()
 ```
 
-The final POC, the complete custom Crypter generates encrypted shellcode from the original shellcode, decrypts the encrypted shellcode at run-time, and executes the original <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode spawing a shell on the local host:
+The final POC, the complete custom Crypter generates encrypted shellcode from the original shellcode, decrypts the encrypted shellcode at run-time, and executes the original <code class="language-plaintext highlighter-rouge">/bin/sh</code> shellcode spawning a shell on the local host:
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python AES_crypter.python 
