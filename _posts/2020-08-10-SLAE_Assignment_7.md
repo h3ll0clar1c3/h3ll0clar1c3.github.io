@@ -14,26 +14,26 @@ classes: wide
 ### Custom Crypter
 ------
 
-* Analyze 3 shellcodes from Shell-Storm, and create polymorphic versions to evade pattern matching
-* The polymorphic versions should not be larger than 150% of the original shellcode
+* Create a custom crypter
+* Use any encryption schema
+* Use any programming language
 
 #### Concept 
 -----
 
-Polymorphism is a method used to alter existing shellcode, with the intention of evading pattern matching whilst still preserving the intended functionality as common AV and IDS systems rely on the fingerprint of patterns, and signatures found within malicious code.
+A crypter is defined as a tool that has the ability to encrypt, obfuscate, and manipulate malicious code making it undetectable to common AV and IDS systems. 
 
-Evasion techniques used in polymorphic shellcodes include semantics of command instructions, use of different arithmetic functions and methods, changing the order of instructions as well as adding/removing instructions.
+Similar to the custom Encoder created in an earlier assignment, the concept is developed further with the use of an encryption scheme, leading to a higher success rate of evasion by decrypting the malicious code at run-time and executing on the target host.
 
-Polymorphic encoders such as Shikata-Ga-Nai can be used in this scenario to evade security controls, using these evasion techniques results in the code appearing completely different and benign, often bypassing signature based detection mechanisms.
+The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael, will be used to illustrate the concept of a custom Encoder:
 
-![Polymorphic](/assets/images/polymorphic.jpg)
+* Symmetric-key algorithm (same key used to encrypt and decrypt the data)
+* 128-bit block sizes
+* 3 different key sizes - 128/192/256 bits
+* High-speed performance and low RAM (memory) requirement when encrypting/decrypting 
 
-The 3 Shell-Storm references that will be modified:
-
-* Execve <code class="language-plaintext highlighter-rouge">/bin/sh</code> 
-* <code class="language-plaintext highlighter-rouge">Killall</code>  
-* <code class="language-plaintext highlighter-rouge">Chmod 666 /etc/shadow</code>  
-
+![AES](/assets/images/AES.jpg)
+ 
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
