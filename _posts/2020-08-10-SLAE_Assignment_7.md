@@ -34,11 +34,10 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 
 ![AES](/assets/images/AES.jpg) 
 
-3 steps used to demonstrate the Crypter process:
+2 steps used to demonstrate the Crypter process:
 
 * Encryption
-* Decryption
-* POC
+* Decryption (along with execution of the shellcode)
 
 #### Encryption
 --------
@@ -95,7 +94,7 @@ Encrypted shellcode using AES 128-bit key + Base64 encoded:
 5CJtU2PsI+erEYEb0l/3xle2srUXUxlJ8Zcv0RUKDAzn8dvPUM9H04Q8FCEK06HT7VlgveJoGWQDjXszmOjUkP0OvPf0OrefgZ/eRqrryx95REGDTPhOzCbPEY0el9s4zIV4N0lvsnFNy/o/aCRGOg==
 ```
 
-#### Decryption
+#### Decryption (Along with execution of the shellcode)
 --------------
 
 For the decryption portion, the encrypted shellcode is hardcoded within the python wrapper script along with the AES key:
