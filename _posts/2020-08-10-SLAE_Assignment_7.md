@@ -34,10 +34,21 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 
 ![AES](/assets/images/AES.jpg) 
 
-#### 1st Shellcode (Execve /bin/sh)
+3 steps used to demonstrate the Crypter process:
+
+* Encryption
+* Decryption
+* POC
+
+#### Encryption
 --------
 
-The Execve shellcode will spawn a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host. 
+The execve-stack shellcode from an earlier assignment will be used as a reference, this shellcode spawns a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host:
+
+```bash
+osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./execve-stack | grep ‘[0-9a-f]:’|grep -v ‘file’|cut -f2 -d:|cut -f1-6 -d’ ‘|tr -s ‘ ‘|tr ‘\t’ ‘ ‘|sed ‘s/ $//g’|sed ‘s/ /\\x/g’|paste -d ” -s |sed ‘s/^/”/’|sed ‘s/$/”/g’
+“\x31\xc0\x50\x68\x2f\x2f\x6c\x73\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80”
+```
 
 Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-811.php] [execve-shellstorm]:
 
