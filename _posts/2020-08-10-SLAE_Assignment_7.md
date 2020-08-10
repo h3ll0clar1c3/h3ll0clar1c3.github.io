@@ -32,7 +32,9 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 * 3 different key sizes - 128/192/256 bits
 * High-speed performance and low RAM (memory) requirement when encrypting/decrypting 
 
-![AES](/assets/images/AES.jpg)
+![AES](/assets/images/AES.jpg) 
+wtf
+![Polymorphic](/assets/images/polymorphic.jpg)
  
 #### 1st Shellcode (Execve /bin/sh)
 --------
