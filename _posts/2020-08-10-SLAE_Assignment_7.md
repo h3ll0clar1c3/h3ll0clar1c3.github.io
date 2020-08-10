@@ -218,4 +218,4 @@ GitHub Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment7
-[encrytpion-codekoala]: http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto
+[encryption-codekoala]: http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto
