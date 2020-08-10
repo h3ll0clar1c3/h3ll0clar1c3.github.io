@@ -49,7 +49,7 @@ The execve-stack shellcode from the course material will be used as a reference 
 "\x31\xc0\x50\x68\x2f\x2f\x6c\x73\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80"
 ```
 
-A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto] [encryption-codekoala].
+A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto/] [encryption-codekoala].
 
 Note in this instance a static 128-bit key <code class="language-plaintext highlighter-rouge">KeepMeSecureEKEY</code> is hardcoded into the script for the sake of the POC to illustrate the concept, best practice recommends a randomly generated key dynamically generated (avoid hardcoding/storing within the script):
 
@@ -98,7 +98,7 @@ Encrypted shellcode (AES 128-bit key + base-64 encoded):
 #### Decryption (Along with execution of the shellcode)
 --------------
 
-For the decryption portion, the encrypted shellcode is hardcoded within the python wrapper script along with the AES key:
+For the decryption portion, the encrypted shellcode is hardcoded within the AES decryption wrapper script along with the AES key:
 
 ```python
 #!/usr/bin/python
@@ -258,4 +258,4 @@ GitHub Repo: [Code][github-code]
 
 [slae-link]: http:/securitytube-training.com/online-courses/securitytube-linux-assembly-expert
 [github-code]: https://github.com/h3ll0clar1c3/SLAE/tree/master/Exam/Assignment7
-[encryption-codekoala]: http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto
+[encryption-codekoala]: http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto/
