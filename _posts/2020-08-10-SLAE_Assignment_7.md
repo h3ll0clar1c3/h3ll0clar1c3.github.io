@@ -33,9 +33,7 @@ The AES (Advanced Encryption Standard) cipher  algorithm also known as Rijndael,
 * High-speed performance and low RAM (memory) requirement when encrypting/decrypting 
 
 ![AES](/assets/images/AES.jpg) 
-wtf
-![Polymorphic](/assets/images/polymorphic.jpg)
- 
+
 #### 1st Shellcode (Execve /bin/sh)
 --------
 
