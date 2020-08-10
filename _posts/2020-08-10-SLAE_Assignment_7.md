@@ -51,7 +51,7 @@ The execve-stack shellcode from the course material will be used as a reference 
 
 A python script will be used as a Crypter wrapper to implement the AES encryption/decryption, referenced from Code Koala [http://www.codekoala.com/posts/aes-encryption-python-using-pycrypto/] [encryption-codekoala].
 
-Note in this instance a static 128-bit key <code class="language-plaintext highlighter-rouge">KeepMeSecureEKEY</code> is hardcoded into the script for the sake of the POC to illustrate the concept, best practice recommends a randomly generated key dynamically generated (avoid hardcoding/storing within the script):
+Note in this instance a static 128-bit key <code class="language-plaintext highlighter-rouge">KeepMeSecureEKEY</code> is hardcoded into the script for the sake of the POC to illustrate the concept, best practice recommends a random dynamically generated key (avoid hardcoding/storing):
 
 ```python
 #!/usr/bin/python
