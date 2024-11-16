@@ -1,5 +1,5 @@
 ---
-title: Azure Front Door as a C2 Redirector (Domain Fronting using Azure CDN)
+title: Azure Front Door as a C2 Redirector (Cloud Domain Fronting using Azure CDN)
 date: 2024-08-22 12:00:00 -500
 author: h3ll0clar1c3
 categories: [Blog]
@@ -15,9 +15,9 @@ Using Azure Front Door as a redirector helps simplify complex routing rules and 
 
 A high-level overview of the architecture is shown to illustrate the concept (Credit: BigB0ss).
 
-![Configure Azure Front Door](/assets/img/32.png)
+![Configure Azure Front Door](/assets/images/32.png)
 
-![Configure Azure Front Door](/assets/img/33.png) 
+![Configure Azure Front Door](/assets/images/33.png) 
 
 Here’s a basic guide on how to set up Azure Front Door to function as a C2 redirector:
 
@@ -25,24 +25,24 @@ Here’s a basic guide on how to set up Azure Front Door to function as a C2 red
 
    **Log in to the Azure Portal**: Navigate to the Azure Portal (https://portal.azure.com).
 
-   ![Configure Azure Front Door](/assets/img/10.png)
+   ![Configure Azure Front Door](/assets/images/10.png)
 
    **Create a Front Door**: Go to "Create a resource" and search for "Front Door". Click on "Front Door and CDN profiles" and then "Create".
 
-   ![Configure Azure Front Door](/assets/img/11.png)
+   ![Configure Azure Front Door](/assets/images/11.png)
 
-   ![Configure Azure Front Door](/assets/img/12.png)
+   ![Configure Azure Front Door](/assets/images/12.png)
 
    **Configure Front Door**:
    - **Subscription and Resource Group**: Select your subscription and create or choose a resource group.
    - **Front Door Name**: Enter a unique name for your Front Door (e.g., `fd-1`).
    - **Frontend Hosts**: Define the frontend hostname (e.g., `test-dnh9h9fyezd8d5f9.a01.azurefd.net`).
   
-  ![Configure Azure Front Door](/assets/img/13.png)
+  ![Configure Azure Front Door](/assets/images/13.png)
 
 In this example we will not be using a custom domain, so we can proceed without the need to add a secret or SSL certificate.
 
-  ![Configure Azure Front Door](/assets/img/14.png)
+  ![Configure Azure Front Door](/assets/images/14.png)
 
 ## 2. **Configure Backend Pools**
 
@@ -50,9 +50,9 @@ In this example we will not be using a custom domain, so we can proceed without 
 
    **Add Backends**: Enter the backend details like the hostname, and configure health probes to ensure your backend is reachable (e.g., `test-dnh9h9fyezd8d5f9.a01.azurefd.net`).
 
-   ![Configure Azure Front Door](/assets/img/15.png)
+   ![Configure Azure Front Door](/assets/images/15.png)
 
-   ![Configure Azure Front Door](/assets/img/16.png)
+   ![Configure Azure Front Door](/assets/images/16.png)
 
 ## 3. **Set Up Routing Rules**
 
@@ -62,11 +62,11 @@ In this example we will not be using a custom domain, so we can proceed without 
    - **Backend Pool**: Select the backend pool. This will be the target for the redirect or the service handling the redirection logic.
    - **Path Pattern**: Define the path pattern that triggers this rule (e.g., `/*` for all paths).
 
- ![Configure Azure Front Door](/assets/img/17.png)
+ ![Configure Azure Front Door](/assets/images/17.png)
 
- ![Configure Azure Front Door](/assets/img/18.png)
+ ![Configure Azure Front Door](/assets/images/18.png)
 
- ![Configure Azure Front Door](/assets/img/19.png)
+ ![Configure Azure Front Door](/assets/images/19.png)
 
 ## 4. **Configure Redirects**
 
@@ -74,7 +74,7 @@ In this example we will not be using a custom domain, so we can proceed without 
    - **Redirect Type**: Choose between `Permanent Redirect (301)` or `Temporary Redirect (302)`.
    - **Redirect Destination**: Define the target URL where requests should be redirected. This can be another domain or path.
 
- ![Configure Azure Front Door](/assets/img/20.png)
+ ![Configure Azure Front Door](/assets/images/20.png)
 
 ## 5. **Custom Domain and SSL (Optional)**
 
@@ -88,13 +88,13 @@ In this example we will not be using a custom domain, so we can proceed without 
 
    **Create Front Door**: Click "Create" to deploy your Front Door instance with the redirect configurations.
 
-   ![Configure Azure Front Door](/assets/img/21.png)
+   ![Configure Azure Front Door](/assets/images/21.png)
 
-   ![Configure Azure Front Door](/assets/img/22.png)
+   ![Configure Azure Front Door](/assets/images/22.png)
 
-   ![Configure Azure Front Door](/assets/img/23.png)
+   ![Configure Azure Front Door](/assets/images/23.png)
 
-   ![Configure Azure Front Door](/assets/img/24.png)
+   ![Configure Azure Front Door](/assets/images/24.png)
 
 ### Example Scenario: Redirecting HTTP to HTTPS
 
@@ -117,17 +117,17 @@ To redirect all HTTP traffic to HTTPS:
 
 Azure Front Door Endpoint hostname/URL `test-dnh9h9fyezd8d5f9.a01.azurefd.net`.
 
-![Configure Azure Front Door](/assets/img/25.png)
+![Configure Azure Front Door](/assets/images/25.png)
 
 **Configure Azure Front Door SSL certificate keychain within C2 Profile**: Add in the Azure Front Door keychain (privkey.pem and fullchain.pem) to the C2 Profile.
 
-![Configure Azure Front Door](/assets/img/34.png)
+![Configure Azure Front Door](/assets/images/34.png)
 
-![Configure Azure Front Door](/assets/img/31.png)
+![Configure Azure Front Door](/assets/images/31.png)
 
 **Select C2 Profiles**: Set the "Callback Host" within the Mythic C2 framework when creating and configuring your desired payload e.g., Apollo Windows Exe payload utilising the 'http' C2 Profile `https://test-dnh9h9fyezd8d5f9.a01.azurefd.net`.
 
-![Configure Azure Front Door](/assets/img/26.png)
+![Configure Azure Front Door](/assets/images/26.png)
 
 **Trigger Payload**: Transfer the newly created payload to your 'vulnerable' victim/workstation, and run the payload in a command terminal/powershell window.
 
@@ -135,9 +135,9 @@ Azure Front Door Endpoint hostname/URL `test-dnh9h9fyezd8d5f9.a01.azurefd.net`.
 .\apolloCF_443_8001.exe
 ```
 
-![Configure Azure Front Door](/assets/img/27.png)
+![Configure Azure Front Door](/assets/images/27.png)
 
-![Configure Azure Front Door](/assets/img/28.png)
+![Configure Azure Front Door](/assets/images/28.png)
 
 **Analyse C2 Beacon calling back to the Azure Front Door URL**: Launch Wireshark and listen on your local Ethernet adapter whilst filtering on 'TCP port 443' and 'IP address x.x.x.x' (perform an NS Lookup via DNS to find the IP address of the CDN Endpoint/hostname URL).
 
@@ -145,11 +145,11 @@ Azure Front Door Endpoint hostname/URL `test-dnh9h9fyezd8d5f9.a01.azurefd.net`.
 tcp.port == 443 && ip.addr == x.x.x.x
 ```
 
-![Configure Azure Front Door](/assets/img/29.png)
+![Configure Azure Front Door](/assets/images/29.png)
 
 **Interact with C2 Beacon**: View active callbacks within the Mythic C2 framework, note the 'External IP' has been redacted for privacy.
 
-![Configure Azure Front Door](/assets/img/30.png)
+![Configure Azure Front Door](/assets/images/30.png)
 
 # Final Thoughts
 
